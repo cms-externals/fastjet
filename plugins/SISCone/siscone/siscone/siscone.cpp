@@ -66,7 +66,7 @@ Csiscone::~Csiscone(){
 }
 
 bool Csiscone::init_done=false;
-std::ostream* Csiscone::_banner_ostr = &cout;
+std::ostream* Csiscone::_banner_ostr = 0;
 
 /*
  * compute the jets from a given particle set doing multiple passes
@@ -250,6 +250,7 @@ void Csiscone::_initialise_if_needed(){
 
   // do not do this again
   init_done=true;
+  return;
 
   // print the banner
   if (_banner_ostr != 0){
