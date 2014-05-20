@@ -43,7 +43,7 @@ using namespace std;
 /// allow for warnings
 LimitedWarning ClusterSequenceAreaBase::_warnings;
 LimitedWarning ClusterSequenceAreaBase::_warnings_zero_area;
-LimitedWarning ClusterSequenceAreaBase::_warnings_empty_area;
+LimitedWarning ClusterSequenceAreaBase::_warnings_empty_area = 0;
 
 //----------------------------------------------------------------------
 /// return the total area, within the selector's range, that is free
