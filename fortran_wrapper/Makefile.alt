@@ -1,0 +1,24 @@
+# Makefile showing how to build the fortran wrapper given a properly 
+# installed fastjet compilation
+
+FASTJET_CONFIG=fastjet-config
+
+CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
+LIBS += $(shell $(FASTJET_CONFIG) --libs --plugins )
+
+# set compilers
+FC=gfortran
+F77=gfortran
+
+fastjet_fortran_example: fastjet_fortran_example.o fastjetfortran.o 
+	  $(FC)  -o fastjet_fortran_example  fastjet_fortran_example.o fastjetfortran.o $(LIBS) -lstdc++
+
+clean: 
+	rm -f *.o
+
+realclean: clean
+	rm -f fastjet_fortran_example
+
+depend:
+	makedepend $(FASTJET_INCLUDE) -Y --   -- $(SRCS) $(PROG_SRCS)
+# DO NOT DELETE
