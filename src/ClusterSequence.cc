@@ -144,7 +144,7 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
+std::ostream * ClusterSequence::_fastjet_banner_ostr = 0;
 
 
 // destructor that guarantees proper bookkeeping for the CS Structure
