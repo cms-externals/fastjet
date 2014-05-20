@@ -77,7 +77,6 @@ GhostedAreaSpec::GhostedAreaSpec(
 // sets fj2 ghost placement
 void GhostedAreaSpec::set_fj2_placement(bool val) {
   _fj2_placement  = val; _initialize();
-  if (val) _warn_fj2_placement_deprecated.warn("FJ2 placement of ghosts can lead to systematic edge effects in area evaluation and is deprecated. Prefer new (default) FJ3 placement.");
 }
 
 //======================================================================
