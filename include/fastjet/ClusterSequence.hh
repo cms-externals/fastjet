@@ -40,6 +40,7 @@
 #include<string>
 #include<set>
 #include<cmath> // needed to get double std::abs(double)
+#include <atomic>
 #include "fastjet/Error.hh"
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/SharedPtr.hh"
@@ -570,7 +571,7 @@ private:
   /// \cond internal_doc
 
   /// contains the actual stream to use for banners 
-  static std::ostream * _fastjet_banner_ostr;
+  static std::atomic<std::ostream*> _fastjet_banner_ostr;
 
   /// \endcond
 
@@ -731,12 +732,12 @@ protected:
 
 
   /// will be set by default to be true for the first run
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// record the number of warnings provided about the exclusive
   /// algorithm -- so that we don't print it out more than a few
   /// times.
-  static int _n_exclusive_warnings;
+  static std::atomic<int> _n_exclusive_warnings;
 
   /// the limited warning member for notification of user that 
   /// their requested strategy has been overridden (usually because

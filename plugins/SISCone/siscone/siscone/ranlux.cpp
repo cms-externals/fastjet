@@ -55,7 +55,7 @@ typedef struct {
 
 // internal generator state
 //--------------------------
-ranlux_state_t local_ranlux_state;
+static thread_local ranlux_state_t local_ranlux_state;
 
 
 // incrementation of the generator state

@@ -29,6 +29,7 @@
 #ifndef __CDFMIDPOINTPLUGIN_HH__
 #define __CDFMIDPOINTPLUGIN_HH__
 
+#include <atomic>
 #include "fastjet/JetDefinition.hh"
 
 // questionable whether this should be in fastjet namespace or not...
@@ -169,7 +170,7 @@ private:
   double _overlap_threshold ;
   SplitMergeScale _sm_scale ;
 
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

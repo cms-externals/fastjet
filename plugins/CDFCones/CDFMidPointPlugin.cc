@@ -41,7 +41,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 using namespace cdf;
 
-bool CDFMidPointPlugin::_first_time = true;
+std::atomic<bool> CDFMidPointPlugin::_first_time{true};
 
 string CDFMidPointPlugin::description () const {
   ostringstream desc;
@@ -154,8 +154,8 @@ void CDFMidPointPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CDFMidPointPlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

@@ -89,7 +89,7 @@ T deltaR2 (T eta1, T phi1, T eta2, T phi2) {
 }
 
 //------------------------------------------------------
-bool CMSIterativeConePlugin::_first_time = true;
+std::atomic<bool> CMSIterativeConePlugin::_first_time{true};
 
 string CMSIterativeConePlugin::description () const {
   ostringstream desc;
@@ -222,8 +222,8 @@ void CMSIterativeConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CMSIterativeConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

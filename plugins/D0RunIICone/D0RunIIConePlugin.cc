@@ -53,7 +53,7 @@ const double D0RunIIConePlugin::_DEFAULT_pT_min_second_protojet   = 0.   ;
 const int    D0RunIIConePlugin::_DEFAULT_merge_max                = 10000; 
 const double D0RunIIConePlugin::_DEFAULT_pT_min_nomerge           = 0.   ;
 
-bool D0RunIIConePlugin::_first_time = true;
+std::atomic<bool> D0RunIIConePlugin::_first_time{true};
 
 string D0RunIIConePlugin::description () const {
   ostringstream desc;
@@ -143,8 +143,8 @@ void D0RunIIConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIIConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

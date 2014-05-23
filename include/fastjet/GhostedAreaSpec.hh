@@ -35,7 +35,6 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/internal/BasicRandom.hh"
 #include "fastjet/Selector.hh"
-#include "fastjet/LimitedWarning.hh"
 
 // 
 #define STATIC_GENERATOR 1
@@ -224,10 +223,8 @@ private:
 
 
   std::vector<int> _random_checkpoint;
-  static BasicRandom<double> _random_generator;
+  static thread_local BasicRandom<double> _random_generator;
   //mutable BasicRandom<double> _random_generator;
-
-  static LimitedWarning _warn_fj2_placement_deprecated;
 
   inline double _our_rand() const {return _random_generator();}
   

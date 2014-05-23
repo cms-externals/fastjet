@@ -29,6 +29,7 @@
 //----------------------------------------------------------------------
 //ENDHEADER
 
+#include <atomic>
 #include "fastjet/JetDefinition.hh"
 
 // questionable whether this should be in fastjet namespace or not...
@@ -154,7 +155,7 @@ private:
   const static int    _DEFAULT_merge_max               ;// = 10000; 
   const static double _DEFAULT_pT_min_nomerge          ;// = 0.   ;
 
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

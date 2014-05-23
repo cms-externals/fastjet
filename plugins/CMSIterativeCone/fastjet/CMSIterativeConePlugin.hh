@@ -79,7 +79,7 @@ private:
   double theConeRadius;     ///< cone radius
   double theSeedThreshold;  ///< seed threshold
 
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

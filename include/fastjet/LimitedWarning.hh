@@ -34,6 +34,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <atomic>
 
 FASTJET_BEGIN_NAMESPACE
 
@@ -74,13 +75,22 @@ public:
   /// LimiteWarning class
   static std::string summary();
 
+  //std::atomic can not be stored directly in a std::list
+  struct atomic_counter {
+    std::atomic<unsigned int> _count;
+    atomic_counter(): _count(0) {}
+    atomic_counter(unsigned int iValue): _count(iValue) {}
+    atomic_counter( const atomic_counter& iOther): _count(iOther._count.load()) {}
+
+  };
 private:
-  int _max_warn, _n_warn_so_far;
-  static int _max_warn_default;
-  static std::ostream * _default_ostr;
-  typedef std::pair<std::string, unsigned int> Summary;
+  const int _max_warn;
+  std::atomic<int> _n_warn_so_far;
+  static std::atomic<int> _max_warn_default;
+  static std::atomic<std::ostream*> _default_ostr;
+  typedef std::pair<std::string, atomic_counter > Summary;
   static std::list< Summary > _global_warnings_summary;
-  Summary * _this_warning_summary;
+  std::atomic<Summary*> _this_warning_summary;
   
 };
 

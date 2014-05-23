@@ -89,7 +89,7 @@ private:
   double _seedPt;   ///< the pt seed threshold used in stable-cone search
   double _f;        ///< the overlap thresholod used in the split-merge
 
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

@@ -30,6 +30,7 @@
 
 #include<iostream>
 #include<string>
+#include<atomic>
 
 namespace siscone{
 
@@ -57,7 +58,7 @@ public:
 
 private:
   std::string m_message;       ///< the error message
-  static bool m_print_errors;  ///< do we print error messages?
+  static std::atomic<bool> m_print_errors;  ///< do we print error messages?
 };
 
 }
