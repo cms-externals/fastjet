@@ -29,15 +29,16 @@
 #include "fastjet/LimitedWarning.hh"
 #include <sstream>
 #include <limits>
+#include <mutex>
 
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
-ostream * LimitedWarning::_default_ostr = &cerr;
+std::atomic<ostream*> LimitedWarning::_default_ostr{&cerr};
 std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
-int LimitedWarning::_max_warn_default = 5;
-
+std::atomic<int> LimitedWarning::_max_warn_default{5};
+static std::mutex _global_warnings_summary_mutex;
 
 /// output a warning to ostr
 void LimitedWarning::warn(const std::string & warning) {
@@ -46,9 +47,12 @@ void LimitedWarning::warn(const std::string & warning) {
 
 void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
   if (_this_warning_summary == 0) {
-    // prepare the information for the summary
-    _global_warnings_summary.push_back(Summary(warning, 0));
-    _this_warning_summary = & (_global_warnings_summary.back());
+    std::lock_guard<std::mutex> guard(_global_warnings_summary_mutex);
+    if(_this_warning_summary == 0) {
+      // prepare the information for the summary
+      _global_warnings_summary.push_back(Summary(warning,0));
+      _this_warning_summary = & (_global_warnings_summary.back());
+    }
   }
   if (_n_warn_so_far < _max_warn) {
     // prepare the warning within a string stream
@@ -68,17 +72,21 @@ void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
   }
 
   // maintain the count, but do not allow overflow
-  if (_this_warning_summary->second < numeric_limits<unsigned>::max()) {
-    _this_warning_summary->second++;
-  }
+  //  need to loop since another thread may be updating at the same time
+  unsigned int count = _this_warning_summary.load()->second._count;
+  while(count < numeric_limits<unsigned>::max() and not
+	_this_warning_summary.load()->second._count.compare_exchange_strong(count,count+1));
 }
 
 //----------------------------------------------------------------------
 string LimitedWarning::summary() {
   ostringstream str;
-  for (list<Summary>::const_iterator it = _global_warnings_summary.begin();
-       it != _global_warnings_summary.end(); it++) {
-    str << it->second << " times: " << it->first << endl;
+  {
+    std::lock_guard<std::mutex> guard(_global_warnings_summary_mutex);
+    for (list<Summary>::const_iterator it = _global_warnings_summary.begin();
+	 it != _global_warnings_summary.end(); it++) {
+      str << it->second._count << " times: " << it->first << endl;
+    }
   }
   return str.str();
 }

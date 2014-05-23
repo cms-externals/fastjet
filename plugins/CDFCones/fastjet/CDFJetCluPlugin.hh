@@ -32,6 +32,7 @@
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/PseudoJet.hh"
 #include <map>
+#include <atomic>
 
 // questionable whether this should be in fastjet namespace or not...
 
@@ -98,7 +99,7 @@ private:
   /// as ensure that the jet energy is unique
   void _insert_unique (PseudoJet & jet, std::map<double,int> & jetmap) const;
 
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

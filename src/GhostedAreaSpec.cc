@@ -35,8 +35,7 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
-BasicRandom<double> GhostedAreaSpec::_random_generator;
-LimitedWarning GhostedAreaSpec::_warn_fj2_placement_deprecated;
+thread_local BasicRandom<double> GhostedAreaSpec::_random_generator;
 
 /// explicit constructor
 GhostedAreaSpec::GhostedAreaSpec(

@@ -28,7 +28,7 @@
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
 //ENDHEADER
-
+#include <atomic>
 #include "fastjet/D0RunIBaseConePlugin.hh"
 
 // questionable whether this should be in fastjet namespace or not...
@@ -85,7 +85,7 @@ public:
   virtual void run_clustering(ClusterSequence &) const;
 
 private:
-  static bool _first_time;
+  static std::atomic<bool> _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

@@ -31,6 +31,7 @@
 
 #include<iostream>
 #include<string>
+#include<atomic>
 #include "fastjet/internal/base.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -72,9 +73,9 @@ public:
 
 private:
   std::string _message;                ///< error message
-  static bool _print_errors;           ///< do we print anything?
-  static bool _print_backtrace;        ///< do we print the backtrace?
-  static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
+  static std::atomic<bool> _print_errors;           ///< do we print anything?
+  static std::atomic<bool> _print_backtrace;        ///< do we print the backtrace?
+  static std::atomic<std::ostream*> _default_ostr; ///< the output stream (cerr if not set)
 };
 
 

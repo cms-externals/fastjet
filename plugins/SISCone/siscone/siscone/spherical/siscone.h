@@ -96,7 +96,7 @@ class CSphsiscone : public CSphstable_cones, public CSphsplit_merge{
   std::vector<std::vector<CSphmomentum> > protocones_list;
 
   // random number initialisation
-  static bool init_done;      ///< check random generator initialisation
+  static thread_local bool init_done;      ///< check random generator initialisation
 
 #ifdef DEBUG_STABLE_CONES
   int nb_hash_cones_total, nb_hash_occupied_total;

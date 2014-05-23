@@ -136,7 +136,7 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = 0;
+std::atomic<std::ostream*> ClusterSequence::_fastjet_banner_ostr{nullptr};
 
 
 // destructor that guarantees proper bookkeeping for the CS Structure
@@ -357,8 +357,8 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 
 // these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
-int ClusterSequence::_n_exclusive_warnings = 0;
+std::atomic<bool> ClusterSequence::_first_time{true};
+std::atomic<int> ClusterSequence::_n_exclusive_warnings{0};
 
 
 //----------------------------------------------------------------------
@@ -372,8 +372,8 @@ string fastjet_version_string() {
 // prints a banner on the first call
 void ClusterSequence::print_banner() {
 
-  if (!_first_time) {return;}
-  _first_time = false;
+  bool expected = true;
+  if (!_first_time.compare_exchange_strong(expected,false)) {return;}
 
   // make sure the user has not set the banner stream to NULL
   ostream * ostr = _fastjet_banner_ostr;

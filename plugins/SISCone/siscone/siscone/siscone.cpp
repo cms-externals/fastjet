@@ -65,7 +65,7 @@ Csiscone::~Csiscone(){
   rerun_allowed = false;
 }
 
-bool Csiscone::init_done=false;
+thread_local bool Csiscone::init_done=false;
 std::ostream* Csiscone::_banner_ostr = 0;
 
 /*

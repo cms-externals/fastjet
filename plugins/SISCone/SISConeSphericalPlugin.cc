@@ -24,9 +24,9 @@ template<> PseudoJet::PseudoJet(const siscone_spherical::CSphmomentum & four_vec
 /////////////////////////////////////////////
 // static members declaration              //
 /////////////////////////////////////////////
-std::auto_ptr<SISConeSphericalPlugin>  SISConeSphericalPlugin::stored_plugin;
-std::auto_ptr<std::vector<PseudoJet> > SISConeSphericalPlugin::stored_particles;
-std::auto_ptr<CSphsiscone>             SISConeSphericalPlugin::stored_siscone;
+thread_local std::auto_ptr<SISConeSphericalPlugin>  SISConeSphericalPlugin::stored_plugin;
+thread_local std::auto_ptr<std::vector<PseudoJet> > SISConeSphericalPlugin::stored_particles;
+thread_local std::auto_ptr<CSphsiscone>             SISConeSphericalPlugin::stored_siscone;
 
 
 /////////////////////////////////////////////

@@ -146,8 +146,8 @@ public:
   unsigned int phi_range;     
 
   // extremal value for eta
-  static double eta_min;  ///< minimal value for eta
-  static double eta_max;  ///< maximal value for eta
+  static thread_local double eta_min;  ///< minimal value for eta
+  static thread_local double eta_max;  ///< maximal value for eta
 
 private:
   /// return the cell index corrsponding to an eta value

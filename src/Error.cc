@@ -40,13 +40,14 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
-bool Error::_print_errors = true;
-bool Error::_print_backtrace = false;
-ostream * Error::_default_ostr = & cerr;
+std::atomic<bool> Error::_print_errors{true};
+std::atomic<bool> Error::_print_backtrace{false};
+std::atomic<ostream*> Error::_default_ostr{& cerr};
 
 Error::Error(const std::string & message_in) {
   _message = message_in; 
-  if (_print_errors && _default_ostr){
+  ostream* ostr = _default_ostr;
+  if (_print_errors && ostr){
     ostringstream oss;
     oss << "fastjet::Error:  "<< message_in << endl;
 
@@ -67,16 +68,16 @@ Error::Error(const std::string & message_in) {
     }
 #endif
 
-    *_default_ostr << oss.str();
+    *ostr << oss.str();
     // get something written to file even 
     // if the program aborts
-    _default_ostr->flush(); 
+    ostr->flush(); 
 
     // // output error message either to cerr or to the user-set stream
-    // if (_default_ostr) { *_default_ostr << oss.str();
+    // if (ostr) { *ostr << oss.str();
     //                       // get something written to file even 
     // 			  // if the program aborts
-    //                       _default_ostr->flush(); }
+    //                       ostr->flush(); }
     // else               { std::cerr << oss.str(); }
     
   }
