@@ -35,7 +35,13 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
-thread_local BasicRandom<double> GhostedAreaSpec::_random_generator;
+//CMS change: separate generators for each thread.
+// Not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static thread_local BasicRandom<double> _random_generator;
+#else
+static BasicRandom<double> _random_generator;
+#endif
 
 /// explicit constructor
 GhostedAreaSpec::GhostedAreaSpec(
@@ -171,6 +177,23 @@ string GhostedAreaSpec::description() const {
        << ", n repetitions of ghost distributions =  " << repeat();
   return ostr.str();
 }
+
+ void GhostedAreaSpec::get_random_status(std::vector<int> & __iseed) const {
+  _random_generator.get_status(__iseed);
+}
+
+ void GhostedAreaSpec::set_random_status(const std::vector<int> & __iseed) {
+  _random_generator.set_status(__iseed);
+}
+
+BasicRandom<double> & GhostedAreaSpec::generator_at_own_risk() const {
+  return _random_generator;
+}
+
+double GhostedAreaSpec::_our_rand() const {
+  return _random_generator();
+}
+
 
 FASTJET_END_NAMESPACE
 

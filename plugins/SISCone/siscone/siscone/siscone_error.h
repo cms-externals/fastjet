@@ -30,7 +30,6 @@
 
 #include<iostream>
 #include<string>
-#include<atomic>
 
 namespace siscone{
 
@@ -45,20 +44,33 @@ public:
   ///  \param message_in   the error message to be printed
   Csiscone_error(const std::string & message_in) {
     m_message = message_in; 
-    if (m_print_errors) std::cerr << "siscone::Csiscone_error: "<< message_in << std::endl;
+  // CMS change: hide implementation of printing the error
+  // Change not endorsed by fastjet collaboration 
+    printMessage(message_in);
   };
 
   /// access to the error message
   std::string message() const {return m_message;};
 
+  // CMS change: move implementation to source file
+  // Change not endorsed by fastjet collaboration 
   /// switch on/off the error message printing
   ///  \param print_errors   errors will be printed when true
-  static void setm_print_errors(bool print_errors) {
-    m_print_errors = print_errors;};
+  static void setm_print_errors(bool print_errors);// {
+  //  m_print_errors = print_errors;};
 
 private:
+  // CMS change: hide implementation of printing the error
+  // Change not endorsed by fastjet collaboration 
+  void printMessage(const std::string& message_in);
+
   std::string m_message;       ///< the error message
-  static std::atomic<bool> m_print_errors;  ///< do we print error messages?
+  // CMS change: m_print_errors is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool m_print_errors;  ///< do we print error messages?
 };
 
 }

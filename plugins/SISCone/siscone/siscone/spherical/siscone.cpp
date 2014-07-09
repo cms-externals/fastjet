@@ -67,7 +67,14 @@ CSphsiscone::~CSphsiscone(){
   rerun_allowed = false;
 }
 
-thread_local bool CSphsiscone::init_done=false;
+//CMS change: separate generators for each thread.
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static thread_local bool init_done=false;
+#else
+static bool init_done=false;
+#endif
+
 std::ostream* CSphsiscone::_banner_ostr=&cout;
 
 /*

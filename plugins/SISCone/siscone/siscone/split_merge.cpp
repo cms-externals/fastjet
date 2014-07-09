@@ -344,8 +344,8 @@ int Csplit_merge::init_pleft(){
   n_pass = 0;
 
   Ceta_phi_range epr;
-  epr.eta_min = eta_min-0.01;
-  epr.eta_max = eta_max+0.01;
+  epr.eta_min() = eta_min-0.01;
+  epr.eta_max() = eta_max+0.01;
 
   merge_collinear_and_remove_soft();
 

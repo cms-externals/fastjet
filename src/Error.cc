@@ -29,6 +29,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/config.h"
 #include <sstream>
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
 
 // printing the stack would need execinfo
 #ifdef FASTJET_HAVE_EXECINFO_H
@@ -40,9 +43,17 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
-std::atomic<bool> Error::_print_errors{true};
-std::atomic<bool> Error::_print_backtrace{false};
-std::atomic<ostream*> Error::_default_ostr{& cerr};
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _print_errors{true};
+static std::atomic<bool> _print_backtrace{false};
+static std::atomic<ostream*> _default_ostr{& cerr};
+#else
+static bool _print_errors = true;
+static bool _print_backtrace = false;
+static ostream* _default_ostr =& cerr;
+#endif
 
 Error::Error(const std::string & message_in) {
   _message = message_in; 
@@ -81,6 +92,14 @@ Error::Error(const std::string & message_in) {
     // else               { std::cerr << oss.str(); }
     
   }
+}
+
+void Error::set_print_errors(bool print_errors) {_print_errors = print_errors;}
+
+void Error::set_print_backtrace(bool enabled) {_print_backtrace = enabled;}
+
+void Error::set_default_stream(std::ostream * ostr) {
+    _default_ostr = ostr;
 }
 
 FASTJET_END_NAMESPACE

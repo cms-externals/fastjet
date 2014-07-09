@@ -24,10 +24,17 @@ template<> PseudoJet::PseudoJet(const siscone_spherical::CSphmomentum & four_vec
 /////////////////////////////////////////////
 // static members declaration              //
 /////////////////////////////////////////////
-thread_local std::auto_ptr<SISConeSphericalPlugin>  SISConeSphericalPlugin::stored_plugin;
-thread_local std::auto_ptr<std::vector<PseudoJet> > SISConeSphericalPlugin::stored_particles;
-thread_local std::auto_ptr<CSphsiscone>             SISConeSphericalPlugin::stored_siscone;
-
+//CMS change: separate stores for each thread.
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static thread_local std::auto_ptr<SISConeSphericalPlugin>  stored_plugin;
+static thread_local std::auto_ptr<std::vector<PseudoJet> > stored_particles;
+static thread_local std::auto_ptr<CSphsiscone>             stored_siscone;
+#else
+static std::auto_ptr<SISConeSphericalPlugin>  stored_plugin;
+static std::auto_ptr<std::vector<PseudoJet> > stored_particles;
+static std::auto_ptr<CSphsiscone>             stored_siscone;
+#endif
 
 /////////////////////////////////////////////
 // now comes the implementation itself     //

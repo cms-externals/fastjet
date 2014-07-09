@@ -63,6 +63,9 @@
 #include <vector>
 #include <list>
 #include <sstream>
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 #include "SortByEt.h"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -89,7 +92,14 @@ T deltaR2 (T eta1, T phi1, T eta2, T phi2) {
 }
 
 //------------------------------------------------------
-std::atomic<bool> CMSIterativeConePlugin::_first_time{true};
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+#else
+static bool _first_time = true;
+#endif
+
 
 string CMSIterativeConePlugin::description () const {
   ostringstream desc;
@@ -222,8 +232,13 @@ void CMSIterativeConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CMSIterativeConePlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
   bool expected = true;
   if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if (! _first_time ) return;
+  _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

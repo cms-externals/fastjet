@@ -183,11 +183,17 @@ private:
 
   bool _use_pt_weighted_splitting;
 
+
+  // CMS change: stored_* are no longer class statics.
+  //  moved to file statics since they were changed to thread_local
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
   // part needed for the cache 
   // variables for caching the results and the input
-  static thread_local std::auto_ptr<SISConePlugin          > stored_plugin;
-  static thread_local std::auto_ptr<std::vector<PseudoJet> > stored_particles;
-  static thread_local std::auto_ptr<siscone::Csiscone      > stored_siscone;
+  //static std::auto_ptr<SISConePlugin          > stored_plugin;
+  //static std::auto_ptr<std::vector<PseudoJet> > stored_particles;
+  //static std::auto_ptr<siscone::Csiscone      > stored_siscone;
 };
 
 
