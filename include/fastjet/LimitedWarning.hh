@@ -93,7 +93,7 @@ public:
 #if __cplusplus >= 201103L
     atomic_counter( const atomic_counter& iOther): _count(iOther._count.load()) {}
 #else
-    atomic_counter( const atomic_counter& iOther): _count(iOther) {}
+    atomic_counter( const atomic_counter& iOther): _count(iOther._count) {}
 #endif
 
   };
