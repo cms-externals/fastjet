@@ -29,16 +29,27 @@
 #include "fastjet/LimitedWarning.hh"
 #include <sstream>
 #include <limits>
+  // CMS change: All __cplusplus protected code added for thread-safety
+  // Change not endorsed by fastjet collaboration 
+#if __cplusplus >= 201103L
 #include <mutex>
+#endif
 
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
+  // CMS change: change to std::atomic for thread safety
+  // Change not endorsed by fastjet collaboration 
+#if __cplusplus >= 201103L
 std::atomic<ostream*> LimitedWarning::_default_ostr{&cerr};
-std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
 std::atomic<int> LimitedWarning::_max_warn_default{5};
 static std::mutex _global_warnings_summary_mutex;
+#else
+ostream* LimitedWarning::_default_ostr =&cerr;
+int LimitedWarning::_max_warn_default =5;
+#endif
+std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
 
 /// output a warning to ostr
 void LimitedWarning::warn(const std::string & warning) {
@@ -47,7 +58,9 @@ void LimitedWarning::warn(const std::string & warning) {
 
 void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
   if (_this_warning_summary == 0) {
+#if __cplusplus >= 201103L
     std::lock_guard<std::mutex> guard(_global_warnings_summary_mutex);
+#endif
     if(_this_warning_summary == 0) {
       // prepare the information for the summary
       _global_warnings_summary.push_back(Summary(warning,0));
@@ -73,22 +86,38 @@ void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
 
   // maintain the count, but do not allow overflow
   //  need to loop since another thread may be updating at the same time
+#if __cplusplus >= 201103L
   unsigned int count = _this_warning_summary.load()->second._count;
   while(count < numeric_limits<unsigned>::max() and not
 	_this_warning_summary.load()->second._count.compare_exchange_strong(count,count+1));
+#else
+  if( _this_warning_summary->second._count < numeric_limits<unsigned>::max()) {
+    ++_this_warning_summary->second._count;
+  }
+#endif
 }
 
 //----------------------------------------------------------------------
 string LimitedWarning::summary() {
   ostringstream str;
   {
+#if __cplusplus >= 201103L
     std::lock_guard<std::mutex> guard(_global_warnings_summary_mutex);
+#endif
     for (list<Summary>::const_iterator it = _global_warnings_summary.begin();
 	 it != _global_warnings_summary.end(); it++) {
       str << it->second._count << " times: " << it->first << endl;
     }
   }
   return str.str();
+}
+
+void LimitedWarning::set_default_stream(std::ostream * ostr) {
+  _default_ostr = ostr;
+}
+
+void LimitedWarning::set_default_max_warn(int max_warn) {
+  _max_warn_default = max_warn;
 }
 
 FASTJET_END_NAMESPACE

@@ -25,9 +25,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "siscone_error.h"
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 
 namespace siscone{
 
-std::atomic<bool> Csiscone_error::m_print_errors{true};
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+std::atomic<bool> m_print_errors{true};
+#else
+bool m_print_errors = true;
+#endif
+
+void Csiscone_error::setm_print_errors(bool print_errors) {
+  m_print_errors = print_errors;
+};
+
+void Csiscone_error::printMessage(const std::string& message_in) {
+  if (m_print_errors) std::cerr << "siscone::Csiscone_error: "<< message_in << std::endl;
+}
 
 }

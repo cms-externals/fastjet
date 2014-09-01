@@ -29,6 +29,9 @@
 // D0 stuff
 // apparently this has to go first to avoid a problem with gcc-4.0.1 builds on Macs
 #include <list>
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 #include "ConeClusterAlgo.hpp"
 #include "HepEntityIpre96.h"
 #include "HepEntityI.h"
@@ -149,7 +152,13 @@ void D0RunIBaseConePlugin::run_clustering_worker(ClusterSequence & clust_seq) co
 //                                         //
 /////////////////////////////////////////////
 
-std::atomic<bool> D0RunIpre96ConePlugin::_first_time{true};
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+#else
+static bool _first_time = true;
+#endif
 
 string D0RunIpre96ConePlugin::description () const {
   ostringstream desc;
@@ -171,8 +180,13 @@ void D0RunIpre96ConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
   bool expected = true;
   if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if (! _first_time) return;
+  _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
@@ -197,7 +211,13 @@ void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
 //                                         //
 /////////////////////////////////////////////
 
-std::atomic<bool> D0RunIConePlugin::_first_time{true};
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> D0RunIConePlugin_first_time{true};
+#else
+static bool D0RunIConePlugin_first_time{true};
+#endif
 
 string D0RunIConePlugin::description () const {
   ostringstream desc;
@@ -219,8 +239,13 @@ void D0RunIConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIConePlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
   bool expected = true;
-  if (! _first_time.compare_exchange_strong(expected,false)) return;
+  if (! D0RunIConePlugin_first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if( ! D0RunIConePlugin_first_time ) return;
+  D0RunIConePlugin_first_time = true;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
