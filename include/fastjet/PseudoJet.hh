@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: PseudoJet.hh 2728 2011-11-20 14:18:59Z salam $
+//FJSTARTHEADER
+// $Id: PseudoJet.hh 3566 2014-08-11 15:36:34Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_PSEUDOJET_HH__
@@ -51,9 +53,12 @@ const double MaxRap = 1e5;
 
 /// default value for phi, meaning it (and rapidity) have yet to be calculated) 
 const double pseudojet_invalid_phi = -100.0;
+const double pseudojet_invalid_rap = -1e200;
 
+#ifndef __FJCORE__
 // forward definition
 class ClusterSequenceAreaBase;
+#endif  // __FJCORE__
 
 /// @ingroup basic_classes
 /// \class PseudoJet
@@ -72,6 +77,7 @@ class PseudoJet {
   // cases better than just having the default constructor for the
   // internal shared pointer: see PJtiming.cc and the notes therein)
   PseudoJet() : _px(0), _py(0), _pz(0), _E(0) {_finish_init(); _reset_indices();}
+  //PseudoJet() : _px(0), _py(0), _pz(0), _E(0), _phi(pseudojet_invalid_phi), _rap(pseudojet_invalid_rap), _kt2(0) {_reset_indices();}
   /// construct a pseudojet from explicit components
   PseudoJet(const double px, const double py, const double pz, const double E);
 
@@ -250,7 +256,11 @@ class PseudoJet {
     // complex construct here that works also in such a case. As for
     // dynamic_cast, NULL is returned if L is not derived from
     // PseudoJet
-    const PseudoJet * pj = cast_if_derived<const PseudoJet>(&some_four_vector);
+    //
+    // Note the explicit request for fastjet::cast_if_derived; when
+    // combining fastjet and fjcore, this avoids ambiguity in which of
+    // the two cast_if_derived calls to use.
+    const PseudoJet * pj = fastjet::cast_if_derived<const PseudoJet>(&some_four_vector);
 
     if (pj){
       (*this) = *pj;
@@ -503,6 +513,7 @@ class PseudoJet {
   /// shorthand for validated_cluster_sequence()
   const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   inline const ClusterSequenceAreaBase * validated_cluster_sequence_area_base() const {
@@ -511,6 +522,8 @@ class PseudoJet {
 
   /// shorthand for validated_cluster_sequence_area_base()
   const ClusterSequenceAreaBase * validated_csab() const;
+#endif  //  __FJCORE__
+
   //\}
 
   //-------------------------------------------------------------
@@ -559,7 +572,7 @@ class PseudoJet {
   /// returns a reference to the structure casted to the requested
   /// structure type
   ///
-  /// If there is no sructure associated, an Error is thrown.
+  /// If there is no structure associated, an Error is thrown.
   /// If the type is not met, a std::bad_cast error is thrown.
   template<typename StructureType>
   const StructureType & structure() const;
@@ -652,7 +665,7 @@ class PseudoJet {
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  std::vector<PseudoJet> exclusive_subjets (const double & dcut) const;
+  std::vector<PseudoJet> exclusive_subjets (const double dcut) const;
 
   /// return the size of exclusive_subjets(...); still n ln n with same
   /// coefficient, but marginally more efficient than manually taking
@@ -660,7 +673,7 @@ class PseudoJet {
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  int n_exclusive_subjets(const double & dcut) const;
+  int n_exclusive_subjets(const double dcut) const;
 
   /// return the list of subjets obtained by unclustering the supplied
   /// jet down to nsub subjets. Throws an error if there are fewer than
@@ -682,16 +695,20 @@ class PseudoJet {
   /// associated ClusterSequence
   std::vector<PseudoJet> exclusive_subjets_up_to (int nsub) const;
 
-  /// return the dij that was present in the merging nsub+1 -> nsub 
+  /// Returns the dij that was present in the merging nsub+1 -> nsub 
   /// subjets inside this jet.
+  ///
+  /// Returns 0 if there were nsub or fewer constituents in the jet.
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
   double exclusive_subdmerge(int nsub) const;
 
-  /// return the maximum dij that occurred in the whole event at the
+  /// Returns the maximum dij that occurred in the whole event at the
   /// stage that the nsub+1 -> nsub merge of subjets occurred inside 
   /// this jet.
+  ///
+  /// Returns 0 if there were nsub or fewer constituents in the jet.
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
@@ -717,6 +734,7 @@ class PseudoJet {
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   virtual bool has_area() const;
@@ -738,6 +756,7 @@ class PseudoJet {
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost() const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 
 
@@ -788,6 +807,9 @@ class PseudoJet {
 
   /// set cached rapidity and phi values
   void _set_rap_phi() const;
+
+  // needed for operator* to have access to _ensure_valid_rap_phi()
+  friend PseudoJet operator*(double, const PseudoJet &);
 };
 
 
@@ -811,10 +833,12 @@ inline bool operator!=(const PseudoJet & a, const PseudoJet & b) {return !(a==b)
 /// Can only be used with val=0 and tests whether all four
 /// momentum components are equal to val (=0.0)
 bool operator==(const PseudoJet & jet, const double val);
+inline bool operator==(const double val, const PseudoJet & jet) {return jet == val;}
 
 /// Can only be used with val=0 and tests whether at least one of the
 /// four momentum components is different from val (=0.0)
-inline bool operator!=(const PseudoJet & a, const double & val) {return !(a==val);}
+inline bool operator!=(const PseudoJet & a, const double val)  {return !(a==val);}
+inline bool operator!=( const double val, const PseudoJet & a) {return !(a==val);}
 
 inline double dot_product(const PseudoJet & a, const PseudoJet & b) {
   return a.E()*b.E() - a.px()*b.px() - a.py()*b.py() - a.pz()*b.pz();
@@ -867,7 +891,7 @@ public:
   inline IndexedSortHelper (const std::vector<double> * reference_values) {
     _ref_values = reference_values;
   };
-  inline int operator() (const int & i1, const int & i2) const {
+  inline int operator() (const int i1, const int i2) const {
     return  (*_ref_values)[i1] < (*_ref_values)[i2];
   };
 private:

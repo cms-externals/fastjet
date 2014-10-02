@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------
 
 //STARTHEADER
-// $Id: 11-filter.cc 2684 2011-11-14 07:41:44Z soyez $
+// $Id: 11-filter.cc 3252 2013-10-28 15:22:36Z salam $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -76,7 +76,7 @@ public:
     if (! j.has_pieces()) return _Rmax;
 
     vector<PseudoJet> pieces = j.pieces();
-    if (! pieces.size()==2) return _Rmax;
+    if (pieces.size() != 2) return _Rmax;
 
     double deltaR = pieces[0].delta_R(pieces[1]);
     return min(_Rmax, _deltaR_factor * deltaR);

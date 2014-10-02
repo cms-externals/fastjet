@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------
 
 //STARTHEADER
-// $Id: 14-groomers.cc 2684 2011-11-14 07:41:44Z soyez $
+// $Id: 14-groomers.cc 3302 2013-12-28 10:15:34Z salam $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -165,8 +165,12 @@ int main(){
       // write out result
       cout << "  rap = " << j.rap() << ", phi = " << j.phi() << ", pt = " << j.perp()
            << " mass = " << j.m() 
-           << "  [kept: " << j.pieces().size() << ", rejected: "
-	   << n_rejected << "]" << endl;
+           << "  [kept: " << j.pieces().size() 
+           << ", rejected: " << n_rejected;
+      if (j.has_structure_of<Pruner>()) {
+        cout << ", Rcut: " << j.structure_of<Pruner>().Rcut();
+      }
+      cout << "]" << endl;
     }
   }
 

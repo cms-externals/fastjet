@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: ClusterSequenceStructure.cc 2577 2011-09-13 15:11:38Z salam $
+//FJSTARTHEADER
+// $Id: ClusterSequenceStructure.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +26,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/ClusterSequenceStructure.hh"
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#ifndef __FJCORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
+#endif  // __FJCORE__
 #include <iostream>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -254,6 +258,7 @@ vector<PseudoJet> ClusterSequenceStructure::pieces(const PseudoJet &reference) c
 // associated ClusterSequence (See ClusterSequenceAreaBase for details)
 //----------------------------------------------------------------------
 
+#ifndef __FJCORE__
 // if possible, return a valid ClusterSequenceAreaBase pointer; otherwise
 // throw an error
 const ClusterSequenceAreaBase * ClusterSequenceStructure::validated_csab() const {
@@ -261,7 +266,6 @@ const ClusterSequenceAreaBase * ClusterSequenceStructure::validated_csab() const
   if (csab == NULL) throw Error("you requested jet-area related information, but the PseudoJet does not have associated area information.");
   return csab;
 }
-
 
 // check if it has a defined area
 bool ClusterSequenceStructure::has_area() const{
@@ -293,6 +297,8 @@ PseudoJet ClusterSequenceStructure::area_4vector(const PseudoJet &reference) con
 bool ClusterSequenceStructure::is_pure_ghost(const PseudoJet &reference) const{
   return validated_csab()->is_pure_ghost(reference);
 }
+
+#endif  // __FJCORE__
 
 
 

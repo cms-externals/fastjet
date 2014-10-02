@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 //
 //STARTHEADER
-// $Id: 02-jetdef.cc 2684 2011-11-14 07:41:44Z soyez $
+// $Id: 02-jetdef.cc 3663 2014-09-05 07:23:19Z soyez $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -83,11 +83,13 @@ int main(){
   //
   // this could be one of
   //   {E_scheme, pt_scheme, pt2_scheme, Et_scheme, Et2_scheme, BIpt_scheme, 
-  //    BIpt2_scheme, external_sheme}
+  //    BIpt2_scheme, WTA_pt_scheme, WTA_E_scheme, WTA_modp_scheme, 
+  //    external_sheme}
   // 
   // Notes:
   //  - for the usage of a user-defined recombination scheme
   //    (external_scheme), see 11-boosted_higgs.cc
+  //  - WTA_E_scheme, WTA_modp_scheme are meant for e+e- clusterings
   //
   // By default, the E_scheme is used 
   fastjet::RecombinationScheme recomb_scheme=fastjet::E_scheme;

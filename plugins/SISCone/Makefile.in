@@ -39,7 +39,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/CGAL.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/compiler_flags.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/compiler_flags.m4 \
+	$(top_srcdir)/m4/demangle.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/plugin.m4 $(top_srcdir)/configure.ac
@@ -73,7 +74,9 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libSISConePlugin_la_LIBADD =
-am_libSISConePlugin_la_OBJECTS = libSISConePlugin_la-SISConePlugin.lo \
+am_libSISConePlugin_la_OBJECTS =  \
+	libSISConePlugin_la-SISConeBasePlugin.lo \
+	libSISConePlugin_la-SISConePlugin.lo \
 	libSISConePlugin_la-SISConeSphericalPlugin.lo
 libSISConePlugin_la_OBJECTS = $(am_libSISConePlugin_la_OBJECTS)
 libSISConePlugin_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -171,7 +174,6 @@ CYGPATH_W = @CYGPATH_W@
 D0_CXXFLAGS = @D0_CXXFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -204,7 +206,6 @@ LIST_ALL_PLUGINS = @LIST_ALL_PLUGINS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -217,7 +218,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -230,7 +230,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -266,6 +265,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -286,7 +286,7 @@ SUBDIRS = siscone fastjet .
 @MONOLITHIC_PLUGINS_TRUE@noinst_LTLIBRARIES = libSISConePlugin.la
 @MONOLITHIC_PLUGINS_FALSE@lib_LTLIBRARIES = libSISConePlugin.la
 libSISConePlugin_la_CXXFLAGS = $(AM_CXXFLAGS) -I$(srcdir) -I$(srcdir)/siscone -I$(srcdir)/../../include
-libSISConePlugin_la_SOURCES = SISConePlugin.cc SISConeSphericalPlugin.cc
+libSISConePlugin_la_SOURCES = SISConeBasePlugin.cc SISConePlugin.cc SISConeSphericalPlugin.cc
 EXTRA_DIST = makefile.static
 all: all-recursive
 
@@ -371,6 +371,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libSISConePlugin_la-SISConeBasePlugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libSISConePlugin_la-SISConePlugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libSISConePlugin_la-SISConeSphericalPlugin.Plo@am__quote@
 
@@ -394,6 +395,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+libSISConePlugin_la-SISConeBasePlugin.lo: SISConeBasePlugin.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libSISConePlugin_la_CXXFLAGS) $(CXXFLAGS) -MT libSISConePlugin_la-SISConeBasePlugin.lo -MD -MP -MF $(DEPDIR)/libSISConePlugin_la-SISConeBasePlugin.Tpo -c -o libSISConePlugin_la-SISConeBasePlugin.lo `test -f 'SISConeBasePlugin.cc' || echo '$(srcdir)/'`SISConeBasePlugin.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libSISConePlugin_la-SISConeBasePlugin.Tpo $(DEPDIR)/libSISConePlugin_la-SISConeBasePlugin.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SISConeBasePlugin.cc' object='libSISConePlugin_la-SISConeBasePlugin.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libSISConePlugin_la_CXXFLAGS) $(CXXFLAGS) -c -o libSISConePlugin_la-SISConeBasePlugin.lo `test -f 'SISConeBasePlugin.cc' || echo '$(srcdir)/'`SISConeBasePlugin.cc
 
 libSISConePlugin_la-SISConePlugin.lo: SISConePlugin.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libSISConePlugin_la_CXXFLAGS) $(CXXFLAGS) -MT libSISConePlugin_la-SISConePlugin.lo -MD -MP -MF $(DEPDIR)/libSISConePlugin_la-SISConePlugin.Tpo -c -o libSISConePlugin_la-SISConePlugin.lo `test -f 'SISConePlugin.cc' || echo '$(srcdir)/'`SISConePlugin.cc

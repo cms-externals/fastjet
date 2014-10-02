@@ -7,6 +7,7 @@ libfastjettools_la_SOURCES = \
   BackgroundEstimatorBase.cc \
   JetMedianBackgroundEstimator.cc \
   GridMedianBackgroundEstimator.cc \
+  Recluster.cc \
   Filter.cc Pruner.cc Subtractor.cc\
   MassDropTagger.cc RestFrameNSubjettinessTagger.cc CASubJetTagger.cc \
   JHTopTagger.cc TopTaggerBase.cc

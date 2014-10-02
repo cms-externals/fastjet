@@ -27,6 +27,7 @@ fastjetinclude_HEADERS= JetDefinition.hh\
   CompositeJetStructure.hh\
   WrappedStructure.hh\
   LimitedWarning.hh\
+  RectangularGrid.hh\
   config.h
 
 nodist_fastjetinclude_HEADERS= config_auto.h

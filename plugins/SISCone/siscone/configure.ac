@@ -1,12 +1,12 @@
-AC_INIT([SISCone], [2.0.5])
+AC_INIT([SISCone], [3.0.0])
 AC_CONFIG_SRCDIR([siscone/siscone.cpp])
 AM_INIT_AUTOMAKE
 dnl uncomment the following line if you want to use autoheader
-AM_CONFIG_HEADER(siscone/config.h:config.h.in)
+AC_CONFIG_HEADERS(siscone/config.h:config.h.in)
 dnl and also uncomment the call to autoheader in autogen.sh
 
 dnl check autoconf version
-AC_PREREQ(2.57)
+AC_PREREQ(2.63)
 
 dnl check basic types
 AC_CHECK_TYPE(int)
