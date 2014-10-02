@@ -48,6 +48,12 @@
 #include<string>
 #include<set>
 
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //----------------------------------------------------------------------
@@ -135,6 +141,8 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 
 
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 // The following variable can be modified from within user code
 // so as to redirect banners to an ostream other than cout.
 //
@@ -144,8 +152,32 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
+#if __cplusplus >= 201103L
+static std::atomic<std::ostream*> _fastjet_banner_ostr{nullptr};
+#else
+static std::ostream* _fastjet_banner_ostr = 0;
+#endif
 
+
+
+// these needs to be defined outside the class definition.
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+//     EDITED 2-Oct-2014 (SRR)
+//     - Added _changed_strategy_warning
+//     - Moved higher in the cc file
+//     - _n_exclusive_warnings no longer used
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+//static std::atomic<int> _n_exclusive_warnings{0};
+static std::atomic<LimitedWarning> _exclusive_warnings;
+static std::atomic<LimitedWarning> _changed_strategy_warning;
+#else
+static bool _first_time =true;
+//static int _n_exclusive_warnings =0;
+static LimitedWarning _exclusive_warnings;
+static LimitedWarning _changed_strategy_warning;
+#endif
 
 // destructor that guarantees proper bookkeeping for the CS Structure
 ClusterSequence::~ClusterSequence () {
@@ -406,9 +438,6 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 }
 
 
-// these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
-LimitedWarning ClusterSequence::_exclusive_warnings;
 
 
 //----------------------------------------------------------------------
@@ -417,13 +446,22 @@ string fastjet_version_string() {
   return "FastJet version "+string(fastjet_version);
 }
 
+//CMS change: function definition no longer in header
+//   Change not endorsed by fastjet collaboration
+void ClusterSequence::set_fastjet_banner_stream(std::ostream * ostr) {_fastjet_banner_ostr = ostr;}
+std::ostream * ClusterSequence::fastjet_banner_stream() {return _fastjet_banner_ostr;}
 
 //----------------------------------------------------------------------
 // prints a banner on the first call
 void ClusterSequence::print_banner() {
 
-  if (!_first_time) {return;}
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if (! _first_time) return;
   _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   ostream * ostr = _fastjet_banner_ostr;
@@ -468,8 +506,6 @@ void ClusterSequence::_decant_options(const JetDefinition & jet_def_in,
 // transfer all relevant info into internal variables
 void ClusterSequence::_decant_options_partial() {
   // let the user know what's going on
-  print_banner();
-  
   _jet_algorithm = _jet_def.jet_algorithm();
   _Rparam = _jet_def.R();  _R2 = _Rparam*_Rparam; _invR2 = 1.0/_R2;
   _strategy = _jet_def.strategy();
@@ -1672,11 +1708,6 @@ void ClusterSequence::_do_iB_recombination_step(
 		       Invalid, diB);
 
 }
-
-
-// make sure the static member _changed_strategy_warning is defined. 
-LimitedWarning ClusterSequence::_changed_strategy_warning;
-
 
 //----------------------------------------------------------------------
 void ClusterSequence::_set_structure_shared_ptr(PseudoJet & j) {
