@@ -41,7 +41,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/CGAL.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/compiler_flags.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/compiler_flags.m4 \
+	$(top_srcdir)/m4/demangle.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/plugin.m4 $(top_srcdir)/configure.ac
@@ -79,8 +80,8 @@ am_libfastjettools_la_OBJECTS =  \
 	libfastjettools_la-BackgroundEstimatorBase.lo \
 	libfastjettools_la-JetMedianBackgroundEstimator.lo \
 	libfastjettools_la-GridMedianBackgroundEstimator.lo \
-	libfastjettools_la-Filter.lo libfastjettools_la-Pruner.lo \
-	libfastjettools_la-Subtractor.lo \
+	libfastjettools_la-Recluster.lo libfastjettools_la-Filter.lo \
+	libfastjettools_la-Pruner.lo libfastjettools_la-Subtractor.lo \
 	libfastjettools_la-MassDropTagger.lo \
 	libfastjettools_la-RestFrameNSubjettinessTagger.lo \
 	libfastjettools_la-CASubJetTagger.lo \
@@ -179,7 +180,6 @@ CYGPATH_W = @CYGPATH_W@
 D0_CXXFLAGS = @D0_CXXFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -212,7 +212,6 @@ LIST_ALL_PLUGINS = @LIST_ALL_PLUGINS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -225,7 +224,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -238,7 +236,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -274,6 +271,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -297,6 +295,7 @@ libfastjettools_la_SOURCES = \
   BackgroundEstimatorBase.cc \
   JetMedianBackgroundEstimator.cc \
   GridMedianBackgroundEstimator.cc \
+  Recluster.cc \
   Filter.cc Pruner.cc Subtractor.cc\
   MassDropTagger.cc RestFrameNSubjettinessTagger.cc CASubJetTagger.cc \
   JHTopTagger.cc TopTaggerBase.cc
@@ -383,6 +382,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-JetMedianBackgroundEstimator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-MassDropTagger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-Pruner.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-Recluster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-RestFrameNSubjettinessTagger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-Subtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjettools_la-TopTaggerBase.Plo@am__quote@
@@ -428,6 +428,13 @@ libfastjettools_la-GridMedianBackgroundEstimator.lo: GridMedianBackgroundEstimat
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GridMedianBackgroundEstimator.cc' object='libfastjettools_la-GridMedianBackgroundEstimator.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjettools_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjettools_la-GridMedianBackgroundEstimator.lo `test -f 'GridMedianBackgroundEstimator.cc' || echo '$(srcdir)/'`GridMedianBackgroundEstimator.cc
+
+libfastjettools_la-Recluster.lo: Recluster.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjettools_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjettools_la-Recluster.lo -MD -MP -MF $(DEPDIR)/libfastjettools_la-Recluster.Tpo -c -o libfastjettools_la-Recluster.lo `test -f 'Recluster.cc' || echo '$(srcdir)/'`Recluster.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjettools_la-Recluster.Tpo $(DEPDIR)/libfastjettools_la-Recluster.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Recluster.cc' object='libfastjettools_la-Recluster.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjettools_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjettools_la-Recluster.lo `test -f 'Recluster.cc' || echo '$(srcdir)/'`Recluster.cc
 
 libfastjettools_la-Filter.lo: Filter.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjettools_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjettools_la-Filter.lo -MD -MP -MF $(DEPDIR)/libfastjettools_la-Filter.Tpo -c -o libfastjettools_la-Filter.lo `test -f 'Filter.cc' || echo '$(srcdir)/'`Filter.cc

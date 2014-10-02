@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: fastjetfortran.cc 2577 2011-09-13 15:11:38Z salam $
+// $Id: fastjetfortran.cc 3473 2014-07-29 09:45:34Z soyez $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -253,6 +253,22 @@ void fastjetppgenkt_(const double * p, const int & npart,
     // do everything
     transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
 }
+
+/// a routine that provides similar f77 functionality to fastjetppgenkt_, 
+/// but for the e+e- algorithms instead of the pp ones; note this 
+/// only gives the "inclusive" algorithms. The algorithms are as
+/// defined in the FastJet manual.
+void fastjeteegenkt_(const double * p, const int & npart,                   
+                     const double & R, const double & palg,
+                     double * f77jets, int & njets) {
+    
+  // prepare jet def
+  jet_def = JetDefinition(ee_genkt_algorithm, R, palg);
+  
+  // do everything
+  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+}
+
 
 
 /// f77 interface to the pp generalised-kt (sequential recombination)

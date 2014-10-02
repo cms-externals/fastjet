@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: CDFJetCluPlugin.cc 2777 2011-11-25 15:01:56Z soyez $
+//FJSTARTHEADER
+// $Id: CDFJetCluPlugin.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,12 +26,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/CDFJetCluPlugin.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <sstream>
 #include <cassert>
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 
 // CDF stuff
 #include "JetCluAlgorithm.hh"
@@ -41,7 +46,13 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 using namespace cdf;
 
-bool CDFJetCluPlugin::_first_time = true;
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+#else
+static bool _first_time = true;
+#endif
 
 string CDFJetCluPlugin::description () const {
   ostringstream desc;
@@ -166,8 +177,13 @@ void CDFJetCluPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CDFJetCluPlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
   if (! _first_time) return;
-  _first_time=false;
+  _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

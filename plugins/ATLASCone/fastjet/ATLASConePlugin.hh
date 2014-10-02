@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: ATLASConePlugin.hh 2758 2011-11-24 08:31:58Z soyez $
+//FJSTARTHEADER
+// $Id: ATLASConePlugin.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2007-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 // Note on the implementation:
 //   this implementation of the ATLAS Cone is based on the SpartyJet
@@ -89,7 +91,13 @@ private:
   double _seedPt;   ///< the pt seed threshold used in stable-cone search
   double _f;        ///< the overlap thresholod used in the split-merge
 
-  static bool _first_time;
+
+  // CMS change: _first_time is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

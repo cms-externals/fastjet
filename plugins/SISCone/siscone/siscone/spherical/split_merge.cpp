@@ -6,7 +6,7 @@
 //          an adaptation to spherical coordinates                           //
 // For more details, see http://projects.hepforge.org/siscone                //
 //                                                                           //
-// Copyright (c) 2006-2008 Gavin Salam and Gregory Soyez                          //
+// Copyright (c) 2006-2008 Gavin Salam and Gregory Soyez                     //
 //                                                                           //
 // This program is free software; you can redistribute it and/or modify      //
 // it under the terms of the GNU General Public License as published by      //
@@ -22,19 +22,19 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 322                                                          $//
-// $Date:: 2011-11-15 10:12:36 +0100 (Tue, 15 Nov 2011)                     $//
+// $Revision:: 370                                                          $//
+// $Date:: 2014-09-04 17:03:15 +0200 (Thu, 04 Sep 2014)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <siscone/siscone_error.h>
 #include "split_merge.h"
 #include "momentum.h"
-#include <math.h>
 #include <limits>   // for max
 #include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 namespace siscone_spherical{
 
@@ -234,6 +234,7 @@ CSphsplit_merge::CSphsplit_merge(){
   merge_identical_protocones = true;
 #endif
 #endif
+  _user_scale = NULL;
   indices = NULL;
 
   // ensure that ptcomparison points to our set of particles (though params not correct)
@@ -242,7 +243,7 @@ CSphsplit_merge::CSphsplit_merge(){
   candidates.reset(new multiset<CSphjet,CSphsplit_merge_ptcomparison>(ptcomparison));
 
   // no hardest cut (col-unsafe)
-  SM_var2_hardest_cut_off = -1.0;
+  SM_var2_hardest_cut_off = -numeric_limits<double>::max();
 
   // no energy cutoff for the particles to put in p_uncol_hard
   stable_cone_soft_E2_cutoff = -1.0;
@@ -556,6 +557,141 @@ int CSphsplit_merge::add_protocones(vector<CSphmomentum> *protocones, double R2,
   return 0;
 }
 
+/*
+ * remove the hardest protocone and declare it a a jet 
+ *  - protocones  list of protocones (initial jet candidates)
+ *  - R2          cone radius (squared)
+//  - Emin        minimal energy allowed for jets
+ * return 0 on success, 1 on error
+ *
+ * The list of remaining particles (and the uncollinear-hard ones)
+ * is updated.
+ */
+int CSphsplit_merge::add_hardest_protocone_to_jets(std::vector<CSphmomentum> *protocones, double R2, double Emin){
+
+  int i;
+  CSphmomentum *c;
+  CSphmomentum *v;
+  double R, tan2R;
+  CSphjet jet, jet_candidate;
+  bool found_jet = false;
+
+  if (protocones->size()==0)
+    return 1;
+
+  E_min = Emin;
+  R = sqrt(R2);
+  tan2R = tan(R);
+  tan2R *= tan2R;
+
+  // browse protocones
+  // for each of them, build the list of particles in them
+  for (vector<CSphmomentum>::iterator p_it = protocones->begin();p_it != protocones->end();p_it++){
+    // initialise variables
+    c = &(*p_it);
+
+    // browse particles to create cone contents
+    // note that jet is always initialised with default values at this level
+    jet_candidate.v = CSphmomentum();
+    jet_candidate.contents.clear();
+    for (i=0;i<n_left;i++){
+      v = &(p_remain[i]);
+      if (is_closer(v, c, tan2R)){
+	jet_candidate.contents.push_back(v->parent_index);
+	jet_candidate.v+= *v;
+	v->index=0;
+      }
+    }
+    jet_candidate.n=jet_candidate.contents.size();
+
+    // compute Etilde for that jet.
+    // we can't do that before as it requires knowledge of the jet axis
+    // which has just been computed.
+    compute_Etilde(jet_candidate);
+
+    // set the momentum in protocones 
+    // (it was only known through its spatial coordinates up to now)
+    *c = jet_candidate.v;
+    c->build_thetaphi();
+
+    // set the jet range
+    jet_candidate.range=CSphtheta_phi_range(c->_theta,c->_phi,R);
+
+    // check that the protojet has large enough pt
+    if (jet_candidate.v.E<E_min)
+      continue;
+
+    // assign the split-merge (or progressive-removal) squared scale variable
+    if (_user_scale) {
+      // sm_var2 is the signed square of the user scale returned
+      // for the jet candidate
+      jet_candidate.sm_var2 = (*_user_scale)(jet_candidate);
+      jet_candidate.sm_var2 *= abs(jet_candidate.sm_var2);
+    } else {
+      jet_candidate.sm_var2 = get_sm_var2(jet_candidate.v, jet_candidate.E_tilde);
+    }
+
+    // now check if it is possibly the hardest
+    if ((! found_jet) ||
+	(_user_scale ? _user_scale->is_larger(jet_candidate, jet)
+	             : ptcomparison(jet_candidate, jet))){
+      jet = jet_candidate;
+      found_jet = true;
+    }
+  }
+
+  // make sure at least one of the jets has passed the selection
+  if (!found_jet) return 1;  
+
+  // add the jet to the list of jets
+  jets.push_back(jet);
+  jets[jets.size()-1].v.build_thetaphi();
+  jets[jets.size()-1].v.build_norm();
+
+#ifdef DEBUG_SPLIT_MERGE
+  cout << "PR-Jet " << jets.size() << " [size " << next_jet.contents.size() << "]:";
+#endif
+    
+  // update the list of what particles are left
+  int p_remain_index = 0;
+  int contents_index = 0;
+  //sort(next_jet.contents.begin(),next_jet.contents.end());
+  for (int index=0;index<n_left;index++){
+    if ((contents_index<(int) jet.contents.size()) &&
+	(p_remain[index].parent_index == jet.contents[contents_index])){
+      // this particle belongs to the newly found jet
+      // set pass in initial list
+      particles[p_remain[index].parent_index].index = n_pass;
+#ifdef DEBUG_SPLIT_MERGE
+      cout << " " << jet.contents[contents_index];
+#endif
+      contents_index++;
+    } else {
+      // this particle still has to be clustered
+      p_remain[p_remain_index] = p_remain[index];
+      p_remain[p_remain_index].parent_index = p_remain[index].parent_index;
+      p_remain[p_remain_index].index=1;
+      p_remain_index++;
+    }
+  }
+  p_remain.resize(n_left-jet.contents.size());
+  n_left = p_remain.size();
+  jets[jets.size()-1].pass = particles[jet.contents[0]].index;
+
+  // update list of included particles
+  n_pass++;
+
+#ifdef DEBUG_SPLIT_MERGE
+  cout << endl;
+#endif
+
+  // male sure the list of uncol_hard particles (used for the next
+  // stable cone finding) is updated [could probably be more
+  // efficient]
+  merge_collinear_and_remove_soft();
+  
+  return 0;
+}
 
 /*
  * really do the splitting and merging

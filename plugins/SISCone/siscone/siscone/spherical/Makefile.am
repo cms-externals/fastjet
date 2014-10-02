@@ -15,7 +15,7 @@ EXTRA_DIST = makefile.static
 
 # install the SISCone headers
 sisconeincludedir = $(includedir)/siscone/spherical
-include_HEADERS = geom_2d.h\
+sisconeinclude_HEADERS = geom_2d.h\
   hash.h\
   momentum.h\
   protocones.h\

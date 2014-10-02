@@ -1,3 +1,199 @@
+2014-09-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* SISCone 3.0.0
+
+	* doc/html/usage.html:
+	* doc/html/perfs.html:
+	added a brief discussion about the algogithm complexity.
+
+2014-09-09  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	* doc/html/index.html:
+	* doc/html/usage.html:
+	small phrasing changes
+
+2014-09-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	* NEWS:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	* Doxyfile:
+	preparing for the release of SISCone 3.0.0
+
+	* doc/html/*.html:
+	changed the version number to 3.0.0
+	included the release information
+	updated Gavin's email address
+
+	* doc/html/usage.html:
+	added a description of SISCone with progressive removal
+
+	* Doxyfile:
+	Updated for more recent versions of doxygen [ran doxygen -u from
+	doxygen 1.8.8]
+
+2014-09-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/split_merge.cpp:
+	* siscone/spherical/split_merge.cpp:
+	in progressive removal mode, set the 'pass' index associated to
+	each jet to the index of the iteration at which it has been
+	obtained
+
+	* siscone/siscone.h:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.h:
+	* siscone/spherical/siscone.cpp:
+	put the duplicated code for initialisation in a spearate method
+
+	* siscone/split_merge.cpp:
+	fixed a bug introduced in a recent commit: jet_candidate.sm_var2
+	was not assigned prolperly for non-user-defined scales
+
+	* siscone/spherical/split_merge.cpp:
+	* siscone/spherical/split_merge.h:
+	propagated recent modifications of SISCone to the spherical
+	version:
+	  . reworked some comments (including the misplaced one about
+	    collinear-safety)
+	  . default for SM_var2_hardest_cut_off changed from -1 to
+	    -numeric_limits<double>::max() [largely redundant]
+	  . added support for user-defined scale when run in
+	    "progressive-removal mode"
+
+	* siscone/split_merge.h:
+	  . removed temporary comments at the top of the file
+	  . added a dummy virtual dtor to Csplit_merge::Cuser_scale_base
+
+2014-09-04  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
+
+	* siscone/split_merge.cpp: 
+	SM_var2_hardest_cutoff no longer applied to PR case.
+
+	Modified sm_var2 in (PR) _user_scale case to now be the signed
+	square of the scale variable (to properly handle negative values
+	of the scale).
+
+	default for SM_var2_hardest_cut_off changed from -1 to
+	-numeric_limits<double>::max(); (this change is largely redundant,
+	given that SM_var2_hardest_cutoff is no longer used for PR, while
+	the SM case only allows default scale choices, which are all
+	positive definite).
+
+	replaced <math.h> with <cmath>;
+
+	* siscone/split_merge.h:
+	default Cuser_scale_base::is_larger(...) now uses cached values of
+	scale in Cjet.
+
+	small fixes to a number of comments, including misplaced warning
+	about collinear unsafety.
+
+	* siscone/siscone.h:
+	small changes to comments to clarify situation of an unused
+	variable in progressive removal
+
+2014-09-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/split_merge.cpp:
+	* siscone/siscone/split_merge.h:
+	added material to support user-defined scale choices in
+	progressive-removal mode.
+
+	One needs to overload the Csplit_merge::Cuser_scale_base class and
+	pass a pointer to the split-merge using set_user_scale().
+
+2014-09-03  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/spherical/siscone.h:
+	* siscone/spherical/siscone.cpp:
+	* siscone/spherical/split_merge.h:
+	* siscone/spherical/split_merge.cpp:
+	ported "siscone with progressive removal" to the spherical
+	coordinates version
+
+	* siscone/siscone.h:
+	fixed typo in variable name
+
+	* siscone/split_merge.cpp:
+	imposed the SM_var2_hardest_cut_off in the progressive case too
+	+ made sure at least one candidate jet was found
+
+	* siscone/siscone.h:
+	* siscone/siscone.cpp:
+	added compute_jets_progressive_removal(...) which implements a
+	"progressive removal" version of SISCone. This successively
+	computes stable cones and removes the hardest stable cone as a jet
+	until no particles are left or no stable cones are found.
+
+	Question: what do we do with 'protocones_list'? [for the time
+	being, it's left empty]
+
+	* siscone/split_merge.h:
+	* siscone/split_merge.cpp:
+	added 'add_hardest_protocones_to_jets' which computes the hardest
+	of the stable cones passed as arguments, declares it as a jet and
+	removes its content from the remaining list of particles. This
+	should be used instead of add_protocones()+perform() if one wants a
+	progressive-removal version of SISCone.
+
+2013-04-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/html/index.html:
+	  fixed trivial typo (developper -> developer)
+
+	* switched version number to 2.0.7-devel
+
+2013-04-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Release of SISCone 2.0.6
+
+ 	* NEWS, doc/html/index.html
+	  set the release date to April 9th
+
+	* Doxyfile
+	  Set version number to 2.0.6
+
+2013-04-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/html/*.html:
+	* configure.ac:
+	  switched version number to 2.0.6
+
+	* NEWS:
+	  preparing for SISCone 2.0.6
+
+	* setversion.sh: minor fix (used bash instead of sh)
+
+	* CHECKLIST:   *** ADDED ***
+	  helper checklist for the release process
+
+2013-04-06  Gavin Salam  <gavin.salam@cern.ch>
+
+	* configure.ac: 
+	  updated minimal required autotools version to 2.63
+
+2013-02-05  Gavin Salam  <gavin.salam@cern.ch>
+
+	* autogen.sh: tried to be more tolerant of different libtool
+	  versions (some take --version, others -V). Still have problems
+	  on OS X 10.8 with macports , but autoreconf works fine.
+
+	* configure.ac: 
+	  replaced AM_CONFIG_HEADER with with AC_CONFIG_HEADERS, following
+	  error with autoconf 2.69 on OS X 10.8 with macports.
+
+2013-02-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/Makefile.am:
+	  do not install config.h
+
+	* siscone/spherical/Makefile.am:
+	  fixed directory for headers installation for the spherical
+	  version of SISCone
+
 2012-01-17  Gregory Soyez  <soyez@fastjet.fr>
 
 	* NEWS:

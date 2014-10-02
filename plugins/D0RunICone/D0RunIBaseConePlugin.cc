@@ -1,7 +1,7 @@
-//STARTHEADER
+//FJSTARTHEADER
 // $Id: D0RunIBaseConePlugin.cc 1779 2010-10-25 10:32:59Z soyez $
 //
-// Copyright (c) 2009-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,11 +26,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 // D0 stuff
 // apparently this has to go first to avoid a problem with gcc-4.0.1 builds on Macs
 #include <list>
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 #include "ConeClusterAlgo.hpp"
 #include "HepEntityIpre96.h"
 #include "HepEntityI.h"
@@ -149,7 +154,13 @@ void D0RunIBaseConePlugin::run_clustering_worker(ClusterSequence & clust_seq) co
 //                                         //
 /////////////////////////////////////////////
 
-bool D0RunIpre96ConePlugin::_first_time=true;
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+#else
+static bool _first_time = true;
+#endif
 
 string D0RunIpre96ConePlugin::description () const {
   ostringstream desc;
@@ -171,8 +182,13 @@ void D0RunIpre96ConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
   if (! _first_time) return;
-  _first_time=false;
+  _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
@@ -197,7 +213,13 @@ void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
 //                                         //
 /////////////////////////////////////////////
 
-bool D0RunIConePlugin::_first_time=true;
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> D0RunIConePlugin_first_time{true};
+#else
+static bool D0RunIConePlugin_first_time{true};
+#endif
 
 string D0RunIConePlugin::description () const {
   ostringstream desc;
@@ -219,8 +241,13 @@ void D0RunIConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! D0RunIConePlugin_first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if( ! D0RunIConePlugin_first_time ) return;
+  D0RunIConePlugin_first_time = true;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

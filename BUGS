@@ -1,14 +1,9 @@
 Known bugs
 ----------
 
-1. the CGAL N ln N methods cannot handle coincident points. Events with
-   more than one particle having identical rapidity,phi values should be 
-   clustered with an alternative strategy. If this poses a severe
-   issue to someone, it will be fixed.
-
-2. For N log(N) strategies requiring CGAL, in rare case of near
-   degeneracies, the program may abort with the following error
-   message:
+1. For N log(N) strategies requiring CGAL, in CGAL versions 3.7, 3.8,
+   and 3.9-beta1, in rare case of near degeneracies, the program may
+   abort with the following error message:
 
      terminate called after throwing an instance of
      'CGAL::Assertion_exception'
@@ -20,19 +15,15 @@ Known bugs
    3.8, and 3.9-beta1 of CGAL that has been fixed in CGAL-3.9. Note
    also that versions<=3.6.1 do not show that behaviour. If you
    encounter this problem, please switch to an appropriate version of
-   CGAL. [thanks to the CGAL development team and to Olivier Devillers
+   CGAL. [Thanks to the CGAL development team and to Olivier Devillers
    in particular for the quick fix.]
 
-3. Filter and Pruner may lead to a crash in the following contorted
-   situation:
-   1) they're constructed with just a radius or jet algorithm
-   2) the original jet involves a user-allocated recombiner
-   3) delete_recombiner_when_unused() has been called for the original 
-      jet's definition, jet_def
-   4) the original jet's cluster sequence has gone out of scope
-   5) the user then attempts to obtain the recombiner from the
-      filtered jet (as may occur, e.g., if one tries to refilter or
-      prune it).
+2. With JetMedianBackgroundEstimator, the computation of sigma()
+   implicitly assumes that all jets have the same area. The fact that
+   they don't introduces a bias at the level of a couple of tens of
+   percent. GridMedianBackgroundEstimator should not suffer from this
+   problem. Thanks to Christopher Young for bringing this to our
+   attention. 
 
 ----------------------------------------------------------------------
 Other issues to be aware of
@@ -45,7 +36,7 @@ Other issues to be aware of
 
    However:
 
-   - Some (older) versions of Pythia sometimes produce massive
+   - Some (older) versions of Pythia 6 sometimes produce massive
      particles with pt=0; phi is then ill-defined, while the rapidity
      is finite and we make no guarantees about how we treat the
      particle.
@@ -56,7 +47,8 @@ Other issues to be aware of
      algorithms, many dij can therefore also be identical. The choice
      of which dij to take is then ambiguous and what fastjet actually
      does may depend on: the compiler, the machine architecture
-     (because of rounding errors), the fastjet version.
+     (because of rounding errors), the fastjet version and the
+     clustering strategy.
   
      Physically this issue should not change the jets
      much. Nevertheless, one might choose to break any degeneracy
@@ -99,7 +91,7 @@ Other issues to be aware of
 
 3. Copy of ClusterSequenceArea (and the other CS area-related classes)
    is not fully implemented.
-  
+
 ----------------------------------------------------------------------
 Probably solved
 ---------------

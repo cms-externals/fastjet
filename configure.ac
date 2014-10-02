@@ -1,4 +1,4 @@
-AC_INIT([FastJet],[3.0.3])
+AC_INIT([FastJet],[3.1.0])
 AC_CONFIG_SRCDIR([src/JetDefinition.cc])
 AM_INIT_AUTOMAKE(tar-ustar)
 
@@ -14,7 +14,7 @@ dnl Notes:
 dnl  - the first macro needs to place the files in the correct 
 dnl    dir in order to have the correct -I options for the remote build
 dnl  - see Makefile.am for distcleaning AX_PREFIX_CONFIG_H leftovers
-AM_CONFIG_HEADER(include/fastjet/config_raw.h:config.h.in)
+AC_CONFIG_HEADERS(include/fastjet/config_raw.h:config.h.in)
 AX_PREFIX_CONFIG_H(include/fastjet/config_auto.h,FASTJET,include/fastjet/config_raw.h)
 
 dnl check autoconf version
@@ -24,7 +24,16 @@ dnl   autoconf-2.59 (lxplus)
 dnl   autoconf-2.61 (karnak)
 dnl   autoconf-2.65 (ipht)
 dnl   autoconf-2.68 (virtual&lpthe)
-AC_PREREQ(2.59)
+dnl
+dnl 2013-03-30, updated and tested it works with
+dnl   autoconf-2.63 + automake 1.11 (tycho SLC6)
+dnl   autoconf-2.69 + automake 1.13 (gavin's laptop with macports)
+dnl
+dnl   NB: it is broken on lxplus (SLC5, autoconf 2.59 + automake 1.9), 
+dnl       but lxplus will soon migrate to SLC6. For now 
+dnl       autogen can be run on lxplus6, links to automake-1.11 
+dnl       files replaced with copies and then used on lxplus5
+AC_PREREQ(2.63)
 
 dnl load our M4 macro directory
 dnl  - this is recommended by latest versions of libtoolize
@@ -46,7 +55,10 @@ dnl if the user has not set CXXFLAGS, then set our own default
 dnl-------------------------------------------------------------------
 USE_CUSTOM_FLAGS="yes"
 if [[ "x$CXXFLAGS" == "x" ]]; then
-   CXXFLAGS="-O3 -Wall"
+   dnl 2014-08-11: it seems that -O3 produces timing results that vary
+   dnl quite a lot between different architectures and are sometimes
+   dnl worse than -O2. So we'll use -O2 as a new default
+   CXXFLAGS="-O2 -Wall"
    USE_CUSTOM_FLAGS="no"
 fi
 
@@ -60,7 +72,7 @@ AC_PROG_CXX
 dnl ensure CXX presence
 cxx_progname=$(basename $CXX)
 cxx_dirname=$(dirname $CXX)
-AC_CHECK_PROG([cxx_found],[$cxx_progname],[yes],[no].[$cxx_dirname$PATH_SEPARATOR$PATH])
+AC_CHECK_PROG([cxx_found],[$cxx_progname],[yes],[no],[$cxx_dirname$PATH_SEPARATOR$PATH])
 if test "x$cxx_found" == "xno"; then
    AC_MSG_ERROR([No functional C++ compiler found])
 fi
@@ -205,6 +217,23 @@ if [[ "x${ac_enable_new_dtags_ok}" == "xyes" ]]; then
 fi
 AC_SUBST(HAS_RUNPATH_SUPPORT)
 AC_SUBST(CONFIG_RUNPATH_FLAGS)
+
+dnl-------------------------------------------------------------------
+dnl check if demangling using GNU C++ ABI is supported
+dnl-------------------------------------------------------------------
+dnl only do it if we have execinfo!
+if [[ "x${ac_cv_header_execinfo_h}" == "xyes" ]]; then
+    dnl check if demangling is enabled
+    AC_ARG_ENABLE(demangling,
+        [  --enable-demangling     enables demangling in backtrace (if supported) [default=no]],
+        [enable_demangling_flag="$enableval"],
+        [enable_demangling_flag="no"])
+
+    dnl if asked for, check if deangling is supported
+    if [[ "x${enable_demangling_flag}" == "xyes" ]] ; then
+        ACX_CHECK_DEMANGLE_SUPPORT([AC_DEFINE(HAVE_DEMANGLING_SUPPORT, [], [defined if demangling is enabled at configure time and is supported through the GNU C++ ABI])],[])
+    fi
+fi
 
 dnl substitutions
 AC_SUBST(AM_CXXFLAGS)
@@ -417,6 +446,51 @@ dnl-------------------------------------------------------------------
 dnl sample fortran wrapper
 dnl-------------------------------------------------------------------
 AC_CONFIG_FILES( fortran_wrapper/Makefile )
+
+dnl-------------------------------------------------------------------
+dnl split the version number in major.minor.patch[prerelease] version
+dnl
+dnl We accordingly define FASTJET_VERSION_{MAJOR,MINOR,PATCHLEVEL} as
+dnl well as FASTJET_VERSION_NUMBER. The latter is a 5-digit integer of
+dnl the form 'XYYZZ' (for v X.Y.Z) that can be used to do version
+dnl number comparisons.
+dnl
+dnl We assume that the 3 numbers are present + an optional pre-release
+dnl tag. If the pre-release tag starts with a -, that - will be
+dnl removed. All version numbers should only be made of numbers.
+dnl
+dnl Note that there are multiple strategies one can adopt for
+dnl treatment of the pre-release tag (if any). Here we followed the
+dnl idea that, being a candidate release, pre-releases version number
+dnl will behave as their corresponiding stsable release. E.g. testing
+dnl that the version is at least 3.1.0 using
+dnl   #if FASTJET_VERSION_NUMBER >= 30100
+dnl     ...
+dnl   #endif
+dnl will give a positive anwser for FastJet 3.1.0a1.
+dnl-------------------------------------------------------------------
+versionmajor=`echo $PACKAGE_VERSION | sed 's/^\([[^\.]]*\)\.\([[^\.]]*\)\.\([[^\.]]*\).*/\1/'`
+versionminor=`echo $PACKAGE_VERSION | sed 's/^\([[^\.]]*\)\.\([[^\.]]*\)\.\([[^\.]]*\).*/\2/'`
+versionending=`echo $PACKAGE_VERSION | sed 's/^\([[^\.]]*\)\.\([[^\.]]*\)\.\([[^\.]]*\)$/\3/'`
+versionpatchlevel=`echo $versionending | sed 's/^\([[0-9]][[0-9]]*\).*/\1/'`
+versionprerelease=`echo $versionending | sed 's/^[[0-9-]]*//'`
+versionnumber=`printf "%d%.2d%.2d" "$versionmajor" "$versionminor" "$versionpatchlevel"`
+
+AC_DEFINE_UNQUOTED([VERSION_MAJOR],      [$versionmajor],      [Major version of this package])
+AC_DEFINE_UNQUOTED([VERSION_MINOR],      [$versionminor],      [Minor version of this package])
+AC_DEFINE_UNQUOTED([VERSION_PATCHLEVEL], [$versionpatchlevel], [Patch version of this package])
+if [[ "x$versionprerelease" != "x" ]]; then
+   AC_DEFINE_UNQUOTED([VERSION_PRERELEASE], ["$versionprerelease"], [Pre-release version of this package])
+fi
+AC_DEFINE_UNQUOTED([VERSION_NUMBER], [$versionnumber], [Version of the package under the form XYYZZ (instead of X.Y.Z)])
+
+dnl AC_DEFINE_UNQUOTED([VERSION_IS(X,Y,Z)],
+dnl  [(FASTJET_VERSION_MAJOR == (X) && FASTJET_VERSION_MINOR == (Y) && FASTJET_VERSION_PATCHLEVEL == (Z))],
+dnl  [macro to require a precise version of FastJet (only works for FJ>=3.0.1)])
+dnl 
+dnl AC_DEFINE([VERSION_IS_AT_LEAST(X,Y,Z)],
+dnl  [(FASTJET_VERSION_MAJOR > (X) || (FASTJET_VERSION_MAJOR == (X) && (FASTJET_VERSION_MINOR > (Y) || (FASTJET_VERSION_MINOR == (Y) && (FASTJET_VERSION_PATCHLEVEL >= (Z))))))],
+dnl  [macro to require a minimal version of FastJet (only works for FJ>=3.0.1)])
 
 dnl-------------------------------------------------------------------
 dnl main library outputs

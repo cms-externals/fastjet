@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: Selector.cc 2687 2011-11-14 11:17:51Z soyez $
+//FJSTARTHEADER
+// $Id: Selector.cc 3504 2014-08-01 06:07:54Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +26,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #include <sstream>
 #include <algorithm>
 #include "fastjet/Selector.hh"
+#ifndef __FJCORE__
 #include "fastjet/GhostedAreaSpec.hh"  // for area support
+#endif  // __FJCORE__
 
 using namespace std;
 
@@ -92,6 +96,56 @@ unsigned int Selector::count(const std::vector<PseudoJet> & jets) const {
   return n;
 }
 
+//----------------------------------------------------------------------
+// sum the momenta of the jets that pass the cuts
+PseudoJet Selector::sum(const std::vector<PseudoJet> & jets) const {
+  PseudoJet this_sum(0,0,0,0);
+  const SelectorWorker * worker_local = validated_worker();
+  
+  // separate strategies according to whether the worker applies jet by jet
+  if (worker_local->applies_jet_by_jet()) {
+    for (unsigned i = 0; i < jets.size(); i++) {
+      if (worker_local->pass(jets[i])) this_sum += jets[i];
+    }
+  } else {
+    std::vector<const PseudoJet *> jetptrs(jets.size());
+    for (unsigned i = 0; i < jets.size(); i++) {
+      jetptrs[i] = & jets[i];
+    }
+    worker_local->terminator(jetptrs);
+    for (unsigned i = 0; i < jetptrs.size(); i++) {
+      if (jetptrs[i]) this_sum += jets[i];
+    }
+  }
+
+  return this_sum;
+}
+
+//----------------------------------------------------------------------
+// sum the (scalar) pt of the jets that pass the cuts
+double Selector::scalar_pt_sum(const std::vector<PseudoJet> & jets) const {
+  double this_sum = 0.0;
+  const SelectorWorker * worker_local = validated_worker();
+  
+  // separate strategies according to whether the worker applies jet by jet
+  if (worker_local->applies_jet_by_jet()) {
+    for (unsigned i = 0; i < jets.size(); i++) {
+      if (worker_local->pass(jets[i])) this_sum += jets[i].pt();
+    }
+  } else {
+    std::vector<const PseudoJet *> jetptrs(jets.size());
+    for (unsigned i = 0; i < jets.size(); i++) {
+      jetptrs[i] = & jets[i];
+    }
+    worker_local->terminator(jetptrs);
+    for (unsigned i = 0; i < jetptrs.size(); i++) {
+      if (jetptrs[i]) this_sum += jets[i].pt();
+    }
+  }
+
+  return this_sum;
+}
+
 
 //----------------------------------------------------------------------
 // sift the input jets into two vectors -- those that pass the selector
@@ -130,6 +184,7 @@ void Selector::sift(const std::vector<PseudoJet> & jets,
   }
 }
 
+#ifndef __FJCORE__
 // area using default ghost area
 double Selector::area() const{
   return area(gas::def_ghost_area);
@@ -152,6 +207,7 @@ double Selector::area(double ghost_area) const{
   // check what passes the selection
   return ghost_spec.ghost_area() * ((*this)(ghosts)).size();
 }
+#endif  // __FJCORE__
 
 
 //----------------------------------------------------------------------
@@ -1050,7 +1106,7 @@ protected:
 /// helper for selecting on objects within a distance 'radius' of a reference
 class SW_Circle : public SW_WithReference {
 public:
-  SW_Circle(const double &radius) : _radius2(radius*radius) {}
+  SW_Circle(const double radius) : _radius2(radius*radius) {}
 
   /// return a copy of the current object
   virtual SelectorWorker* copy(){ return new SW_Circle(*this);}
@@ -1095,7 +1151,7 @@ protected:
 
 
 // select on objets within a distance 'radius' of a variable location
-Selector SelectorCircle(const double & radius) {
+Selector SelectorCircle(const double radius) {
   return Selector(new SW_Circle(radius));
 }
 
@@ -1105,7 +1161,7 @@ Selector SelectorCircle(const double & radius) {
 /// betwene 'radius_in' and 'radius_out'
 class SW_Doughnut : public SW_WithReference {
 public:
-  SW_Doughnut(const double &radius_in, const double &radius_out)
+  SW_Doughnut(const double radius_in, const double radius_out)
     : _radius_in2(radius_in*radius_in), _radius_out2(radius_out*radius_out) {}
 
   /// return a copy of the current object
@@ -1154,7 +1210,7 @@ protected:
 
 
 // select on objets with distance from the centre is between 'radius_in' and 'radius_out' 
-Selector SelectorDoughnut(const double & radius_in, const double & radius_out) {
+Selector SelectorDoughnut(const double radius_in, const double radius_out) {
   return Selector(new SW_Doughnut(radius_in, radius_out));
 }
 
@@ -1163,7 +1219,7 @@ Selector SelectorDoughnut(const double & radius_in, const double & radius_out) {
 /// helper for selecting on objects with rapidity within a distance 'delta' of a reference
 class SW_Strip : public SW_WithReference {
 public:
-  SW_Strip(const double &delta) : _delta(delta) {}
+  SW_Strip(const double delta) : _delta(delta) {}
 
   /// return a copy of the current object
   virtual SelectorWorker* copy(){ return new SW_Strip(*this);}
@@ -1208,7 +1264,7 @@ protected:
 
 
 // select on objets within a distance 'radius' of a variable location
-Selector SelectorStrip(const double & half_width) {
+Selector SelectorStrip(const double half_width) {
   return Selector(new SW_Strip(half_width));
 }
 
@@ -1219,7 +1275,7 @@ Selector SelectorStrip(const double & half_width) {
 /// a reference
 class SW_Rectangle : public SW_WithReference {
 public:
-  SW_Rectangle(const double &delta_rap, const double &delta_phi)
+  SW_Rectangle(const double delta_rap, const double delta_phi)
     : _delta_rap(delta_rap),  _delta_phi(delta_phi) {}
 
   /// return a copy of the current object
@@ -1265,7 +1321,7 @@ protected:
 
 
 // select on objets within a distance 'radius' of a variable location
-Selector SelectorRectangle(const double & half_rap_width, const double & half_phi_width) {
+Selector SelectorRectangle(const double half_rap_width, const double half_phi_width) {
   return Selector(new SW_Rectangle(half_rap_width, half_phi_width));
 }
 
@@ -1339,6 +1395,7 @@ Selector SelectorIsZero(){
 
 
 //----------------------------------------------------------------------
+#ifndef __FJCORE__
 /// helper for selecting the pure ghost
 class SW_IsPureGhost : public SelectorWorker {
 public:
@@ -1363,7 +1420,6 @@ public:
 Selector SelectorIsPureGhost(){
   return Selector(new SW_IsPureGhost());
 }
-
 
 //----------------------------------------------------------------------
 // Selector and workers for obtaining a Selector from an old
@@ -1419,6 +1475,7 @@ protected:
 Selector::Selector(const RangeDefinition &range) {
   _worker.reset(new SW_RangeDefinition(range));
 }
+#endif  // __FJCORE__
 
 
 // operators applying directly on a Selector

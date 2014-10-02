@@ -1,8 +1,8 @@
 
-//STARTHEADER
-// $Id: ClusterSequenceAreaBase.cc 2687 2011-11-14 11:17:51Z soyez $
+//FJSTARTHEADER
+// $Id: ClusterSequenceAreaBase.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -13,9 +13,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,7 +27,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 
@@ -33,15 +35,30 @@
 #include "fastjet/ClusterSequenceAreaBase.hh"
 #include <algorithm>
 
+
+
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE
 
 using namespace std;
 
-
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 /// allow for warnings
-LimitedWarning ClusterSequenceAreaBase::_warnings;
-LimitedWarning ClusterSequenceAreaBase::_warnings_zero_area;
-LimitedWarning ClusterSequenceAreaBase::_warnings_empty_area;
+#if __cplusplus >= 201103L
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings;
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_zero_area;
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_empty_area{0};
+#else
+static LimitedWarning _warnings;
+static LimitedWarning _warnings_zero_area;
+static LimitedWarning _warnings_empty_area = 0;
+#endif
 
 //----------------------------------------------------------------------
 /// return the total area, within the selector's range, that is free

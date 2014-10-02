@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: GhostedAreaSpec.hh 2728 2011-11-20 14:18:59Z salam $
+//FJSTARTHEADER
+// $Id: GhostedAreaSpec.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_GHOSTEDAREASPEC_HH__
@@ -35,7 +37,6 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/internal/BasicRandom.hh"
 #include "fastjet/Selector.hh"
-#include "fastjet/LimitedWarning.hh"
 
 // 
 #define STATIC_GENERATOR 1
@@ -121,8 +122,10 @@ public:
   void _initialize();
 
   // for accessing values set by the user
-  inline double ghost_etamax () const {return _ghost_maxrap;}
+  inline double ghost_rapmax () const {return _ghost_maxrap;}
   inline double ghost_maxrap () const {return _ghost_maxrap;}
+  inline double ghost_etamax () const {return _ghost_maxrap;}
+  inline double ghost_maxeta () const {return _ghost_maxrap;}
   inline double ghost_area   () const {return _ghost_area   ;}
   inline double grid_scatter () const {return _grid_scatter;}
   inline double pt_scatter   () const {return _pt_scatter  ;}
@@ -139,8 +142,10 @@ public:
 
   // when explicitly modifying values, sometimes call the initializer
   inline void set_ghost_area   (double val) {_ghost_area    = val; _initialize();}
-  inline void set_ghost_etamax (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_rapmax (double val) {_ghost_maxrap = val; _initialize();}
   inline void set_ghost_maxrap (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_etamax (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_maxeta (double val) {_ghost_maxrap = val; _initialize();}
   inline void set_grid_scatter (double val) {_grid_scatter   = val; }
   inline void set_pt_scatter   (double val) {_pt_scatter     = val; }
   inline void set_mean_ghost_pt(double val) {_mean_ghost_pt  = val; }
@@ -173,19 +178,21 @@ public:
   inline int nphi() const {return _nphi;}
   inline int nrap() const {return _nrap;}
 
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// get all relevant information about the status of the 
   /// random number generator, so that it can be reset subsequently
   /// with set_random_status.
-  inline void get_random_status(std::vector<int> & __iseed) const {
-    _random_generator.get_status(__iseed);}
+  void get_random_status(std::vector<int> & __iseed) const;
 
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// set the status of the random number generator, as obtained
   /// previously with get_random_status. Note that the random
   /// generator is a static member of the class, i.e. common to all
   /// instances of the class --- so if you modify the random for this
   /// instance, you modify it for all instances.
-  inline void set_random_status(const std::vector<int> & __iseed) {
-    _random_generator.set_status(__iseed);}
+  void set_random_status(const std::vector<int> & __iseed);
   
   inline void checkpoint_random() {get_random_status(_random_checkpoint);}
   inline void restore_checkpoint_random() {set_random_status(_random_checkpoint);}
@@ -200,9 +207,10 @@ public:
   /// very deprecated public access to a random number 
   /// from the internal generator
   inline double random_at_own_risk() const {return _our_rand();}
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// very deprecated public access to the generator itself
-  inline BasicRandom<double> & generator_at_own_risk() const {
-    return _random_generator;}
+  BasicRandom<double> & generator_at_own_risk() const;
 
 private:
   
@@ -224,12 +232,16 @@ private:
 
 
   std::vector<int> _random_checkpoint;
-  static BasicRandom<double> _random_generator;
+  //CMS change: _random_generator no longer class static since
+  // thread safety requires it to be thread_local but the header
+  // needs to be parsed by non C++11 compilers 
+  // Change not endorsed by fastjet collaboration
+  //static BasicRandom<double> _random_generator;
   //mutable BasicRandom<double> _random_generator;
 
-  static LimitedWarning _warn_fj2_placement_deprecated;
-
-  inline double _our_rand() const {return _random_generator();}
+  //CMS change: no longer inlined
+  // Change not endorsed by fastjet collaboration
+  double _our_rand() const;
   
 };
 

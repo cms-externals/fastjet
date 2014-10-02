@@ -49,6 +49,9 @@
 \global\emergencystretch = .9\hsize
 
 \newcommand{\fastjet}{\texttt{FastJet}\xspace}
+\newcommand{\contrib}{\texttt{Contrib}\xspace}
+\newcommand{\fjcontrib}{\texttt{\href{http://fastjet.hepforge.org/contrib/}{fjcontrib}}\xspace}
+\newcommand{\fjcore}{\texttt{fjcore}\xspace}
 \newcommand{\ktjet}{\texttt{KtJet}\xspace}
 \newcommand{\clhep}{\texttt{CLHEP}\xspace}
 % ttt includes some resizing of text so that things look nicer inline
@@ -74,7 +77,7 @@
 
 \title{\sf FastJet user manual%
   \\ \large (for version
-  3.0.3%  %%%-VERSION-NUMBER (do not remove this comment; used
+  3.1.0%  %%%-VERSION-NUMBER (do not remove this comment; used
              %  for automatic version-number changes; version number must
              %  stay one a single line)
   )
@@ -87,7 +90,7 @@
   \normalsize
   $^3$CERN, Physics Department, Theory Unit, Geneva, Switzerland\\
   \normalsize
-  $^4$Department of Physics, Princeton University, Princeton, NJ 08544,USA\\
+  $^4$Department of Physics, Princeton University, Princeton, NJ 08544, USA\\
   \normalsize
   $^5$Institut de Physique Th\'eorique, CEA Saclay, France
 }
@@ -238,7 +241,7 @@ $R$ in eq.~(\ref{eq:dij-illustr}), usually called the jet radius, is a
 parameter of the algorithm that determines its angular reach.
 %
 In the original, so-called ``exclusive'' formulation of the $k_t$
-algorithm~\cite{ktexcl} (generally used with $R=1$), one identifies
+algorithm~\cite{ktexcl} (proposed with $R\equiv 1$), one identifies
 the smallest of the $d_{ij}$ and $d_{iB}$. 
 %
 If it is a $d_{ij}$, one replaces $i$ and $j$ with a single new object
@@ -253,7 +256,12 @@ the ``beam'' jet.
 %
 One repeats this procedure until the smallest $d_{ij}$ or $d_{iB}$ is
 above some threshold $d_{\text{cut}}$; all particles/pseudojets that
-are left are then that event's (non-beam) jets.
+are left are then that event's (non-beam) jets.%
+%
+\footnote{One can also choose to have the exclusive algorithm stop
+  when it reaches a configuration with a predetermined number of
+  remaining particles/pseudojets, which then become the event's
+  (non-beam) jets.}
 
 In the ``inclusive'' formulation of the $k_t$ algorithm~\cite{ktincl},
 the $d_{ij}$ and $d_{iB}$ distances are the same as above.
@@ -551,11 +559,11 @@ int main () {
   // print the jets
   cout <<   "        pt y phi" << endl;
   for (unsigned i = 0; i < jets.size(); i++) {
-    cout << "jet " << i << ": "<< jets[i].perp() << " " 
+    cout << "jet " << i << ": "<< jets[i].pt() << " " 
                    << jets[i].rap() << " " << jets[i].phi() << endl;
     vector<PseudoJet> constituents = jets[i].constituents();
     for (unsigned j = 0; j < constituents.size(); j++) {
-      cout << "    constituent " << j << "'s pt: "<< constituents[j].perp() << endl;
+      cout << "    constituent " << j << "'s pt: "<< constituents[j].pt() << endl;
     }
   }
 }
@@ -843,9 +851,39 @@ multiplicity.
 %
 A discussion of the main available strategies together with their
 performance is given in appendix~\ref{app:strategies}.
+%
+Different strategies give identical clustering results, except
+potentially in the presence of distance degeneracies, where different
+strategies may resolve those degeneracies differently.
 
 A textual description of the jet definition can be obtained by a call
 to the member function \ttt{std::string description()}.
+
+As of \fastjet version 3.1, the \ttt{JetDefinition} class allows one
+to directly perform the clustering and access the inclusive jets through
+a \ttt{()} operator:
+\begin{lstlisting}
+  template<class L> std::vector<PseudoJet> JetDefinition::operator()(
+                                         const std::vector<L> & particles
+					 ) const;
+\end{lstlisting}
+Doing
+\begin{lstlisting}
+  fastjet::JetDefinition AKT4(fastjet::antikt_algorithm,0.4);
+  vector<fastjet::PseudoJet> akt4_jets = AKT4(particles);
+\end{lstlisting}
+returns the list of all the inclusive jets given by clustering with
+the anti-$k_t$ algorithm with radius parameter $R=0.4$.
+%
+Jets from the anti-$k_t$ algorithm and other hadron-collider
+algorithms are returned sorted in decreasing transverse momentum,
+while those from $e^+e^-$ algorithms are returned sorted in decreasing
+energy.
+%
+This behaviour differs from that of
+\ttt{ClusterSequence::inclusive\_jets()}, where the ordering of the
+jets is not a priori determined (i.e.\ the user must manually sort the
+jets themselves).
 
 %......................................................................
 \subsection{\tt fastjet::ClusterSequence}
@@ -879,7 +917,7 @@ To access inclusive jets, the following member function should be used
 \begin{lstlisting}
   /// return a vector of all jets (in the sense of the inclusive
   /// algorithm) with pt >= ptmin. 
-  vector<PseudoJet> inclusive_jets (const double & ptmin = 0.0) const;
+  vector<PseudoJet> inclusive_jets (const double ptmin = 0.0) const;
 \end{lstlisting}
 where \ttt{ptmin} may be omitted, then implicitly taking the value
 zero.
@@ -908,16 +946,16 @@ to be stopped once it reaches the specified number of jets.
 \begin{lstlisting}
   /// return a vector of all jets (in the sense of the exclusive algorithm) that would 
   /// be obtained when running the algorithm with the given dcut.
-  vector<PseudoJet> exclusive_jets (const double & dcut) const;
+  vector<PseudoJet> exclusive_jets (const double dcut) const;
 
   /// return a vector of all jets when the event is clustered (in the exclusive sense) 
   /// to exactly njets. Throws an error if the event has fewer than njets particles.
-  vector<PseudoJet> exclusive_jets (const int & njets) const;
+  vector<PseudoJet> exclusive_jets (const int njets) const;
 
   /// return a vector of all jets when the event is clustered (in the exclusive sense) 
   /// to exactly njets. If the event has fewer than njets particles, it returns all
   /// available particles.
-  vector<PseudoJet> exclusive_jets_up_to (const int & njets) const;
+  vector<PseudoJet> exclusive_jets_up_to (const int njets) const;
 \end{lstlisting}
 %
 The user may also wish just to obtain information about the number of
@@ -925,7 +963,7 @@ jets in the exclusive algorithm:
 \begin{lstlisting}
   /// return the number of jets (in the sense of the exclusive algorithm) that would 
   /// be obtained when running the algorithm with the given dcut.
-  int n_exclusive_jets (const double & dcut) const;
+  int n_exclusive_jets (const double dcut) const;
 \end{lstlisting}
 Another common query is to establish the $d_{\min}$ value associated
 with merging from $n+1$ to $n$ jets. Two member functions are
@@ -933,12 +971,12 @@ available for determining this:
 \begin{lstlisting}
   /// return the dmin corresponding to the recombination that went from n+1 to n jets 
   /// (sometimes known as $d_{n,n+1}$).
-  double exclusive_dmerge (const int & n) const;
+  double exclusive_dmerge (const int n) const;
 
   /// return the maximum of the dmin encountered during all recombinations up to the one 
   /// that led to an n-jet final state; identical to exclusive_dmerge, except in cases 
   /// where the dmin do not increase monotonically.
-  double exclusive_dmerge_max (const int & n) const;
+  double exclusive_dmerge_max (const int n) const;
 \end{lstlisting}
 The first returns the $d_{\min}$  in going from $n+1$ to $n$ jets. 
 %
@@ -1062,9 +1100,12 @@ table~\ref{tab:RecombSchemes}, and are described below.
     \ttt{Et2\_scheme}   \\\hline
     \ttt{BIpt\_scheme}  \\\hline
     \ttt{BIpt2\_scheme} \\\hline
+    \ttt{WTA\_pt\_scheme} \\\hline
+    \ttt{WTA\_modp\_scheme} \\\hline
   \end{tabular}
-  \caption{Members of the \ttt{RecombinationScheme} enum; the last two
-    refer to boost-invariant version of the $p_t$ and $p_t^2$ schemes
+  \caption{Members of the \ttt{RecombinationScheme} enum; the schemes
+    prefixed by ``BI''
+    boost-invariant version of the $p_t$ and $p_t^2$ schemes
     (as defined in section~\ref{sec:recomb_schemes}).}
   \label{tab:RecombSchemes}
 \end{table}
@@ -1079,6 +1120,7 @@ the energy in the $E_t$ and $E_t^2$ schemes). Then for all schemes the
 recombination $p_r$ of $p_i$ and $p_j$ is a massless 4-vector
 satisfying
 \begin{subequations}
+  \label{eq:recomb-weights}
   \begin{align}
     p_{t,r} &= p_{t,i} + p_{t,j}\,,\\
     \phi_r &= (w_i \phi_i + w_j \phi_j)/(w_i + w_j)\,,\\
@@ -1096,9 +1138,46 @@ $p_t^2$ schemes, which are identical to the normal $p_t$ and $p_t^2$
 schemes, except that they omit the preprocessing stage. They are
 available as \ttt{BIpt\_scheme} and \ttt{BIpt2\_scheme}.
 
+A generalisation of the $p_t$ and $p_t^2$ schemes is to take a
+weighting by $w_i = p_t^n$. 
+%
+An interesting limit is then $n \to \infty$, referred to as the
+winner-takes-all scheme (WTA), because the new rapidity and azimuth in
+Eq.~(\ref{eq:recomb-weights}) coincide with those of the harder of the
+two particles~\cite{Bertolini:2013iqa}. 
+%
+This gives the \ttt{WTA\_pt\_scheme}. 
+%
+The \ttt{WTA\_pt\_scheme} does not perform any preprocessing, but
+differs from the \ttt{BIpt...} schemes in that the result of a
+recombination acquires the mass of the higher-$p_t$ of the two
+particles (instead of setting the mass to zero).
+%
+This treatment ensures, for example, that recombination of a massive
+particle with an infinitesimally soft particle leaves the mass
+unchanged.
+
 \paragraph{Other schemes for $\boldsymbol{e^+e^-}$ collisions.}
-On request, we may in the future provide dedicated schemes for $\ee$
+%
+The default $E$-scheme is a sensible choice also for $e^+e^-$
 collisions.
+%
+The only non-standard $e^+e^-$-specific scheme currently implemented
+is the \ttt{WTA\_modp\_scheme}, in which the recombination of $p_i$ ad
+$p_j$ points in the direction and has the mass of the particle with
+larger 3-vector modulus ($|\vec p|$), and has a 3-vector modulus
+$|\vec p_r| = |\vec p_i| + |\vec p_i|$.
+%
+\footnote{It is tempting to define also a \ttt{WTA\_E\_scheme} in
+  which the recombination would point in the direction of the particle
+  with the largest energy. This is however dangerous in situations
+  where the most energetic particle is at rest. As a consequence, this
+  scheme is not provided in \fastjet. A similar consideration applies
+  for a \ttt{WTA\_mt\_scheme}.}
+
+%
+On request, we may in the future provide further dedicated schemes for
+$\ee$ collisions.
 
 \paragraph{User-defined schemes.} The user may define their own,
 custom recombination schemes, as described in Appendix~\ref{sec:recombiner}.
@@ -1142,7 +1221,7 @@ $d_{\mathrm{cut}}$ scale inside a given jet, one may use the following
 \begin{lstlisting}
   /// Returns a vector of all subjets of the current jet (in the sense of the exclusive 
   /// algorithm) that would be obtained when running the algorithm with the given dcut
-  std::vector<PseudoJet> exclusive_subjets (const double & dcut) const;
+  std::vector<PseudoJet> exclusive_subjets (const double dcut) const;
 \end{lstlisting}
 If $m$ jets are found, this takes a time $\order{m \ln m}$ (owing to
 the internal use of a priority queue). Alternatively one may obtain
@@ -1333,7 +1412,27 @@ We recommend also that the main elements of the
 the original article that defines the algorithm, as well as to this
 manual and, optionally, the original \fastjet paper~\cite{fastjet}.
 
-
+As of version 3.1, it is also possible to conditionally compile code
+based on the the \fastjet version number, which is encoded in the
+\ttt{FASTJET\_VERSION\_NUMBER} preprocessor symbol as a single integer
+Mmmpp: M is the major version number, mm the minor version
+number and pp the patch level.
+%
+Thus version 3.1.12 would be represented as 30112.
+%
+Code requiring at least version 3.1.0 could be included as follows:
+\begin{lstlisting}
+  #include "fastjet/config.h"
+  
+  #if FASTJET_VERSION_NUMBER >= 30100
+  // code that needs version 3.1.0 or higher
+  # else
+  // alternative code that works also with version 3.0.x
+  #endif
+\end{lstlisting}
+In versions prior to 3.1.0 the \ttt{FASTJET\_VERSION\_NUMBER} symbol
+is undefined and is accordingly treated by the preprocessor as if it
+were zero.
 
 %======================================================================
 \section{\fastjet native jet algorithms}
@@ -1390,11 +1489,12 @@ cases and the jets can then be obtained as follows:
 %......................................................................
 \subsection{Cambridge/Aachen jet algorithm}
 
-Currently the $pp$ Cambridge/Aachen (C/A) jet
-algorithm~\cite{CamOrig,CamWobisch} is provided only in an inclusive
-version~\cite{CamWobisch}, whose formulation is identical to that of
-the $k_t$ jet algorithm, except as regards the distance measures,
-which are:
+The $pp$ Cambridge/Aachen (C/A) jet
+algorithm~\cite{CamOrig,CamWobisch} is provided in the form proposed
+in Ref.~\cite{CamWobisch}.
+%
+Its formulation is identical to that of the (inclusive) $pp$ $k_t$ jet
+algorithm, except as regards the distance measures, which are:
 \begin{subequations}
   \label{eq:dij_cam}
   \begin{align}
@@ -1413,15 +1513,15 @@ algorithm with a
 $d_{cut}$ parameter simply provides the set of jets obtained up to the
 point where all $d_{ij},d_{iB} > d_{cut}$. Having clustered with some
 given $R$, this can actually be an effective way of viewing the event
-at a smaller radius, $R_{eff} = \sqrt{d_{cut}} R$, thus allowing a
-single event to be viewed at a continuous range of $R_{eff}$ within a
+at a smaller radius, $R_\text{eff} = \sqrt{d_{cut}} R$, thus allowing a
+single event to be viewed at a continuous range of $R_\text{eff}$ within a
 single clustering.
 
-We note that the true exclusive formulation of the Cambridge
-algorithm~\cite{CamOrig} (in $e^+e^-$) instead makes use an auxiliary ($k_t$)
-distance measure and `freezes' pseudojets whose recombination would
-involve too large a value of the auxiliary distance measure. Details
-are given in section~\ref{sec:ee-cam}.
+We note that the original formulation of the Cambridge
+algorithm~\cite{CamOrig} (in $e^+e^-$) instead makes use of an
+auxiliary ($k_t$) distance measure and `freezes' pseudojets whose
+recombination would involve too large a value of the auxiliary
+distance measure. Details are given in section~\ref{sec:ee-cam}.
 
 
 %......................................................................
@@ -1649,25 +1749,85 @@ the pointer to the plugin and delete it when it is no longer needed.
 \subsection{SISCone Plugin}
 \label{sec:siscone-plugin}
 
-SISCone~\cite{SISCone} is an implementation of a stable-cone jet
-algorithm with a split--merge step (SC-SM in the notation
-of~\cite{Salam:2009jx}).
+SISCone provides infrared and collinear-safe implementations of the
+two most common kinds of cone algorithm.
 %
-As with most modern cone algorithms, it is divided into two parts:
-first it searches for stable cones; then, because a particle can
-appear in more than one stable cone, a `split--merge' procedure is
-applied, which ensures that no particle ends up in more than one jet.
+Cone algorithm execution generally involves two phases.
+%
+The first is the search for stable cones (SC).
+%
+Then, because a given particle can appear in more than one stable
+cone, there are two options for the second phase: the standard
+approach is to apply a
+`split--merge' (see e.g.\ Ref.\ \cite{RunII-jet-physics}) procedure,
+which ensures that no particle ends up in more than one jet.
+%
+Alternatively, one can identify the highest-$p_t$ stable cone, call it a jet,
+remove all particles that it contained and then repeat the stable-cone
+search and removal over and over until no particles remain (we call
+this progressive removal).
+
 The stable cones are identified using an $\order{N^2 \ln N}$ seedless
-approach. This (and some care in the the `split--merge' procedure)
-ensures that the jets it produces are insensitive to additional soft
-particles and collinear splittings, i.e.\ the algorithm is infrared
-and collinear safe.
+approach~\cite{SISCone}. This (and some care in the `split--merge'
+procedure, if used) ensures that the jets it produces are insensitive
+to additional soft particles and collinear splittings, i.e.\ the
+algorithm is infrared and collinear safe.
+
+By default SISCone runs with a split--merge step.
+%
+The implementation with progressive removal was made public in version
+3.0 of SISCone, first released with version 3.1 of \fastjet.
+
+%  `split--merge' procedure is applied,  which
+% ensures that no particle ends up in more than one jet.
+% 
+%  using an
+% exhaustive geometric approach~\cite{SISCone} to help identify all
+% possible stable cones.
+% %
+% Because the exhaustive approach avoids the need for seeds and cone
+% iterations, it bypasses many of infrared and collinear-safety issues
+% that are present for seeded algorithms.
+% 
+% Cone algorithms generally have two steps: the identification of stable
+% cones and a step that processes those stable cones, e.g.\ dealing with
+% the fact that two distinct stable cones may share particles
+% %
+% SISCone can be operated in two variants: the default and original
+% mode, as described in Ref.\cite{SISCone}, performs a
+% Tevatron-style~\cite{RunII-jet-physics} split--merge (SM) operation to
+% handle overlaps;
+% %
+% The progressive removal (PR) variant
+
+%......................................................................
+\subsubsection{Default mode: SISCone with a split--merge step (SISCone-SM)}
+
+The original implementation of SISCone~\cite{SISCone} corresponded to
+a stable-cone jet algorithm with a split--merge step (SC-SM in the
+notation of~\cite{Salam:2009jx}).
+%
+This remains SISCone's default and, unless explicitly mentioned
+otherwise, it corresponds to the version of SISCone used in the literature.
+
+% As with most modern cone algorithms, it is divided into two parts:
+% first it searches for stable cones; then, because a particle can
+% appear in more than one stable cone, a `split--merge' procedure is
+% applied, which ensures that no particle ends up in more than one jet.
+% %
+% The stable cones are identified using an $\order{N^2 \ln N}$ seedless
+% approach. This (and some care in the the `split--merge' procedure)
+% ensures that the jets it produces are insensitive to additional soft
+% particles and collinear splittings, i.e.\ the algorithm is infrared
+% and collinear safe.
 
 The plugin library and include files are to be be found in the
 \verb:plugins/SISCone: directory, and the main header file is
-\verb:SISConePlugin.hh:. The \verb:SISConePlugin: class has a
+\verb:fastjet/SISConePlugin.hh:. The \verb:SISConePlugin: class has a
 constructor with the following structure
 \begin{lstlisting}
+  #include "fastjet/SISConePlugin.hh"
+
   SISConePlugin (double cone_radius,
                  double overlap_threshold,
                  int    n_pass_max = 0,
@@ -1854,6 +2014,67 @@ large $N$.
 %
 An alternative implementation that is faster for $N \lesssim 10$ was
 presented in~\cite{Weinzierl:2011jx}. 
+
+%......................................................................
+\subsubsection{SISCone with progressive removal (SISCone-PR)}
+\label{sec:SISCone-PR}
+
+After creating an instance of \ttt{SISConePlugin}, the
+progressive-removal option can be enabled by calling
+\begin{lstlisting}
+  plugin->set_progressive_removal(true);
+\end{lstlisting}
+The value of the split--merge overlap threshold is then ignored and
+caching is not available.
+%
+The \ttt{SplitMergeScale} argument in the constructor, instead of
+being interpreted as the choice of scale to use in the split-merge step,
+is instead interpreted as the scale used to order the stable cones (the
+default is \ttt{SISConePlugin::SM\_pttilde}, i.e.\ the scalar sum of
+$p_t$'s of the constituents) and it is the hardest stable cone
+according to that choice that is removed.
+%
+The stable cone finding is then repeated on the remaining set of
+particles, the new hardest cone is removed, and so forth.
+%
+As for other progressive-removal cone algorithms, SISCone-PR
+guarantees that the first jet that is found has area $\pi
+R^2$.\footnote{The \texttt{inclusive\_jets()} function returns the
+  jets in the order in which they were found. Each jet's
+  \texttt{extras->pass(jet)} value also corresponds to the pass of
+  stable-cone finding at which it was obtained.}
+
+There can be interest in trying out other choices of scale variable for
+the ordering of stable cones.
+%
+This can be achieved by calling
+\begin{lstlisting}
+  plugin->set_user_scale(&user_scale);
+\end{lstlisting}
+where \ttt{user\_scale} is an instance of any class that derives from
+the \ttt{SISConePlugin::UserScaleBase} class (actually defined in
+\ttt{SISConeBasePlugin}).
+
+In discussing the speed of SISCone with progressive removal, it is
+useful to distinguish $N$, the total number of particles in the event
+from $n$, the number inside a typical circle of radius $R$.
+%
+SISCone with split--merge actually takes a time $N n \ln n$.
+%
+SISCone with progressive removal, in its current implementation,
+repeats the full stable cone finding $\order{N/n}$ times.
+%
+Thus it takes a time $\sim N^2 \ln n$.
+%
+This could be reduced by repeating the stable-cone finding only for
+particles in the neighbourhood of the last stable-cone that was
+removed: that more limited stable-cone finding should take a time $n^2
+\ln n$ at each iteration, so that the total time would then be $N n
+\ln n$, albeit with a larger coefficient than for the split--merge
+variant.
+% 
+We leave such an improvement to future work, should there be demand
+for it.
 
 %----------------------------------------------------------------------
 \subsection{Other plugins for hadron colliders }
@@ -2315,14 +2536,16 @@ algorithm~\cite{SISCone}.
   #include "fastjet/SISConeSphericalPlugin.hh"
   // ...
   SISConeSphericalPlugin(double R, 
-                         double overlap\_threshold
+                         double overlap_threshold
 			 double protojet_Emin = 0.0, 
 			 bool   caching = false,
 			 SISConeSphericalPlugin::SplitMergeScale  
                            split_merge_scale = SISConeSphericalPlugin::SM_Etilde,
 			 double split_merge_stopping_scale = 0.0);
 \end{lstlisting}
-The functionality follows directly that of \ttt{SISConePlugin}.
+The functionality follows directly that of \ttt{SISConePlugin},
+including options for using a split--merge step (the default) or
+progressive removal.
 
 Note that the underlying implementation of spherical SISCone is
 optimised for large $N$. 
@@ -2923,7 +3146,7 @@ determinations.
 %----------------------------------------------------------------------
 \subsection{\tt ClusterSequenceArea}
 
-This is the class
+This is the class%
 %
 \footnote{  
   \texttt{ClusterSequenceArea} is derived from
@@ -2988,6 +3211,16 @@ information about the area of its jets using the following methods of
   /// exclusively of ghosts and for ghost constituents.
   bool is_pure_ghost = jet.is_pure_ghost();
 \end{lstlisting}
+In the limit of small-$R$ jets, the transverse component of the
+4-vector area is close to the scalar area; for moderate $R$ values,
+the transverse component of the 4-vector area is smaller by a factor
+that reads $1 - R^2/8 + R^4/192 + \order{R^6}$~for the case of
+circular jets~\cite{Dasgupta:2007wa}.
+%
+Note that 4-vector areas are not currently computed exactly for
+Voronoi areas of jets in sparse events, insofar as the 4-vector area
+of each particle's Voronoi cell is approximated as massless and
+pointing in the direction of the particle.
 
 %----------------------------------------------------------------------
 \section{Background estimation and subtraction}
@@ -3118,7 +3351,7 @@ following calls
   // an estimate of the fluctuations in the $p_t$ density per unit $\smash{\sqrt{A}}$,
   // which is obtained from the 1-sigma half-width of the distribution of pt/A.
   // To be precise it is defined such that a fraction (1-0.6827)/2 of the jets
-  // (including empty jets) have $p_t/A < \rho - \sigma \sqrt{\langle A \rangle}$
+  // (including empty jets) have $p_t/A < \rho - \sigma / \sqrt{\langle A \rangle}$
   sigma = bge.sigma(); 
 \end{lstlisting}
 Note that $\rho$ and $\sigma$ determinations count empty area within
@@ -3136,11 +3369,13 @@ A common use of an estimation of the background is to subtract its contamination
 from the
 transverse momentum of hard jets, in the form
 \begin{equation}
-p_{t,jet}^{sub} = p_{t,jet}^{raw} - \rho A_{jet} 
+  \label{eq:BGE-scalar-pt}
+  p_{t,jet}^{sub} = p_{t,jet}^{raw} - \rho A_{jet} 
 \end{equation}
 or its 4-vector version
 \begin{equation}
-p_{\mu,jet}^{sub} = p_{\mu,jet}^{raw} - \rho A_{\mu,jet} \, ,
+  \label{eq:BGE-4vector-massless}
+  p_{\mu,jet}^{sub} = p_{\mu,jet}^{raw} - \rho A_{\mu,jet} \, ,
 \end{equation}
 as first proposed in~\cite{cs}.
 
@@ -3164,7 +3399,7 @@ The subtractor can then be used as follows:
 \end{lstlisting}
 The subtractor normally returns \ttt{jet - bge.rho(jet)*jet.area\_4vector()}.
 %
-If \ttt{jet.perp() < bge.rho(jet)*jet.area\_4vector().perp()}, then
+If \ttt{jet.pt() < bge.rho(jet)*jet.area\_4vector().pt()}, then
 the subtractor instead returns a jet with zero 4-momentum (so that
 \ttt{(subtracted\_jet==0)} returns \ttt{true}).
 %
@@ -3203,7 +3438,7 @@ through the methods (available for both
 
 
 %......................................................................
-\subsubsection{Local estimation}
+\subsubsection{Local estimation (jet based)}
 \label{sec:local-bkgd-estimation}
 
 The first technique, ``local estimation'', available for now only in
@@ -3247,6 +3482,32 @@ takes the ones within the strip.\footnote{If you use non-geometric
 %
 This is however not always very effective, because one may not know
 how many hard jets to remove.
+
+%......................................................................
+\subsubsection{Estimation in regions (grid based)}
+\label{sec:region-bkgd-estimation}
+
+The grid-based estimator does not currently provide for local
+estimates, in the sense that the set of tiles used for a given
+instance of the grid-based estimator is always fixed.
+%
+However, as of \fastjet 3.1, it is possible to obtain relatively fine
+control over which fixed set of tiles a grid-based estimator uses.
+%
+This is done with the help of the \ttt{RectangularGrid} class
+%
+\begin{lstlisting}
+  RectangularGrid grid(rap_min, rap_max, rap_spacing, phi_spacing, selector);
+  GridMedianBackgroundEstimator bge(grid);
+\end{lstlisting}
+A given grid tile will be used only if a massless \ttt{PseudoJet}
+placed at the centre of the tile passes the \ttt{selector}.
+%
+So, for example, to obtain an estimate for $\rho$ based on the activity
+in the two forward regions of a detector, one might set \ttt{rap\_min}
+and \ttt{rap\_min} to cover the whole detector and then supply a
+\ttt{SelectorAbsRapRange(rap\_central\_max, rap\_max)} to select just
+the two forward regions.
 
 %......................................................................
 \subsubsection{Rescaling method}
@@ -3301,6 +3562,120 @@ Additionally, it has the advantage of reduced sensitivity to biases in
 events with high multiplicities of hard jets.
 
 %......................................................................
+\subsection{Handling masses}
+\label{sec:BGE-masses}
+
+There are several subtleties in handling masses in
+subtraction. 
+%
+The first is related to the fact that hadrons have
+masses.
+%
+In some contexts those masses are ignored and set to zero, e.g.\
+because they are experimentally unconstrained: detectors do not
+systematically give information on the mass for every particle.
+%
+However, if particle masses are kept non-zero, then
+Eq.~(\ref{eq:BGE-4vector-massless}) must be
+extended~\cite{Soyez:2012hv} to read
+\begin{equation}
+  \label{eq:4vector-subtraction-with-rhom}
+  p^\mu_\text{jet,sub} = 
+  p^\mu_\text{jet}  
+  - [\rho A^x_\text{jet}, \,
+     \rho A^y_\text{jet}, \,
+     (\rho+\rho_m) A^z_\text{jet}, \,
+     (\rho+\rho_m) A^E_\text{jet}
+     ]\,,
+\end{equation}
+where $\rho_m$ accounts the massive component of the energy flow. 
+%
+It can be approximately determined as the median across patches of a
+quantity $m_{\delta,\text{patch}}/A_{\text{patch}}$, where
+\begin{equation}
+  \label{eq:m-delta}
+  m_{\delta,\text{patch}} = \sum_{i\in\text{patch}}
+  \left(\sqrt{\smash[b]{m^2_{i} + p_{t,i}^2}} - p_{ti}\right)\,.
+\end{equation}
+By default, as of \fastjet 3.1, the grid and jet-median background
+estimators automatically determine $\rho_m$. 
+%
+It is returned from a call to \ttt{rho\_m()}, with fluctuations
+accessible through \ttt{sigma\_m()}.
+%
+The determination of $\rho_m$ involves a small speed penalty and can
+be disabled with a call to \ttt{set\_compute\_rho\_m(false)} for
+either of the background estimators.
+
+To avoid changes in results relative to version 3.0, by default
+\fastjet 3.1 does not use $\rho_m$ in the \ttt{Subtractor}, i.e.\ it
+uses Eq.~(\ref{eq:BGE-4vector-massless}).
+%
+However, for a given subtractor, a call to
+\ttt{set\_use\_rho\_m(true)}, will cause it to instead use
+Eq.~(\ref{eq:4vector-subtraction-with-rhom}) for all subsequent
+subtractions.
+%
+We \emph{strongly recommend} switching this on if your input particles
+have masses, and in future versions of \fastjet we may change the
+default so that it is automatically switched on.\footnote{It is also
+  possible to construct a \texttt{Subtractor} with explicit $\rho$ and
+  $\rho_m$ values, \texttt{Subtractor subtractor(rho, rho\_m)}; if
+  this is done, then $\rho_m$ use \emph{is enabled} by default.}
+%
+An alternative is to make the input particles massless.
+
+A second issue, relevant both for
+Eqs.~(\ref{eq:BGE-4vector-massless}) and
+(\ref{eq:4vector-subtraction-with-rhom}), is that sometimes the
+resulting squared jet mass is negative.\footnote{Recall that if
+  $m^2<0$, \ttt{m()} returns $-\sqrt{-m^2}$, to avoid having to
+  introduce complex numbers just for this special case.}
+%
+This is obviously unphysical.
+%
+By default the 4-vector returned by the subtractor is left in that
+unphysical state, so that the user can decide what to do with it.
+%
+For most applications a sensible behaviour is to adjust the
+4-vector so as to maintain its $p_t$ and azimuth, while setting the
+mass to zero.
+%
+This behaviour can be enabled for a given subtractor by a call to
+its \ttt{set\_safe\_mass(true)} function (available since v.3.1).
+%
+In this case the rapidity is then taken to be that of the original
+unsubtracted jet.
+%
+In future versions of \fastjet, the default behaviour may be changed
+so that ``safe'' subtraction is automatically enabled.
+
+A general note with regards to jet masses is that a number of
+techniques have been proposed as alternatives to 4-vector subtraction
+for jet masses.
+%
+They include Jet Cleansing~\cite{Krohn:2013lba} (which requires
+charged-track information; see also the discussion in
+Ref.~\cite{Cacciari:2014jta}), Constituent
+Subtraction~\cite{Berta:2014eza}, the
+SoftKiller~\cite{Cacciari:2014gra} method and
+PUPPI~\cite{Bertolini:2014bba}.
+%
+Some of these can give significant improvements in the resolution of
+the subtraction for the jet masses, though potentially at the expense
+of some bias.
+%
+SoftKiller and PUPPI appear to give improved resolution also for the
+jet $p_t$ (again at the potential expense of modest biases).
+%
+Implementations of most of these techniques are, or will soon become
+available in \fjcontrib.
+%
+There one will also find the \ttt{GenericSubtractor} contrib, with
+code for area-based subtraction of jet shapes and other generic
+observables as discussed in Refs.~\cite{Soyez:2012hv,Cacciari:2012mu}.
+
+%......................................................................
 \subsection{Other facilities}
 \label{sec:BGE-other-facilities}
 
@@ -3334,9 +3709,33 @@ total range area and the area of the jets contained in the range, with
 the number of empty jets then being calculated based on the average
 jet area for ghost jets ($0.55\pi R^2$~\cite{CSSAreas}).
 %
-All four function above return a result corresponding to the last call
+All four functions above return a result corresponding to the last call
 to \ttt{rho} or \ttt{sigma} (as long as the particles, cluster sequence or
 selector have not changed in the meantime).
+
+The \ttt{Subtractor} has an option
+\begin{lstlisting}
+  void set_known_selectors(const Selector & sel_known_vertex,
+                           const Selector & sel_leading_vertex);
+\end{lstlisting}
+The idea here is that there are contexts where it is possible, for
+some of a jet's constituents, to identify which vertex they come from.
+%
+In that case it is possible to provide a user-defined a selector
+(section~\ref{sect:selectors}) that indicates whether a particle comes
+from an identified vertex or not and a second user-defined selector
+that indicates whether that vertex was the leading vertex.
+%
+The 4-momentum from the non-leading vertex is then discarded, that
+from the leading vertex is kept, and subtraction is applied to
+component that is not from identified vertices.
+%
+It follows that $\rho$ must correspond only to the momentum flow from
+non-identified vertices.
+%
+With this setup, the jet $p_t$ is bounded to be at least equal to that
+from the leading vertex, as is the mass if the ``safe'' subtraction
+option is enabled.
 
 %......................................................................
 \subsection{Alternative workflows}
@@ -3378,7 +3777,50 @@ jets passed via the \ttt{set\_jets()} call above must all originate from a commo
 \ttt{ClusterSequenceAreaBase} type class.
 
 
+%......................................................................
+\subsection{Recommendations}
 
+While the basic idea of pileup subtraction is rather simple, in
+practice a few details are relevant to obtaining the best possible
+performance.
+%
+Here we summarise some useful recommendations:
+\begin{enumerate}
+\item The \ttt{GridMedianBackgroundEstimator} is significantly faster
+  than the \ttt{JetMedianBackgroundEstimator} and performs equally
+  well in nearly all cases.
+
+\item Pileup usually has non-negligible rapidity dependence (and
+  in the case of heavy-ion collisions, the underlying event also has
+  azimuthal dependence).  
+  %
+  It is often important to account for this dependence, which can be
+  done either with the rescaling method
+  (section~\ref{sec:rescaled-bkgd-estimation}) or via a local
+  background estimator (section \ref{sec:local-bkgd-estimation}) or
+  the use of regions (section~\ref{sec:region-bkgd-estimation}).
+  % 
+  For their own work in pileup subtraction the \fastjet authors tend
+  to prefer the rescaling method, with local estimation also a useful
+  option e.g.\ in the case of heavy-ion collisions.
+
+\item If you are interested in jet masses, and wish to use non-zero
+  input particle masses, make sure you use the $\rho_m$ component in
+  Eq.~(\ref{eq:4vector-subtraction-with-rhom}) by calling your
+  subtractor's \ttt{set\_use\_rho\_m()} method
+  (section~\ref{sec:BGE-masses}).
+  %
+  You should also pay attention to what happens with negative squared
+  masses, and consider calling the subtractor's \ttt{set\_safe\_mass()}
+  option.
+  %
+  For reasons of backwards compatibility, both of these options are
+  disabled by default; in future versions of \fastjet, this may change.
+
+\item For jet masses and shapes, there are various other techniques
+  that may be of use, see e.g.\
+  Refs.~\cite{Cacciari:2012mu,Soyez:2012hv,Krohn:2013lba,Cacciari:2014jta,Berta:2014eza,Cacciari:2014gra,Bertolini:2014bba}.
+\end{enumerate}
 
 
 
@@ -3644,10 +4086,12 @@ to construct the pruner using functions that dynamically compute \ttt{zcut} and
 \ttt{Rcut} for the jet being pruned:
 \begin{lstlisting}
   Pruner (const JetDefinition &jet_def, 
-          FunctionOfPseudoJet< double > *zcut_dyn, 
-	  FunctionOfPseudoJet< double > *Rcut_dyn);
+          const FunctionOfPseudoJet< double > *zcut_dyn, 
+	  const FunctionOfPseudoJet< double > *Rcut_dyn);
 \end{lstlisting}
-
+The \ttt{pruned\_jet.structure\_of<Pruner>()} object also provides
+\ttt{Rcut()} and \ttt{zcut()} members, in order to retrieve the
+actual $R_\text{cut}$ and $z_\text{cut}$ values used for that jet.
 
 
 \subsection{Boosted-object taggers}
@@ -3757,6 +4201,9 @@ be achieved with
 (It is also possible to use the \ttt{Rfilt\_dyn} option to the filter
 discussed in section~\ref{sec:filtering}).
 
+A significantly updated version of the mass-drop tagger, modified as
+in Ref.~\cite{Dasgupta:2013ihk}, is available as part of the
+RecursiveTools \fjcontrib module (see section~\ref{sec:fjcontrib}).
 
 %......................................................................
 \subsubsection{The Johns-Hopkins top tagger}
@@ -3865,7 +4312,6 @@ the user to the online doxygen documentation for further details.
 
 
 
-
 %======================================================================
 \section{Compilation notes}
 
@@ -3904,19 +4350,120 @@ standard location.\footnote{For events with near degeneracies in their
 The \ttt{NlnNCam} strategy does not require CGAL, since it is based on
 a considerably simpler computational-geometry structure~\cite{Chan}.
 
+%=======================================================================
+\section{FJcore}
+\label{sec:fjcore}
 
+The \ttt{fjcore} package provides a simple, compact way of accessing
+the main \fastjet functionality.
+%
+It consists of just two files \ttt{fjcore.hh} and \ttt{fjcore.cc}.
+%
+A program can access the \ttt{fjcore} functionality by linking with
+\ttt{fjcore.cc} instead of the full \fastjet library,
+%  distributed separately from the
+% full \fastjet package from \url{http://fastjet.fr}, are meant to provide easy access to these 
+% core functions, in the form of single files and without the need of a full 
+% \fastjet installation:
+\begin{lstlisting}
+    g++ main.cc fjcore.cc
+\end{lstlisting}
+where \ttt{main.cc} includes \ttt{fjcore.hh} rather than the usual
+\fastjet headers.
+%
+Clustering results are identical to those obtained by linking to the
+full \fastjet distribution.
 
+One of the main intended uses of \fjcore is to provide jet-finding
+code that can be easily distributed with 3rd party code (e.g.\ it is
+currently distributed with Pythia~8~\cite{Sjostrand:2007gs} and
+MadGraph5\_aMC@NLO).
+%
+We emphasize that the \fastjet licensing conditions \emph{must} be
+respected when incorporating \fjcore.
+%
+This includes a mention of \fjcore's GPL license in the third-party
+package's own LICENSE or COPYING file.
+%
+Furthermore for interactive usage, the \fjcore banner may not be
+removed.
+%
+This is because it contains crucial information, such as the \fjcore version
+number, that users are expected to quote in their scientific
+publications.
+%
+In order to make it possible for \ttt{fjcore} and the full \fastjet
+(e.g.\ used in a separate user program) to coexist, the \fjcore
+package uses the \ttt{fjcore} namespace instead of \ttt{fastjet}.
+
+In particular, \ttt{fjcore} provides:
+\begin{itemize}
+\item access to all native hadron-collider and $e^+e^-$ algorithms,
+  $k_t$, anti-$k_t$, C/A.  For C/A, the $N\ln N$ method is available,
+  while anti-$k_t$ and $k_t$ are limited to the $N^2$ one (still the
+  fastest for $N < 100$k particles)
+  \item access to selectors, for implementing cuts and selections
+  \item access to all functionalities related to PseudoJets (e.g. a jet's
+    structure or user-defined information)
+\end{itemize}
+Instead, it does \emph{not} provide:
+\begin{itemize}
+  \item jet-area functionality
+  \item background estimation
+  \item access to other algorithms via plugins
+  \item interface to CGAL
+  \item fastjet tools, e.g. filters, taggers
+\end{itemize}
+%
+If these functionalities are needed, the full \fastjet installation must be
+used. The code will be fully compatible, with the sole replacement of the
+header files and of the \ttt{fjcore} namespace with the \ttt{fastjet} one.
+
+The \fjcore package has been available since release 3.0.4 of
+\fastjet, and tracks \fastjet versions.
+%
+It is available for download from the \url{http://fastjet.fr/} web
+site.
+
+%=======================================================================
+\section{FastJet Contrib}
+\label{sec:fjcontrib}
+
+The \fastjet update schedule is geared towards providing stability.
+%
+Typically, a minor (e.g.\ $3.0 \to 3.1$) release is made every two or
+three years, and a new minor or major release may only become widely
+adopted (notably by the experiments) a further year or two down the
+line.
+%
+In comparison, the field of jet physics, especially jet substructure,
+and the development of associated tools proceeds at a much faster pace.
+
+To accommodate this, part way through the 3.1 development cycle, in
+2013, \fastjet \contrib (\fjcontrib) was introduced. 
+%
+This provides a home for a variety of contributed tools. 
+%
+New tools from 3rd-party authors can usually be added in the space of
+days or weeks, after some basic review of the interface, so far
+usually carried out by the \fastjet authors.
+%
+Contents, instructions and information for contributing are provided
+on the \fjcontrib web pages~\cite{fjcontrib},
+\url{http://fastjet.hepforge.org/contrib/}.
+%
 
 
 
 %======================================================================
 \section*{Acknowledgements}
 
-Many people have provided bug reports, suggestions for development and
-in some cases explicit code for plugin algorithms. We would in
-particular like to thank
+Many people have provided bug reports, suggestions for development,
+documentation and in some cases explicit code for plugin
+algorithms. We would in particular like to thank
 %
-% The list below should be identical to that in the AUTHORS file
+% The list below should be identical to that in the AUTHORS file,
+% which is the master list
 %
 Vanya Belyaev,
 Andy Buckley,
@@ -3935,6 +4482,7 @@ Jessie Shelton,
 Lars Sonnenschein,
 Hartmut Stadie,
 Mark Sutton,
+Jesse Thaler
 Chris Vermilion,
 Markus Wobisch.
 
@@ -3961,36 +4509,6 @@ The constructor for a \ttt{JetDefinition} can take a strategy argument
 It is an \ttt{enum} of type \ttt{Strategy} with relevant
 values listed in table~\ref{tab:Strategies}.
 %
-\begin{table}
-  \begin{center}
-    \begin{tabular}{ll}\toprule
-      \ttt{N2Plain} & a plain $N^2$ algorithm (fastest for $N
-      \lesssim 30$)\\
-      \ttt{N2Tiled} & a tiled $N^2$ algorithm (fastest for $30 \lesssim
-      N \lesssim 400$)\\ 
-      \ttt{N2MinHeapTiled} & a tiled $N^2$ algorithm with a heap for
-      tracking the minimum of \\& $d_{ij}$ (fastest for $400 \lesssim
-      N \lesssim 15000$)\\ 
-      \ttt{NlnN} & the Voronoi-based $N\ln N$ algorithm (fastest for $
-      N \gtrsim 15000$)\\ 
-      \ttt{NlnNCam} & based on Chan's $N\ln N$ closest pairs
-      algorithm (fastest for \\&$ 
-      N \gtrsim 6000$), suitable only for the Cambridge jet algorithm\\ 
-      \ttt{Best} & automatic selection of the best of these based on
-      $N$ and $R$\\\bottomrule
-    \end{tabular}
-    \caption{The more interesting of the various algorithmic
-      strategies for clustering. Other strategies are given
-      \ttt{JetDefinition.hh} --- note however that strategies not
-      listed in the above table may disappear in future releases.
-      %
-      For jet algorithms with spherical distance measures (those whose
-      name starts with ``\ttt{ee\_}''), only the \ttt{N2Plain} strategy is
-      available.  }
-    \label{tab:Strategies}
-  \end{center}
-\end{table}
-%
 Nearly all strategies are based on the factorisation of energy and
 geometrical distance components of the $d_{ij}$
 measure~\cite{fastjet}. In particular they involve the dynamic
@@ -3998,11 +4516,67 @@ maintenance of a nearest-neighbour graph for the geometrical
 distances.  They apply equally well to any of the internally
 implemented hadron-collider jet algorithms.
 %
-The one exception is \ttt{NlnNCam}, which is based on a computational
-geometry algorithm for dynamic maintenance of closest pairs
-\cite{Chan} (rather than the more involved nearest neighbour graph),
-and is suitable only for the Cambridge algorithm, whose distance
-measure is purely geometrical.
+The two exceptions are: \ttt{NlnNCam}, which is based on a
+computational geometry algorithm for dynamic maintenance of closest
+pairs \cite{Chan} (rather than the more involved nearest neighbour
+graph), and is suitable only for the Cambridge algorithm, whose
+distance measure is purely geometrical; and
+\ttt{N2MHTLazy9AntiKtSeparateGhosts}, intended specifically for area
+calculations with the anti-$k_t$ algorithm (to be considered
+preliminary in v3.1; it can also be used for passive area calculations
+for other algorithms).
+
+%
+\begin{table}[bt]
+  \begin{center}
+    \begin{tabular}{ll}\toprule
+      \ttt{N2Plain} & Plain $N^2$ algorithm\\
+      \ttt{N2Tiled} & Tiled $N^2$ algorithm\\ 
+      \ttt{N2MinHeapTiled} & Tiled $N^2$ algorithm with a heap for
+      tracking the min.\ of $d_{ij}$ 
+      %(fastest for $400 \lesssim N \lesssim 15000$)\\ 
+      \\
+      \ttt{N2MHTLazy9} & Variant of \ttt{N2MinHeapTiled}, with
+      ``lazy'' (see text) evaluation of \\ &
+      distances to  particles in the set of $9=3\times3$ nearby
+      tiles
+      \\
+      \ttt{N2MHTLazy25} & Like \ttt{N2MHTLazy9}, but uses tiles of
+      size $R/2$ and a set of \\& $25=5\times5$ neighbours
+      \\ 
+      \ttt{N2MHTLazy9AntiKtSeparateGhosts} & Similar to
+      \ttt{N2MHTLazy9}, but neglects ghost-ghost clusterings\\
+      & (to be considered preliminary in FJ3.1)
+      \\
+      \ttt{NlnN} & Voronoi-based $N\ln N$ algorithm\\ 
+      \ttt{NlnNCam} & Based on Chan's $N\ln N$ closest pairs
+      algorithm, suitable only\\& for the Cambridge jet algorithm
+      \\ 
+      \ttt{Best} & Automatic selection of the best of these based on
+      $N$ and $R$
+      \\ 
+      \ttt{BestFJ30} & Automatic strategy selection as was done in
+      FastJet 3.0
+      \\\bottomrule
+    \end{tabular}
+    \caption{The more interesting of the various algorithmic
+      strategies for clustering. Other strategies are given in 
+      \ttt{JetDefinition.hh} --- however, strategies not
+      listed in the above table may disappear in future releases.
+      %
+      For jet algorithms with spherical distance measures (those whose
+      name starts with ``\ttt{ee\_}''), only the \ttt{N2Plain}
+      strategy is available.  
+      %
+      The $N$ range in which a given strategy is optimal depends on
+      $R$ and on the rapidity extent of the particles. 
+      %
+      See figure~\ref{fig:optimal-strategy} for details.
+    }
+    \label{tab:Strategies}
+  \end{center}
+\end{table}
+
 
 The \ttt{N2Plain} strategy uses a ``nearest-neighbour heuristic''
 \cite{Anderberg} approach to maintaining the geometrical
@@ -4017,57 +4591,126 @@ and \ttt{N2MinHeapTiled} differs only in that it uses an $N\ln N$
 (rather than $N^2$) data structure for maintaining in order the subset
 of the $d_{ij}$ that involves nearest neighbours.
 %
+Both use tiles of size at least $R\times R$, and search for a
+particle's nearest neighbours in the $3\times 3$ set of tiles centred
+on that particle's own tile.
+%
+The \ttt{N2MHTLazy9} strategy is similar, however before considering a
+neighbouring tile it establishes whether the edge of the tile is
+closer than the particle's nearest same-tile neighbour.
+%
+If not, it skips the tile, hence the name ``lazy''.
+%
+The extra checks and bookkeeping introduce a speed penalty for
+moderate $N$, but at large $N$ that is more than compensated for by
+the fact that one searches for neighbours in a smaller set
+of tiles.
+%
+The \ttt{N2MHTLazy25} strategy is almost identical except that it uses
+a $5\times 5$ set of tiles of size at least $R/2$.
+%
+All the lazy algorithms are new in \fastjet 3.1.
+%
 The \ttt{NlnN} strategy uses CGAL's Delaunay Triangulation
 \cite{CGAL} for the maintenance of the nearest-neighbour graph.
 %
-Note that $N \ln N$ performance of is an \emph{expected} result, and
+Note that $N \ln N$ performance is an \emph{expected} result, and
 it holds in practice for the $k_t$ and Cambridge algorithms, while for
-anti-$k_t$ and generalised-$k_t$ with $p<0$, hub-and-spoke
-(or bicycle-wheel) type configurations emerge dynamically during the
+anti-$k_t$ and generalised-$k_t$ with $p<0$, hub-and-spoke (or
+bicycle-wheel) type configurations emerge dynamically during the
 clustering and these break the conditions needed for the expected
 result to hold (this however has a significant impact only for $N
-\gtrsim 10^5$).
-%
-A further comment about the $N \ln N$ strategy is that it currently
-has the limitation that it cannot be used in events with perfectly
-collinear particles.
-%
-This is related to the fact that the underlying computation geometry
-structures cannot cleanly accommodate multiple particles in the same
-location, because of the degeneracies that are induced. 
-%
-A workaround for this problem may be provided on request.
+\gtrsim 10^5$; we believe that it leads to $N^{3/2}$ asymptotic time
+for clustering).\footnote{%
+  % 
+  In versions of \fastjet prior to 3.1.0, the $N \ln N$ strategy had
+  the limitation that it could not be used in events with perfectly
+  collinear particles.
+  %
+  This was related to the fact that the underlying computational geometry
+  structures cannot cleanly accommodate multiple particles in the same
+  location.
+  %, because of the degeneracies that are induced. 
+  %
+  As of version 3.1.0, this limitation has been eliminated.
+}
 
-If \ttt{strategy} is omitted then the \ttt{Best} option is set.  
-%
-Note that the $N$ ranges quoted in table~\ref{tab:Strategies} for
-which a given strategy is optimal hold for $R=1$; the general $R$
-dependence can be significant and non-trivial.
-%
-While some attempt has been made to account for the $R$-dependence in
-the choice of the strategy with the ``\ttt{Best}'' option, there may
-exist specific regions of $N$ and $R$ in which a manual choice of
-strategy can give faster execution.
-%
-Furthermore the \ttt{NlnNCam} strategy's timings may depend
-strongly on the size of the cache.
-Finally for a given $N$ and $R$, the optimal strategy may also depend
-on the event structure.
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=0.32\textwidth]{figs/fj31-best-strategy-manual-akt}\hfill
+  \includegraphics[width=0.32\textwidth]{figs/fj31-best-strategy-manual-cam}\hfill
+  \includegraphics[width=0.32\textwidth]{figs/fj31-best-strategy-manual-kt}
+  \caption{Transitions between fastest strategies in the plane of
+    particle multiplicity $N$ and radius $R$. 
+    %
+    The events consist of
+    one hard scatter and a variable number pileup collisions, with
+    particles accepted up to rapidity $|y|<5$. 
+    %
+    To probe the small $N$
+    region, only the $N$ hardest particles in the event are kept.
+    %
+    The red lines with symbols indicate the measured transitions,
+    while the black solid lines are the approximate transitions used
+    for the \texttt{Best} strategy.
+    %
+    The three plots are, from left to right, for the anti-$k_t$, C/A and
+    $k_t$ algorithms.
+  }
+  \label{fig:optimal-strategy}
+\end{figure}
 
-\begin{figure}[t]
+
+Given the many strategies, it is not entirely trivial to select the
+fastest one for any given event.
+%
+The optimal choice depends on the jet algorithm, its radius parameter,
+the event multiplicity, and the way in which the particles are
+distributed across the event (e.g.\ all concentrated at small
+rapidities, or covering a large rapidity range).
+%
+Figure~\ref{fig:optimal-strategy} shows our determination of the
+optimal strategy for different $R$ and $N$ for events covering
+rapidities up to $|y|<5$.\footnote{The optimal transition to the
+  \ttt{NlnNCam} strategy may depend strongly on the size of the
+  cache.}
+%
+The solid black lines indicate the transitions encoded in the
+``\ttt{Best}'' meta-strategy, which automatically selects one of the
+actual strategies for execution.
+%
+Note that the choice of optimal strategy can to some extent depend
+also on the processor, compiler version and optimisation flags.
+%
+Accordingly, the choices made in the \ttt{Best} strategy may not be
+perfectly optimal on all systems.
+
+\begin{figure}[tp]
   \centering
   % NB: use of 3_0_1 in file naming is to ensure that we can drop the
   % file extension. That way both latex and pdflatex will find an
   % appropriate figure.
-  \includegraphics[width=0.7\textwidth]{figs/timings_best_3_0_1}
-  \caption{Time required to perform the clustering of $N$ particles in
-    \fastjet 3.0.1 with the \ttt{Best} strategy. The anti-$k_t$,
-    $k_t$, and Cambridge/Aachen (C/A) native algorithms are shown,
-    together with the SISCone plugin.  All use $R=0.7$.
+  %\includegraphics[width=0.7\textwidth]{figs/timings_best_3_0_1}
+  \includegraphics[width=0.47\textwidth]{figs/fj31_timings_best_R04}\hfill
+  \includegraphics[width=0.47\textwidth]{figs/fj31_timings_best_R12}
+  \caption{
+    Time required to perform the clustering of $N$ particles in
+    \fastjet 3.1.0 with the \ttt{Best} strategy. The anti-$k_t$,
+    $k_t$, and Cambridge/Aachen (C/A) native algorithms are shown for
+    $R=0.4$ (left) and $R=1.2$ (right).
+    %
+    For comparison, the figure also includes the timings for the anti-$k_t$ algorithm
+    in version 3.0.6 of \fastjet.
     %%
-    Shown for an Intel i5 760 processor with 8~MB of
-    cache.
-    %%
+    % The timings were obtained on an Intel i5 760 processor with 8~MB of
+    % cache. 
+    %% machine is talos
+    The timings were obtained on an Intel Xeon X3360 processor with 6~MB of
+    level-3 cache, running at 2.83GHz.
+    %
+    The code was compiled with \ttt{g++} version 4.4, using the \ttt{-O2}
+    optimisation flag.
+    %
     For small $N$, $N$ was varied by taking a single hard dijet event
     generated with Pythia~6~\cite{Sjostrand:2006za} and extracting the
     $N$ hardest particles. 
@@ -4075,45 +4718,78 @@ on the event structure.
     Large $N$ values were obtained by taking a single hard dijet event
     and adding simulated minimum-bias events to it.  
     %%
+    Particles are limited to rapidities $|y|<5$.
+    %%
     The results include the time to extract the inclusive jets with
-    $p_t > 5\GeV$ and sort them into decreasing $p_t$.  }
-\label{fig:timings}
+    $p_t > 5\GeV$ and sort them into decreasing $p_t$.
+    %
+    Note that timings observed in practice can differ from those given
+    here for events with substantially different distributions of
+    particles.  
+    %
+  }
+  \label{fig:timings}
 \end{figure}
 
 Illustrative timings for the \ttt{Best} strategy are shown as a
 function of $N$ in figure~\ref{fig:timings} for the anti-$k_t$, $k_t$
-and the Cambridge/Aachen algorithms. Results for the SISCone plugin
-are given for comparison purposes.
+and the Cambridge/Aachen algorithms, with $R=0.4$ on the left and
+$R=1.2$ on the right.
+%
+For comparison the figure also shows the timings for the anti-$k_t$
+algorithm in \fastjet 3.0.6 and additionally for SISCone ($R=0.4$ only).
 %
 Kinks in the timings of the native algorithms are visible at the $N$
 values where there is a switch from one strategy to another.
 %
-There can be imperfections in this choice, e.g. as seen for the $k_t$
-algorithm near $N=20\,000$. 
+%There can be imperfections in this choice, e.g. as seen for the $k_t$
+%algorithm near $N=20\,000$. 
 %
-While their impact is generally modest, depending on event structure
-there can be cases where a manual choice of strategy can have
-significant benefits.
+% While their impact is generally modest, depending on event structure
+% there can be cases where a manual choice of strategy can have
+% significant benefits.
 %
+The speed improvements from the strategies introduced in version
+3.1 set in starting with a couple of thousand (hundred) particles for
+$R=0.4$ ($1.2$) and reach about a factor of ten improvement for
+$N\simeq 10^5$ ($20\,000$); they also result in the transition to the
+$N\ln N$ strategies occurring at somewhat larger $N$ than in version
+3.0, typically at or beyond $N=10^5$.
+%
+%
+Taking $N=10^4$ particles as a reference (e.g.\ corresponding to moderate
+$pp$ pileup plus ghosts for area subtraction\footnote{For the specific
+  case of the anti-$k_t$ algorithm with ghosts, the
+  \ttt{N2MHTLazy9AntiKtSeparateGhosts} can bring further benefits in
+  this region.}), the improvement in speed is about a factor of $2$
+for $R=0.4$ and $7$ for $R=1.2$.
 
 We note that there are a few places where there remains scope for
 timing improvements. 
 %
 In particular at low $N$ the overheads related to copying and sorting
-of a vector of \ttt{PseudoJet} objects are a substantial fraction of the
+a vector of \ttt{PseudoJet} objects are a relevant fraction of the
 total time, and could be reduced.
 %
 Additionally, for the Cambridge/Aachen algorithm at moderate to large
-$N$, the use of multiple grid sizes could bring an $\order{1}$
-benefit;
+$N$, the use of multiple grid sizes could bring some 
+benefit.
 %
-for the anti-$k_t$ algorithm one can envisage $\order{1}$ improvements
-at moderate to large $N$ when $N$ is dominated by ghost particles,
-making use of the fact that for the anti-$k_t$ algorithm one may
-neglect the ghosts' self clustering in the determination of hard jets'
-areas.
+The improvements contained in the \ttt{N2MHTLazy9AntiKtSeparateGhosts}
+strategy could be further extended to the \ttt{Lazy25} case and made
+available automatically.
 %
-Should users have applications where such improvements would be
+Finally the \ttt{Best} strategy selection could try to better take
+into account the rapidity extent of the event, and special cases like
+single-jet reclustering.
+% 
+% for the anti-$k_t$ algorithm one can envisage $\order{1}$ improvements
+% at moderate to large $N$ when $N$ is dominated by ghost particles,
+% making use of the fact that for the anti-$k_t$ algorithm one may
+% neglect the ghosts' self clustering in the determination of hard jets'
+% areas.
+%
+Should users have applications where such improvements are
 critical, they are encouraged to contact the \fastjet authors.
 
 %======================================================================
@@ -4585,6 +5261,17 @@ The user should carry out a dynamic cast so as to convert the extras
 back to the specific plugin extras class, as illustrated for
 SISCone in section~\ref{sec:siscone-plugin}.
 
+Note that when calculating areas, the \ttt{extras()} member works
+only for active areas with explicit ghosts and for Voronoi areas. 
+%
+The reason for this is that other types of area first carry out a
+clustering with explicit ghosts and then edit the
+\ttt{ClusterSequence} to remove the information related to pure ghost
+jets.
+%
+This modifies the internal indices of the jets, making it very
+challenging, for example, for the \ttt{Extras} class to handle queries
+about individual jets.
 
 %----------------------------------------------------------------------
 \subsubsection{Building new sequential recombination algorithms}
@@ -5017,9 +5704,17 @@ It brought the first of a series of \fastjet tools to help with
 advanced jet analyses, namely the \ttt{Selector} class, filters,
   pruners, taggers and new background estimation classes.
 %
-Version~3 also added the D0-Run I cone~\cite{Abbott:1997fc} plugin and
+Version~3.0 also added the D0-Run I cone~\cite{Abbott:1997fc} plugin and
 support for native jet algorithms to be run with $R>\pi/2$.
-
+%
+Version~3.1 gave significant speed improvements for multiplicities
+from a few thousand up to a few hundred thousand and various other
+small additions.
+%
+The period in between versions 3.0.0 and 3.1.0 also saw the first
+releases of the \fjcore compact subset of \fastjet
+(section~\ref{sec:fjcore}) and of the \fjcontrib project
+(section~\ref{sec:fjcontrib}).
 
 %......................................................................
 \subsection{Deprecated and removed features}
@@ -5069,6 +5764,10 @@ have led us to deprecate and/or remove functionality.
                    & 3.0    & --   & BackgroundEstimator (cf.\ section \ref{sec:BGE-positional})\\
     GAS::set\_fj2\_placement(...)
                    & 3.0    & --   & use new default ghost placement instead\\
+    \midrule %------------------------------------------------------------
+    CS::plugin\_associate\_extras(auto\_ptr) 
+                   & 3.1    &  --  &
+                   CS::plugin\_associate\_extras(Extras *)\\
     \bottomrule %=========================================================
   \end{tabular}
   \caption{Summary of interfaces and features of earlier versions that have been
@@ -5080,6 +5779,10 @@ have led us to deprecate and/or remove functionality.
     \label{tab:deprecated}
   } 
 \end{table}
+
+As of version 3.1.0, the \ttt{FASTJET\_VERSION\_NUMBER} symbol can be
+used to provide version-dependent code compilation, as discussed in
+section~\ref{sec:version-information}. 
 
 %......................................................................
 \subsection{Backwards compatibility of background estimation facilities}
@@ -5401,6 +6104,14 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   %''A sweepline algorithm for Voronoi diagrams,''
   Algorithmica {\bf 2} (1987) 1.
 
+\bibitem{Dasgupta:2007wa}
+  M.~Dasgupta, L.~Magnea and G.~P.~Salam,
+  %``Non-perturbative QCD effects in jets at hadron colliders,''
+  JHEP {\bf 0802} (2008) 055
+  [arXiv:0712.3014 [hep-ph]].
+  %%CITATION = ARXIV:0712.3014;%%
+  %90 citations counted in INSPIRE as of 04 Aug 2014
+
 \bibitem{Cacciari:2009dp}
   M.~Cacciari, G.~P.~Salam, S.~Sapeta,
   %``On the characterisation of the underlying event,''
@@ -5410,6 +6121,59 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
 \bibitem{GridMedianLH} M.~Cacciari, G.~P.~Salam and G.~Soyez, contribution in
   preparation to proceedings of ``Workshop on TeV Colliders'', Les
   Houches, June 2011.
+
+\bibitem{Soyez:2012hv}
+  G.~Soyez, G.~P.~Salam, J.~Kim, S.~Dutta and M.~Cacciari,
+  %``Pileup subtraction for jet shapes,''
+  Phys.\ Rev.\ Lett.\  {\bf 110} (2013) 16,  162001
+  [arXiv:1211.2811 [hep-ph]].
+  %%CITATION = ARXIV:1211.2811;%%
+  %30 citations counted in INSPIRE as of 11 Aug 2014
+
+\bibitem{Krohn:2013lba}
+  D.~Krohn, M.~D.~Schwartz, M.~Low and L.~T.~Wang,
+  %``Jet Cleansing: Pileup Removal at High Luminosity,''
+  arXiv:1309.4777 [hep-ph].
+  %%CITATION = ARXIV:1309.4777;%%
+  %9 citations counted in INSPIRE as of 12 Aug 2014
+
+\bibitem{Cacciari:2014jta}
+  M.~Cacciari, G.~P.~Salam and G.~Soyez,
+  %``On the use of charged-track information to subtract neutral pileup,''
+  arXiv:1404.7353 [hep-ph].
+  %%CITATION = ARXIV:1404.7353;%%
+  %2 citations counted in INSPIRE as of 12 Aug 2014
+
+\bibitem{Berta:2014eza}
+  P.~Berta, M.~Spousta, D.~W.~Miller and R.~Leitner,
+  %``Particle-level pileup subtraction for jets and jet shapes,''
+  JHEP {\bf 1406} (2014) 092
+  [arXiv:1403.3108 [hep-ex]].
+  %%CITATION = ARXIV:1403.3108;%%
+  %4 citations counted in INSPIRE as of 12 Aug 2014
+
+
+\bibitem{Cacciari:2014gra}
+  M.~Cacciari, G.~P.~Salam and G.~Soyez,
+  %``SoftKiller, a particle-level pileup removal method,''
+  arXiv:1407.0408 [hep-ph].
+  %%CITATION = ARXIV:1407.0408;%%
+  %1 citations counted in INSPIRE as of 12 Aug 2014
+
+\bibitem{Bertolini:2014bba}
+  D.~Bertolini, P.~Harris, M.~Low and N.~Tran,
+  %``Pileup Per Particle Identification,''
+  arXiv:1407.6013 [hep-ph].
+  %%CITATION = ARXIV:1407.6013;%%
+
+
+\bibitem{Cacciari:2012mu}
+  M.~Cacciari, P.~Quiroga-Arias, G.~P.~Salam and G.~Soyez,
+  %``Jet Fragmentation Function Moments in Heavy Ion Collisions,''
+  Eur.\ Phys.\ J.\ C {\bf 73} (2013) 2319
+  [arXiv:1209.6086 [hep-ph]].
+  %%CITATION = ARXIV:1209.6086;%%
+  %4 citations counted in INSPIRE as of 12 Aug 2014
 
 
 \bibitem{BDRS}
@@ -5448,11 +6212,28 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   %%CITATION = PHRVA,D83,011502;%%
 
 
+\bibitem{Dasgupta:2013ihk}
+  M.~Dasgupta, A.~Fregoso, S.~Marzani and G.~P.~Salam,
+  %``Towards an understanding of jet substructure,''
+  JHEP {\bf 1309} (2013) 029
+  [arXiv:1307.0007 [hep-ph]].
+  %%CITATION = ARXIV:1307.0007;%%
+  %20 citations counted in INSPIRE as of 14 Aug 2014
+
+
 \bibitem{Chan}
   T.~M.~Chan,
   ``Closest-point problems simplified on the RAM,''
   in Proc.\ 13th ACM-SIAM Symposium on Discrete Algorithms (SODA),
   p.~472 (2002).
+
+\bibitem{Sjostrand:2007gs}
+  T.~Sjostrand, S.~Mrenna, P.~Z.~Skands,
+  %``A Brief Introduction to PYTHIA 8.1,''
+  Comput.\ Phys.\ Commun.\  {\bf 178 } (2008)  852-867.
+  [arXiv:0710.3820 [hep-ph]].
+
+\bibitem{fjcontrib} \fastjet \contrib, \url{http://fastjet.hepforge.org/contrib/}.
 
 
 \bibitem{Anderberg}
@@ -5474,12 +6255,6 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   [arXiv:hep-ph/0603175].
   %%CITATION = JHEPA,0605,026;%%
 
-\bibitem{Sjostrand:2007gs}
-  T.~Sjostrand, S.~Mrenna, P.~Z.~Skands,
-  %``A Brief Introduction to PYTHIA 8.1,''
-  Comput.\ Phys.\ Commun.\  {\bf 178 } (2008)  852-867.
-  [arXiv:0710.3820 [hep-ph]].
-
 \bibitem{EppsteinHierarchical}
   %%David Eppstein
   D.~Eppstein
@@ -5487,8 +6262,22 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   %closest pairs,''
   J. Experimental Algorithmics {\bf 5} (2000) 1-23 [cs.DS/9912014].
 
-
-
+\bibitem{Bertolini:2013iqa}
+  D.~Bertolini, T.~Chan and J.~Thaler,
+  %``Jet Observables Without Jet Algorithms,''
+  JHEP {\bf 1404} (2014) 013
+  [arXiv:1310.7584 [hep-ph]];\\
+  %%CITATION = ARXIV:1310.7584;%%
+  %7 citations counted in INSPIRE as of 12 Sep 2014
+  %
+%\bibitem{Larkoski:2014uqa}
+  A.~J.~Larkoski, D.~Neill and J.~Thaler,
+  %``Jet Shapes with the Broadening Axis,''
+  JHEP {\bf 1404} (2014) 017
+  [arXiv:1401.2158 [hep-ph]];\\
+  %%CITATION = ARXIV:1401.2158;%%
+%  
+  G.~P.~Salam, unpublished.
 \end{thebibliography}
 
 

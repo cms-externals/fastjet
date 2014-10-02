@@ -1,27 +1,32 @@
-//STARTHEADER
-// $Id: Voronoi.cc 2767 2011-11-24 21:43:09Z salam $
+//FJSTARTHEADER
+// $Id: Voronoi.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 1994 by AT&T Bell Laboratories (see below)
-//
-//
-//----------------------------------------------------------------------
-// This file is included as part of FastJet but was mostly written by
-// S. Fortune in C, put into C++ with memory management by S
-// O'Sullivan, and with further interface and memory management
-// modifications by Gregory Soyez.
-//
-// Permission to use, copy, modify, and distribute this software for
-// any purpose without fee is hereby granted, provided that this
-// entire notice is included in all copies of any software which is or
-// includes a copy or modification of this software and in all copies
-// of the supporting documentation for such software. THIS SOFTWARE IS
-// BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED WARRANTY.
-// IN PARTICULAR, NEITHER THE AUTHORS NOR AT&T MAKE ANY REPRESENTATION
-// OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY OF THIS
-// SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
-//ENDHEADER
+// This file is part of FastJet.
+//
+//  FastJet is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation; either version 2 of the License, or
+//  (at your option) any later version.
+//
+//  The algorithms that underlie FastJet have required considerable
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
+//  FastJet as part of work towards a scientific publication, please
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
+//
+//  FastJet is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
+//----------------------------------------------------------------------
+//FJENDHEADER
 
 
 /*
@@ -108,11 +113,21 @@
 #include <stdio.h>
 #include "fastjet/internal/Voronoi.hh"
 
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
+
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy;
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+  static std::atomic<LimitedWarning> VoronoiDiagramGenerator::_warning_degeneracy{0};
+#else
+  static LimitedWarning _warning_degeneracy=0;
+#endif
 
 VoronoiDiagramGenerator::VoronoiDiagramGenerator(){
   siteidx = 0;

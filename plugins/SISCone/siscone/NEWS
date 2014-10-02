@@ -1,7 +1,35 @@
-This file contains the history of SISCone releases. For each of the,
+This file contains the history of SISCone releases. For each one,
 we give a short summary of the important changes from the previous
 version. If you want to see a more detailed list of changes, please
 read the ChangeLog file.
+
+SISCone version 3.0.0 (September 9 2014)
+=====================
+
+* Added the option of running SISCone with progressive removal,
+  corresponding to the following algorithm:
+
+    1. search for stable cones
+    2. declare the hardest stable cone a jet and remove its particles
+       from the list of remaining particles
+    3. if there are some remaining particles, go back to 1.
+
+  Use Csiscone::compute_jets_progressive_removal(...) for this version
+  of SISCone
+
+  The scale used to determine which is the hardest stable cone can be
+  chosen amongst the same options as the scale used for the
+  split--merge step [SM_pttilde by default for the pp version of
+  SISCone, SM_Etilde for the spherical version].  Alternatively, a
+  user-defined scale choice can be provided using set_user_scale(...).
+
+  Version to be included in FastJet>=3.1.0
+
+SISCone version 2.0.6 (April 9 2013)
+=====================
+* Minor release fixing an issue concerning the installation of
+  configuration headers and bringing small updates in the autotools
+  build system (version to be included in FastJet>=3.0.4)
 
 SISCone version 2.0.5 (January 17 2012)
 =====================
