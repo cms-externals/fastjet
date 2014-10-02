@@ -380,7 +380,13 @@ private:
   
   double minDistanceBetweenSites;
 
-  static LimitedWarning _warning_degeneracy;
+  // CMS change: _warning_degeneracy is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  // ADDED to commented-out portion 2-Oct-2014 (SRR) :
+  // static LimitedWarning _warning_degeneracy;
 };
 
 int scomp(const void *p1,const void *p2);
