@@ -1,33 +1,1668 @@
-2012-06-25  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory + Matteo
+2014-09-30  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
 
-        * Release of FastJet fastjet-3.0.3
+	* Release of FastJet 3.1.0
 
-	* NEWS: tidied it up.
+2014-09-30  Gregory Soyez  <soyez@fastjet.fr>
 
-	* configure.ac:
-	* include/fastjet/config_win.h:
+	* tools/fastjet/tools/Recluster.hh:
+	put the Recluster tool in the "generic tools" doxygen module
+
+2014-09-29  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
+
+        * Doxyfile
+        * configure.ac
+        * doc/fastjet-doc.tex
+        * CHECKLIST
+        * include/fastjet/config_win.h
+	updated version number to 3.1.0 in preparation for release
+	siscone now points to 3.0.0
+
+	* include/fastjet/Selector.hh:
+	fixed comment for InvalidArea (+minor typo fix)
+
 	* Doxyfile:
-	* tex/fastjet-doc.tex:
-	  changed version to 3.0.3
+	made sure certain files like README etc are linked to from the
+	file list. 
 
-2012-06-15  Gregory Soyez  <soyez@fastjet.fr>
+	* AUTHORS:
+	updated list of people who have helped out
+
+2014-09-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/ClusterSequence.hh:
+	placed _Line and _Parabola in the "internal" doxygen doc
+
+2014-09-25  Gregory Soyez  <soyez@fastjet.fr> + Matteo
 
 	* NEWS:
-	  cleaned the list of things we need to merge from the trunk
+	further work on the 3.1.0 release notes
 
-	* configure.ac:
-	* include/fastjet/config_win.h:
-	* Doxyfile:
-	* tex/fastjet-doc.tex:
-	  changed version to 3.0.3-devel
-
-	* Merged the items below from the trunk
-
-2012-06-13  Gavin Salam  <salam@lpthe.jussieu.fr> + Matteo & Gregory
+2014-09-24  Gregory Soyez  <soyez@fastjet.fr>
 
 	* NEWS:
-	  worked on NEWS file for 3.0.3, including a list of the things we
-	  need to merge from the trunk
+	preliminary version of the 3.1.0 release notes
+
+2014-09-18  Gavin Salam  <gavin.salam@cern.ch>
+
+	* configure.ac:
+	fixed typo in --enable-demangling help message
+
+	* regression-tests/nightly-check.pl:
+	added minimal check that --enable-demangling doesn't break anything
+	(commit done only 2014-09-29)
+
+2014-09-18  Matteo Cacciari  <cacciari@lpthe.jussieu.fr>
+
+        * regression-tests/nightly-check.pl
+          Added a test with gcc 4.9
+
+2014-09-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/fastjet-doc.tex:
+	  . in the WTA section, added a footnote saying that WTA_E_scheme
+	    is sick and therefore not implemented
+	  . added a few words here and there to highlight the fact that
+	    "SISCone" means SISCone with SM (better avoid any confusion)
+
+	* plugins/SISCone/fastjet/SISConeBasePlugin.hh:
+	added a note that we recommend to implement
+	UserScaleBase::is_larger() whenev possible.
+
+2014-09-18  Matteo Cacciari  <cacciari@lpthe.jussieu.fr>
+
+        * src/Error.cc
+	modified the guard to LimitedWarning Error::_execinfo_undefined;
+	so that it's the same that is now used elsewhere and in Error,hh,
+	i.e. #if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
+	Note that #ifndef FASTJET_HAVE_EXECINFO_H would actually be sufficient.
+
+2014-09-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/Error.hh
+	* src/Error.cc:
+	restored some FJCORE guards to keep it more lightweight
+
+	* include/fastjet/Error.hh
+	* src/Error.cc:
+	fixed a few details:
+	  . included the config.h header in Error.hh
+	  . defined _demangle in the header
+	  . removed unnecessary __FJCORE__ guards (since
+	    FASTJET_HAVE_EXECINFO_H) is not defined in FJCORE
+	    This allows to used -DFASTJET_HAVE_EXECINFO_H on
+	    the command line.
+
+	* include/fastjet/RectangularGrid.hh:
+	added '_in' suffix to a few ctor arguments to prevent a series of
+	Wshadow warnings
+
+2014-09-18  Matteo Cacciari  <cacciari@lpthe.jussieu.fr>
+
+	* include/fastjet/Error.hh
+        * src/Error.cc
+	* scripts/mkfjcore.sh
+
+	- demangle() included in the Error class
+	- Added a warning to Error:set_print_backtrace in case
+	  backtrace is asked for by the user but EXECINFO is not
+	  available
+	- tweaked mkfjcore.sh to make the backtrace warning work
+	  properly in fjcore
+
+2014-09-11  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/ClusterSequence.cc:
+	now throws Error in case of use of N2MHTLazy9AntiKtSeparateGhosts
+	from fjcore (since it's no longer supported)
+
+2014-09-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/Error.cc:
+	added a missing FJCORE guard
+
+	* src/Error.cc:
+	* configure.ac:
+	* config.h.in:
+	* m4/demangle.m4:              *** ADDED ***
+	added demangling of the backtrace symbols to the backtrace. This
+	is only activated if (in order of the tests)
+	  . execinfo.h          is found
+	  . --enable-demangling is specified at configure time
+	  . the GNU C++ ABI     is supported
+
+2014-09-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/JetDefinition.hh:
+	* src/JetDefinition.cc:
+	commented out the WTA_E_scheme
+
+	Energy-ordering can lead to dangerous situations with particles at
+	rest. We instead implement the WTA_modp_scheme
+
+2014-09-08  Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+        * src/Error.cc
+	* scripts/mkfjcore.sh
+	
+	Added FJCORE guards around the backtrace block and the corresponding
+	include in Error.cc, so that they are never included in fjcore
+	(issues under Windows with MSVC, as reported by 
+	Chaowaroj Wanotayaroj <ma.x@cern.ch>). Also fully cleaned away
+	the EXECINFO guards from config_auto.h (not really necessary though)
+
+        * src/ClusterSequence.cc
+	Added FJCORE guards around Lazy9AntiKtSeparateGhosts strategy so
+	that it's never included in fjcore. Eliminated the files accordingly
+	from mkfjcore.sh
+	
+2014-09-08  Gregory Soyez  <soyez@fastjet.fr> + Matteo + Gavin
+
+	* tools/fastjet/tools/Subtractor.hh:
+	* tools/Subtractor.cc:
+	added a Subtractor(rho, rho_m) constructor + worked on some error messages
+
+	* example/07-subtraction.cc:
+	added the mass to the printed output
+
+	* plugins/D0RunICone/fastjet/D0RunIConePlugin.hh:
+	* plugins/D0RunICone/fastjet/D0RunIpre96ConePlugin.hh:
+	* tools/fastjet/tools/Subtractor.hh:
+	explicitly included base.hh to help Doxygen [likely a bug in Doxygen!]
+
+	* src/JetDefinition.cc:
+
+	For WTA_modp scheme, added a safeguard that prevents divisions by
+	zero if both objects are at rest (the energy of the sum will
+	therefore be the mass of pa)
+
+	For WTA_E scheme, if the hardest object is at rest, keep the sum
+	at rest and set the energy to the sum of energies: this implies
+	that we break the rule of the mass being that of the higher-energy
+	particle.
+
+2014-09-05  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/JetDefinition.hh:
+	amplified doxygen documentation on WTA schemes. Also mentioned
+	that all pt^2, WTA, etc. schemes are collinear safe only for
+	algorithms with an appropriate recombination order.
+
+	* plugins/SISCone/SISConeSphericalPlugin.cc (description):
+	* plugins/SISCone/SISConePlugin.cc (description):
+
+	small tweak so that if there is a user scale for progressive
+	removal and it has a description, that description gets printed
+	out as part of the SISCone description
+
+2014-09-05  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/02-jetdef.cc:
+	mentioned the WTA schemes in the example
+
+2014-09-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/JetDefinition.cc:
+	implemented the recombination for WTA_{E,modp}_scheme
+
+	* includec/fastjet/JetDefinition.hh:
+	* src/JetDefinition.cc:
+	started the addition of WTA recombination schemes
+	 . WTA_pt_scheme fully done
+	 . WTA_{E,modp}_scheme have a description and a (inexistant)
+	   preprocess step but still lack the actual recombination
+
+
+2014-09-04  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* plugins/SISCone/SISConeBasePlugin.cc:     *** ADDED ***
+	* plugins/SISCone/Makefile.am:
+	* plugins/SISCone/makefile.static:
+	SISConeBasePlugin::UserScaleBase::is_larger now uses the cached
+	value and has been moved in a proper .cc file (allows to declare
+	StructureType at the end of the class)
+
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.hh:
+	* plugins/SISCone/SISConeSphericalPlugin.cc:
+	implemented the user-defined scale support in the spherical
+	version too
+
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeBasePlugin.hh:
+	   . worked on the description of the plugin
+	   . moved the UserScaleBase class to SISConeBasePlugin
+	     derived plugins now use a template specialisation
+	       SISConePlugin::UserScaleBaseStructureType<type_of_siscone_jet>
+	
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeBasePlugin.hh:
+	carried on with the support of user-defined scales
+	[current version under testing].
+
+2014-09-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/SISConeSphericalPlugin.cc:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.h:
+	added support for SISCone with progressive removal (use
+	plugin.set_progressive_removal() to activate)
+
+	started the work towards support for user-defined scale to decide
+	which is the hardest stable cone in progressive-removal
+	mode. [breaks compilation for now... committed to carry on
+	development with Gavin]
+
+2014-09-03  Gavin Salam  <gavin.salam@cern.ch> + Gregory
+
+	* plugins/SISCone/SISConePlugin.cc (run_clustering):
+	* plugins/SISCone/SISConeSphericalPlugin.cc (run_clustering):
+	added comment to explain that jets are transferred such that
+	CS::inclusive_jets() returns them in the order they were created
+	by SISCone.
+
+2014-09-03  Gavin Salam  <gavin.salam@cern.ch> 
+
+	* src/PseudoJet.cc (join):
+	* include/fastjet/CompositeJetStructure.hh (join):
+	in join with a fixed number of input PseudoJets, reserved space
+	ahead of time in the temporary pieces vector.
+
+2014-08-15  Gavin SALAM  <gavin.salam@cern.ch> + Matteo 
+
+        * Doxyfile
+        * configure.ac
+        * doc/fastjet-doc.tex
+        * CHECKLIST
+        * NEWS
+	switched version number back to 3.1.0-devel
+
+2014-08-15  Gavin SALAM  <gavin.salam@cern.ch> + Matteo 
+
+        * Doxyfile
+        * configure.ac
+        * doc/fastjet-doc.tex
+        * CHECKLIST
+        * NEWS
+	update of version number for 
+	Release of FastJet fastjet-3.1.0-beta.1
+	
+
+2014-08-15  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Filter.cc:
+	added a few safeguards for situations where there is no subjets
+
+2014-08-15  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* tools/fastjet/tools/Recluster.hh:
+	switched default for acquire_reombiner_in in constructor with
+	new_jet_def so that it is now false (i.e. the jet_def is used
+	exactly as it is supplied).
+
+2014-08-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* regression-tests/test-contrib.pl:  *** ADDED ***
+	added script to facilitate testing of fjcontrib
+
+2014-08-14  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/Recluster.cc:
+	* tools/fastjet/tools/Recluster.hh:
+	added functions set_acquire_recombiner(...) and set_keep(...) to
+	control behaviour after construction.
+
+	Fixed issue in case where there are no subjets and keep() is false
+	(now returns empty jet).
+
+	In comments and variable nameing replaced subjet_def ->
+	new_jet_def and subjets with inclusive jets.
+
+	Various other small changes to comments.
+
+2014-08-13  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* plugins/CDFCones/CDFcode/JetCluAlgorithm.cc:
+	* plugins/CDFCones/CDFcode/MidPointAlgorithm.cc:
+	small changes, labelled in code, to avoid compiler warnings about
+	unused variables and comparisons between unsigned int and int
+
+	* src/AreaDefinition.cc:
+	replaced cerr + exit with a throw.
+
+	* src/LimitedWarning.cc:
+	introduced max_warn() and n_warn_so_far() functions and changed
+	warning text so that it says "WARNING from FastJet" rather than
+	just "WARNING".
+
+	* include/fastjet/ClusterSequence.hh:
+	* src/ClusterSequence.cc (exclusive_jets_up_to):
+	rephrased warning for exclusive jets to reflect the fact that it
+	may be used with C/A and genkt. Also switched it over to the
+	LimitedWarning system.
+
+	* include/fastjet/internal/DynamicNearestNeighbours.hh:
+	DnnError now derives from fastjet::Error
+
+2014-08-13  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/RectangularGrid.hh:
+	* src/RectangularGrid.cc:
+	made sure that all member variables are set even for the default
+	constructor (issue revealed by Coverity when testing SoftKiller).
+	Added is_initialised() member to base class and RectangularGrid,
+	to allow classes using the grid to check the grid is sensible.
+
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	throws exception if contructed with an uninitialised grid.
+
+	* plugins/GridJet/GridJetPlugin.cc:
+	throws on uninitialised grid.
+
+	* testsuite/run_tests.cc:
+	* testsuite/TestGrids.hh: *** ADDED ***
+	added a few basic tests of the grid initialisation, GridJetPlugin,
+	etc. 
+
+2014-08-13 Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+        Files manually merged from the 3.0.X branch:
+
+        * scripts/mkfjcore.sh
+	* scripts/Makefile-fjcore.txt               *** ADDED ***
+	* scripts/preamble-fjcore.txt
+
+	switched mkfjcore to -O2 (flag also added in Makefile-fjcore.txt)
+	Added new Lazy* TilingExtent and files to mkfjcore.sh
+
+2014-08-13  Gavin SALAM  <gavin.salam@cern.ch> + Matteo & Gregory
+
+	* NEWS:
+	reshuffled entries to try to get an order reflecting importance of
+	different changes.
+
+2014-08-12  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* example/07-subtraction.cc:
+	switched on use_rho_m and _safe_mass
+
+	* NEWS:
+	worked on the list of changes since FastJet-3.0.6
+
+	* include/fastjet/internal/LazyTiling9SeparateGhosts.hh:
+	* src/LazyTiling9SeparateGhosts.cc:
+	declared ghost_pt2_threshold as a static (public) member of the
+	class. [with a note that this is use-ar-your-own-risk material]
+
+	* tools/Subtractor.cc (_amount_to_subtract):
+	small change to warning message about non-zero rho_m.
+
+2014-08-12  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
+
+	* plugins/GridJet/GridJetPlugin.cc:
+	* plugins/GridJet/fastjet/GridJetPlugin.hh:
+	switched this over to the use of RectangularGrid internally, plus
+	a new constructor that takes a RectangularGrid. Added code to
+	handle cases where some grid tiles are deselected. Also removed an
+	apparently redundant copy constructor.
+
+	Passes the test-all-algs tests, and also examined behaviour
+	with deselected tiles in
+	issue-tracker/2014-08-08-testing-rect-grid/test-gridjet.cc
+
+	* include/fastjet/RectangularGrid.hh:
+	added rapmin(), rapmax(), drap() and dphi() enquiry functions.
+
+2014-08-12  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Subtractor.cc:
+	* tools/fastjet/tools/Subtractor.hh:
+	* doc/fastjet-doc.tex:
+	used safe_mass instead of safe (or be_safe)
+
+2014-08-12  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/LimitedWarning.cc:
+	* include/fastjet/LimitedWarning.hh:
+	introduced versions of warn that take a const char *, in addition
+	to the existing ones with a const string &, so that calls of the
+	form warn("some message") don't need to create an intermediate
+	string (which could be slow). The master code is now the char *
+	version, and the string version just pass the resulting c_str().
+
+	* tools/fastjet/tools/Subtractor.hh:
+	* tools/Subtractor.cc (_amount_to_subtract):
+	added a warning for cases where rho_m is available and
+	substantially non-zero, but not used.
+
+2014-08-12  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Subtractor.cc:
+	fixed typo in the treatment of CHS events
+
+	* configure.ac:
+	used -O2 rather than -O3 as a default (more stable timings. O3 was
+	only giving a small gain, sometimes being worse than -O2 and being
+	much more compiler-version-dependent than O2)
+
+	* tools/Filter.cc:
+	reinserted the missing bit of code needed to include internal
+	subtraction!
+
+2014-08-11  Gavin Salam  <gavin.salam@cern.ch> + Gregory & Matteo
+
+	* include/fastjet/PseudoJet.hh:
+	* src/PseudoJet.cc: 
+	operator* and operator*= now premptively call
+	_ensure_valid_rap_phi() so that we can always ensure that rap()
+	and phi() will be conserved after a *= operation (previously, if
+	they hadn't yet been cached, and you multiplied by 0, you would
+	get a non-sensical rap() and phi()).
+
+2014-08-11  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/preamble-fjcore.txt: 
+	small tweaks to fjcore preamble
+
+2014-08-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Subtractor.cc:
+	* tools/fastjet/tools/Subtractor.hh:
+	worked on the description; tidied a few loose ends.
+
+	* tools/Subtractor.cc:
+	* tools/fastjet/tools/Subtractor.hh:
+	added several options to the original Subtractor:
+	  . support for rho_m (set_use_rho_m(bool)) [off by default]
+	  . support for mass-safety tests (set_safe(bool)) [off by default]
+	  . support for CHS events using
+	    set_known_selectors(const Selector &sel_known_vertex,
+			        const Selector &sel_leading_vertex)
+
+2014-08-11  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
+
+	* src/RectangularGrid.cc:
+	* include/fastjet/RectangularGrid.hh:
+	index() -> tile_index()
+	is_good() -> tile_is_good()
+
+	* tools/GridMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	took into account above name changes
+
+2014-08-08  Gavin Salam  <gavin.salam@cern.ch> (later)
+
+	* include/fastjet/RectangularGrid.hh:
+	* src/RectangularGrid.cc:
+	constructor can now take a Selector that causes only certain tiles
+	to be considered "good"
+
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh
+	* tools/GridMedianBackgroundEstimator.cc:
+	Added constructor that just takes a RectangularGrid.
+
+	Implemented support for cases where some tiles are discarded
+	through the mechanism of Selectors for good tiles.
+
+	Tests in issue-tracker/2014-08-08-testing-rect-grid
+
+2014-08-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/RectangularGrid.hh:
+	added mean_tile_area() and in the base class, by default
+	tile_area(itile) returns mean_tile_area() (since
+	all_tiles_equal_area() also returns true).
+
+	* tools/GridMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	switched GMBGE over to the RectangularGrid class (enabled with
+	the FASTJET_GMBGE_USEFJGRID symbol). See 
+	2013-particle-level-sub/fj31-devel-timing-tests for timing
+	tests, which suggest a slight advantage for the new setup.
+	For SoftKiller there appears to be little difference.
+
+2014-08-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/RectangularGrid.hh:
+	* src/RectangularGrid.cc:
+	* & corresponding Makefile.am files
+	added a new RectangularGrid class, intended to provide a common
+	core for at least some of the uses we have of rectangular grids.
+
+2014-08-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* regression-tests/test-all-algs.pl (setRefResults):
+	for areas checksums, added a comment about results coming out
+	differently on Gavin's laptop, and in one case checked that this
+	is due to a single last digit change.
+
+	* src/ClusterSequence.cc (_best_strategy):
+	added handling of cambridge_for_passive_algorithm (treat it like
+	kt). This resolves today's nightly-check failure on cambridge
+	passive areas.
+
+	* include/fastjet/JetDefinition.hh:
+	noted in comments that cambridge_for_passive_algorithm is not
+	intended for the end-user, but rather for internal games.
+	Also added a comment that genkt_for_passive_algorithm is not
+	currently implemented.
+
+	* regression-tests/test-all-algs.pl:
+	now handles comma-separated strategy lists (not just colon-separated).
+
+2014-08-01  Gavin SALAM  <gavin.salam@cern.ch>
+
+	* testsuite/TestRecombiners.hh:
+	added some very basic tests of recombiners, that setting to a
+	default recombination scheme works sensibly and that copying a
+	pointer to a recombination scheme also works. OK also with
+	valgrind.
+
+2014-08-01  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/GridMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	replaced _disable_rho_m with _enable_rho_m internally
+
+	* tools/JetMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	replaced _disable_rho_m with _enable_rho_m internally
+	+ has_rho_m now also returns false if there is a density class
+
+2014-08-01  Gavin SALAM  <gavin.salam@cern.ch> & Gregory
+
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+        disable_rho_m() replaced with set_compute_rho_m()
+
+	* tools/fastjet/tools/BackgroundEstimatorBase.hh:
+	changes to comments
+
+	* tools/fastjet/tools/Recluster.hh:
+	* tools/Recluster.cc:
+	work on comments and also slight change to interface relating to
+	C/A optimisation.
+
+	* src/ClusterSequence.cc:
+	_best_strategy will now assert(false) if the jet alg is not one of
+	kt, antikt, cam or genkt, and drops back to kt or antikt choices
+	depending on genkt's p value.
+
+	The routine that calls it now replaces the NlnN strategy with
+	N2MHTLazy25 if NlnN isn't available.
+
+2014-08-01  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/ClusterSequence.cc:
+	best_strategy() now follows the transitions sugegsted by the
+	latest timing run
+
+	* include/fastjet/Selector.hh:
+	* src/Selector.cc:
+	added Selector::scalar_pt sum that sums the pt of the objecs
+	passing the Selector.
+
+2014-07-31  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/JetMedianBackgroundEstimator.cc:
+	fix: enabled rho_m in reset()
+	do not compute rho_m if a jet density class is provided.
+	fix: critical "pt" v. "dt" typo in _compute()
+
+	* tools/JetMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	added support for rho_m, sigma_m (on by default but can be turned
+	off using disable_rho_m())
+	TODO: disable rho_m automatically when a density class is provided
+	[do not forget to set it back if an empty density class is passed]
+
+	* tools/fastjet/tools/BackgroundEstimatorBase.hh:
+	fixed doxygen comment
+
+	* tools/GridMedianBackgroundEstimator.cc:
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	  . no longer cache the scalar pt in each grid cell (<~5% effect on
+	    timing, omitting the call to _percentile in the version with
+	    caching)
+	  . added support for rho_m, sigma_m (on by default but can be
+	    turned off using disable_rho_m())
+
+	* tools/fastjet/tools/BackgroundEstimatorBase.hh:
+	added rho_m(), sigma_m(), rho_m(jet), sigma_m(jet) [throw by
+	default] and has_rho_m() [false by default].
+
+2014-07-30  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/Recluster.hh:
+	worked on the description of the class
+
+	* tools/fastjet/tools/Filter.hh:
+	properly handled the case where C/A optimisation has been used and
+	the jet has a non-explicit-ghost jet area
+
+	* tools/Recluster.cc:
+	no longer keep track of the jet definition used to obtain the
+	subjets. It can be accessed through the subjets themselves.
+
+	* src/JetDefinition.cc:
+	reinserted the missing genkt_algorithm in n_parameters_for_algorithm
+
+	* tools/Filter.cc :
+	adapted to use the Keep enum in Recluster.
+	TODO: fix the "discard_area" part for non-explicit-ghost areas
+	with C/A reclustering
+
+	Note: we could get rid of the sub jet def returned by
+	Recluster::get_new_jets_and_def since it can be obtained from the
+	subjets.
+
+	* tools/fastjet/tools/Recluster.hh:
+	* tools/Recluster.cc:
+	  . added an enum (Keep) that takes values keep_only_hardest or
+	    keep_all, replacing the 'single' member
+	  . moved the ctor structure to
+	      Recluster(JetDef, acquire_recombiner = true,
+	                Keep keep_in = Recluster::keep_only_hardest)
+              Recluster(JetAlg, R, keep_in = Recluster::keep_only_hardest)
+              Recluster(JetAlg, keep_in = Recluster::keep_only_hardest)
+	    simplified quite a bit the structure accordingly
+	  . used the new description functionalities in JetDefinition
+	  . added Recluster::disable_cambridge_optimisation to disable the
+	    attempt to optimise for C/A
+	  . introduced get_new_jets_and_def(...) and generate_output_jet().
+	    These are the two steps of result() and this should ease the
+	    Filter.
+
+	* include/fastjet/JetDefinition.hh:
+	* src/JetDefinition.cc:
+	added JetDefinition::n_parameters_for_algorithm (static),
+	JetDefinition::algorithm_description (static) and
+	description_no_recombiner().
+	Slightly simplified other bits of the code accordingly.
+
+2014-07-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/ClusterSequenceArea.hh:
+	replaced an error message printed to stdout (followed by exit(-1))
+	by an error thrown when the area type is unknown.
+	Note that this uses ostringstream, so we could try to move that to
+	the cc (or introduce AreaDefinition::area_type_str())
+
+2014-07-29  Gavin Salam  <gavin.salam@cern.ch>
+
+        * include/fastjet/JetDefinition.hh:
+        * src/JetDefinition.cc:
+	moved new set_recombiner code into the .cc file, included a test
+	of the JetDef invariants and ensured that recombination_scheme()
+	returns correct result in case of external recombiners
+
+        * testsuite/TestRecombiners.hh:
+        * testsuite/run_tests.cc:
+	added first elements of testing for Recombiners.
+
+2014-07-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Recluster.cc:
+	* tools/Pruner.cc:
+	* tools/fastjet/tools/Recluster.hh:
+	* tools/fastjet/tools/Pruner.hh:
+	arranged the code to use JD::set_recombiner(const JetDefinition&)
+	instead of JD::set_recombiner(Recombiner*)
+
+	* include/fastjet/JetDefinition.hh:
+	introduced set_recombiner(const JetDefinition&) that correctly
+	copies the recombiner from another jet definition. When
+	applicable, this version is strongly recommended as the
+	alternative (set_recombiner(Recombiner*)) can lead to memory
+	corruption if the recombiner is owned by the jet definition.
+
+	removed set_shared_recombiner and shared_recombiner (superseded
+	by the above option)
+
+2014-07-29  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory
+
+        * src/LazyTiling25.cc
+        * src/LazyTiling9.cc
+        * src/LazyTiling9Alt.cc
+        * include/fastjet/internal/LazyTiling25.hh
+        * include/fastjet/internal/LazyTiling9.hh
+        * include/fastjet/internal/LazyTiling9Alt.hh
+	replace is_near_zero_phi() test, based on double-precision
+	arithmetic for each tiles with a use_periodic_delta_phi bool for
+	each tile. This appears to solve the
+	2014-07-26-Lazy9-largeR-clustering issue. (Tests ongoing with 10^7
+	events).
+
+	* src/ClusterSequence_Delaunay.cc (_delaunay_cluster):
+	reworked comments around the assert for cases where the clustering
+	strategy has not been recognized (all cases for which this would
+	be called should be recognized).
+
+2014-07-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/SISConeSphericalPlugin.cc:
+	* plugins/SISCone/fastjet/SISConeBasePlugin.hh:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.hh:
+	* include/fastjet/ClusterSequenceArea.hh:
+	* src/ClusterSequence_Delaunay.cc:
+	* example/fastjet_timing_plugins.cc:
+	* fortran_wrapper/fastjetfortran.cc:
+	rolled back to the auto_ptr (The idea would be to switch to a
+	unique_ptr when we include c++11 support). For now, we just
+	deprecate its use in the interface
+
+	* example/fastjet_timing_plugins.cc:
+	replaced rapmax->grid_rapmax in a local declaration to eliminate a warning.
+
+2014-07-28  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/fastjet_timing_plugins.cc:
+	declared SubType globally to prevent a icpc (v10.1) error.
+
+2014-07-28  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/fastjet_timing_plugins.cc:
+	* fortran_wrapper/fastjetfortran.cc:
+	auto_ptr -> SharedPtr as below
+
+	* include/fastjet/ClusterSequenceArea.hh:
+	use a standard pointer to hold the specific underlying CSAB rather
+	than an auto_ptr
+
+2014-07-27  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/ClusterSequence_Delaunay.cc:
+	replaced the auto_ptr to the DNN object by a standard C pointer
+	(deleted at the end of ClusterSequence::_delaunay_cluster())
+
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/SISConeSphericalPlugin.cc:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.hh:
+	replaced the use of auto_ptr by SharedPtr (auto_ptr has been
+	deprecated by C++11. Ideally a unique_ptr should be used but
+	SharedPtr will do the job)
+
+2014-07-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/fastjet_timing_plugins.cc:
+	Switched from fj:: to using namespace fastjet.
+
+	Added -compare-strategy for comparing two different strategies and
+	printing out events where they disagree. Currently does full
+	clustering history comparison (not suitable for C/A alg.)
+
+2014-07-25  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/LazyTiling9.cc:
+
+	added FASTJET_LAZY9_MIN2TILESY option, which forces at least two
+	tiles in rapidity. Ran usual tests of 10k events on each of antikt,
+	cam & kt with R=1000. Found one event for kt in which the answers
+	do not agree with N2MinHeapTiled. This appears to be independent
+	of whether FASTJET_LAZY9_MIN2TILESY is set. Commands to see the
+	problem are
+
+	gunzip -c ../data/Pythia-PtMin50-LHC-10kev.dat.gz| time ./example/fastjet_timing_plugins -kt -R 1000 -strategy -7 -write -nev 7492 -skip 7491
+	gunzip -c ../data/Pythia-PtMin50-LHC-10kev.dat.gz| time ./example/fastjet_timing_plugins -kt -R 1000 -strategy -4 -write -nev 7492 -skip 7491
+
+	Detailed investigation still to be carried out.
+	Issue filed as 2014-07-26-Lazy9-largeR-clustering
+
+2014-07-25  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/Recluster.hh:
+	* tools/Recluster.cc:
+	back to the case with C/A reclustering and non-ghosted areas:
+	instead of issuing a warning, discard the area info in the
+	composite jet.
+
+	* include/fastjet/CompositeJetStructure.hh:
+	commented out set_area_information: the comment said this was used
+	by "join" and cannot be used by an end-user while in practice,
+	join no longer uses this (has it at any time?)
+
+	instead, added a discard_area() method that allows to disable the
+	area information for composite jets made of pieces with area.
+
+	* tools/Pruner.cc:
+	* tools/fastjet/tools/Pruner.hh:
+	when creating the pruning jet definition, set the shared
+	recombiner in case it it owned by the parent jet definition.
+
+	* include/fastjet/JetDefinition.hh:
+	in set_shared_Recombiner, only copy the recombiner if we have
+	ownership of it [this allows us to copy the shared pointer even if we
+	have no ownership of the recombiner]
+
+	* tools/fastjet/tools/Filter.hh:
+	* tools/Filter.cc:
+	simplified things considerably to use Recluster... still work in
+	progress and checks to be made
+
+	* tools/fastjet/tools/Recluster.hh:
+	* tools/Recluster.cc:
+	issue a warning when we're using the simplified C/A reclustering
+	and that there is non-explicit-ghost area support. Areas can be
+	erroneous in this case.
+
+2014-07-24  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/Recluster.hh              *** ADDED ***
+	* tools/Recluster.cc:                           *** ADDED ***
+	added a "Recluster" tool [it is essentially the reclustering part
+	of Filter although this code has transited through the
+	RecursiveTools contrib]
+
+2014-07-24  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo
+
+	* include/fastjet/ClusterSequence.hh:
+	removed an old commented-out constructor
+
+2014-07-24  Gavin Salam  <gavin.salam@cern.ch>
+
+        * include/fastjet/Selector.hh
+        * include/fastjet/internal/Dnn2piCylinder.hh
+        * include/fastjet/internal/Dnn3piCylinder.hh
+        * include/fastjet/internal/Dnn4piCylinder.hh
+        * include/fastjet/internal/DnnPlane.hh
+        * include/fastjet/internal/DynamicNearestNeighbours.hh
+        * src/DnnPlane.cc
+        * src/Selector.cc
+	further replacements of const double & and const int & with plain
+	const double and const int.
+
+2014-07-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/LazyTiling25.cc:
+
+	fixed bug in positioning of tile centers that emerged when
+	_tiles_ieta_min*_tile_size and _tiles_eta_min were different
+	(which was previously never the case); having fixed this, the
+	scheme for always having at least 3 tiles in Y now works. Ran a
+	test on 10k events that anti-kt results are identical to other
+	schemes.
+
+	* src/LazyTiling9.cc:
+	fixed the same bug in positioning of tile centers; this should
+	have no effect here since, for now, _tiles_ieta_min*_tile_size and
+	_tiles_eta_min are always the same.
+
+	* scripts/update-headers.pl:  *** ADDED ***
+	new script to update headers (including copyright date) of all .hh,
+	.cc, .icc and .f files.
+
+	The master copyright text is now stored here. It has been adapted
+	to mention the manual as well as the original fastjet paper, and
+	also to request that the FastJet version number be quoted in
+	scientific publications.
+
+	The header start/end strings are now FJSTARTHEADER and FJENDHEADER
+	(i.e. added "FJ") in order to limit chances of collisions with
+	other code.
+
+	* **/*.(cc|icc|hh|f): 
+	updated headers
+
+2014-07-22  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo + Gregory
+
+	* RoadMap: updated (plans for 3.1)
+
+	* include/fastjet/PseudoJetStructureBase.hh:
+	deprecated the use of "const double& dcut" in exclusive_subjets(...)
+	and exclusive_subjets_up_to(...) for future major releases. (to be
+	replaced by "const double dcut".
+
+	* include/fastjet/GhostedAreaSpec.hh:
+	added both (set)_ghost_maxeta and (set)_ghost_rapmax to ensure
+	symmetry
+
+	* BUGS:
+	removed the bug due to coincident points in strategies using CGAL
+
+	* include/fastjet/JetDefinition.hh:
+	* src/JetDefinition.cc:
+	  . addded shared_recombiner() and set_shared_recombiner() methods.
+	  . replaced _recombiner_shared with _shared_recombiner
+	  . tidied up comments
+
+	* include/fastjet/ClusterSequence.hh: 
+	fixed comment about delete_self_when_unused() (one should not be
+	in a context where the CS may just go out of scope).
+	+ deprecated the use of auto_ptr for plugin extras.
+
+	* include/fastjet/internal/LazyTiling9Alt.hh: 
+	* src/LazyTiling9Alt.cc: 
+	commented out unused variant of _distance_to_tile
+
+	* src/ClusterSequence.cc: 
+	* include/fastjet/JetDefinition.hh: 
+	renamed FJ30Best -> BestFJ30
+
+2014-07-22  Gavin Salam  <gavin.salam@cern.ch>
+
+        * include/fastjet/ClusterSequence.hh
+        * include/fastjet/PseudoJet.hh
+        * include/fastjet/internal/LazyTiling25.hh
+        * include/fastjet/internal/LazyTiling9.hh
+        * include/fastjet/internal/LazyTiling9Alt.hh
+        * include/fastjet/internal/LazyTiling9SeparateGhosts.hh
+        * src/ClusterSequence.cc
+        * src/ClusterSequence_Delaunay.cc
+        * src/ClusterSequence_TiledN2.cc
+        * src/LazyTiling25.cc
+        * src/LazyTiling9.cc
+        * src/LazyTiling9Alt.cc
+        * src/LazyTiling9SeparateGhosts.cc
+        * src/PseudoJet.cc
+	replaced a number of "const double &" and "const int &" with
+	"const double" and "const int". There are still a number of others
+	to handle. 
+	
+2014-07-22  Gavin Salam  <gavin.salam@cern.ch>
+
+	* testsuite/TestPseudoJet.hh:
+	added a set of tests of the ==0 and != 0 operators
+
+	* testsuite/cs_delete_self.cc: 
+	now gives errors when things that should (not) throw do not (or
+	do). 
+
+	* testsuite/PJtiming.cc:
+	replaced dynamic-sized C-array (which gave compilation errors)
+	with a dynamically allocated array.
+
+	* testsuite/run-all.sh: *** ADDED ***
+	this script runs everything in the directory and makes sure it all
+	exits OK. 
+
+	* testsuite/README: *** ADDED ***
+	added a README to help us recall how to use what's in here
+
+	* include/fastjet/PseudoJet.hh:
+	added val==PseudoJet and val!=PseudoJet bool functions so that we
+	have the complete set.
+
+	* include/fastjet/internal/SearchTree.hh (circulator):
+	the following line 
+	"template<class U> friend class SearchTree<U>::const_circulator;"
+	gave a warning, so made it template wrt class T
+	Things still work with Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
+
+	* src/ClosestPair2D.cc:
+	removed unused
+	const unsigned int huge_unsigned = 4294967295U;
+	which was giving unused-variable warnings
+
+	Both warnings reported by Torbjorn Sjostrand.
+
+2014-07-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* test-compare.sh (extra_args): 
+	eliminated lines with "Strategy" as well as "strategy" in order
+	for make check not to give error if all that has changed is the
+	strategy choice (previously just eliminated strategy, and was
+	failing because in one place the output said "Strategy")
+
+2014-07-18  Gavin Salam  <gavin.salam@cern.ch> [on train]
+
+	* regression-tests/test-all-algs.pl (setDefaults):
+	default strategy set for tests now includes -7 (N2MHTLazy9) and -6
+	(N2MHTLazy25) for kt, cam and anti-kt.
+
+	* include/fastjet/JetDefinition.hh: 
+	* include/fastjet/ClusterSequence.hh:
+	* src/ClusterSequence.cc:
+	added Strategy = FJ30Best (21), which reproduces the strategy
+	selection of FJ 3.0.
+
+	Best now instead calls the new ClusterSequence::_best_strategy()
+	routine to select the best strategy. Also added helper classes
+	ClusterSequence::_Parabola and ClusterSequence::_Line. Structure
+	and parameters are based on Gregory's preliminary results in
+	issue-tracker/2014-07-auto-strategy-selection/transition_fit.gp.
+	Ran some basic tests to make sure that transitions look sensible
+	(compared to the plot transition_fit.eps). 
+
+	*** It's still missing the transitions to NlnN routines. ***
+
+	* src/ClusterSequence.cc: 
+	strategy_string() now correctly outputs a name for the new
+	LazyTiled strategies.
+
+	* include/fastjet/JetDefinition.hh:
+	filled out the comments to describe the new strategies.
+
+	* src/LazyTiling25.cc (_initialise_tiles): 
+	added some commented code to adapt tile rapidity-size choice in
+	cases where _tiles_eta_max - _tiles_eta_min < 3/2R, so as to
+	ensure exactly 3 spanning tiles; for large R, in cases where it
+	works, it appears to give a (sometimes substantial) speed
+	improvement, but it also hangs. Reason still needs identifying
+	(hence it's commented).
+
+2014-07-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/fastjet_timing_plugins.cc:
+	reinstated the -etamax option which actually sets maximal rapidity
+	(and prints a warning) --- backported from the 3.0.X branch
+
+	* NEWS:
+	backported news for v3.0.5 and 3.0.6 from the 3.0.X branch
+
+	* example/ktjet_timing.cc:
+	included cstdio required by recent compilers
+
+	* tools/fastjet/tools/Filter.hh:
+	- added an _initialised flag allowing to check whether the Filter
+	  has been initialised properly or not
+	- made the subtractor a (pointer to a)
+	  FunctionOfPseudoJet<PseudoJet> instead of a Transformer
+
+2014-07-18  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* include/fastjet/internal/Makefile.am
+	(fastjetincludeinternal_HEADERS):
+	added TilingExtent to fastjetincludeinternal_HEADERS
+
+	* src/TilingExtent.cc (_determine_rapidity_extent): 
+	switched all ints for bin counts -> doubles
+	
+2014-07-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/TilingExtent.cc (_determine_rapidity_extent):
+	_cumul2 was declared locally and hence shadowing the _cumul2
+	declared as a class member. Fixed.
+
+	* include/fastjet/internal/Makefile.am (fastjetincludeinternal_HEADERS):
+	LazyTiling25.hh was listed twice. Removed one. [was giving install
+	errors]
+
+2014-07-18  Gavin Salam  <gavin.salam@cern.ch> (later)
+
+	Carried out substantial renaming of the new Tiling files, classes,
+	strategy enum names, etc., basically according to the following
+	pattern
+
+                                                Strategy        Class
+    N2MinHeapTiled_experimental1 (Tiling)   ->  N2MHTLazy9Alt  (LazyTiling9Alt)
+    N2MinHeapTiled_experimental3 (Tiling2)  ->  N2MHTLazy9     (LazyTiling9)
+    N2MinHeapTiled_experimental2 (Tiling25) ->  N2MHTLazy25    (LazyTiling25)
+
+
+    N2MinHeapTiled_separate_ghosts_antikt (Tiling3)
+                                            ->  N2MHTLazy9AntiKtSeparateGhosts (LazyTiling9SeparateGhosts)
+
+    TilingAnalysis -> TilingExtent (separated out into a separate file)
+
+
+	Overall that gives following renamed files
+
+        * include/fastjet/internal/LazyTiling25.hh:
+        * include/fastjet/internal/LazyTiling9.hh:
+        * include/fastjet/internal/LazyTiling9Alt.hh:
+        * include/fastjet/internal/LazyTiling9SeparateGhosts.hh:
+        * src/LazyTiling25.cc:
+        * src/LazyTiling9.cc:
+        * src/LazyTiling9Alt.cc:
+        * src/LazyTiling9SeparateGhosts.cc:
+
+	moved from old names
+
+        * include/fastjet/internal/TilingExtent.hh: *** ADDED ***
+	* src/TilingExtent.cc                       *** ADDED ***
+
+	TilingExtent (was TilingAnalysis) moved out of old files.
+
+        * include/fastjet/JetDefinition.hh:
+        * src/ClusterSequence.cc:
+        * src/ClusterSequence_TiledN2.cc:
+	adaptations to take into account the new naming 
+
+        * include/fastjet/Makefile.am:
+	* include/fastjet/internal/Makefile.am
+        * src/Makefile.am
+	updated these to reflect new file naming scheme
+	
+	
+2014-07-18  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/Tiling2.cc: 
+	changed name of the _TILING2_USE_TILING_ANALYSIS_
+	preprocessor variable to include FASTJET in its name (as per our
+	convention). 
+
+	* src/Tiling25.cc:
+	switched over to use of TilingAnalysis, again using a preprocessor
+	variable to control whether it is on or off.
+
+2014-07-17  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* src/Tiling2.cc: 
+	turned TilingAnalysis back on in Tiling2 and in TilingAnalysis,
+	changed allowed_max_fraction from 0.5 to 0.25.
+
+2014-07-17  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/Tiling2.cc:
+	added a pre-processor define to allow to switch on/off the use of
+	TilingAnalysis in Tiling2 (currently disabled)
+
+2014-07-17  Gavin Salam  <gavin.salam@cern.ch> + Matteo & Gregory
+
+	* src/Tiling2.cc|hh:
+	should have fixed issue where TilingAnalysis can crash in certain classes of
+	low multiplicity events (basically allowed_max_cumul should not be
+	larger than largest single bin), added
+	sum_of_binned_squared_multiplicity() member and fixed some
+	double-counting issues in its calculation. Also tried to improve
+	code readability and comments
+
+2014-06-14  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/JetDefinition.hh:
+	fixed issue reported by TJ Wilkason when constructing a 2-parameter
+	jet definition with a pointer to a recombiner
+
+2014-05-25  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/PseudoJet.hh: 
+	fixed minor typo in comment
+
+	* src/ClusterSequenceVoronoiArea.cc: 
+	removed erroneous sentence in license comments about this file
+	being part of a command-line handling environment
+
+2014-02-18  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* scripts/mksnapshot.sh:
+	updated location of snapshots.html file
+
+2014-01-16  Gregory Soyez  <soyez@fastjet.fr> and Gavin (committed by Gavin)
+
+	* include/fastjet/FunctionOfPseudoJet.hh: 
+	a FunctionOfPseudoJet(const TOut & constant_value) member
+	declaration was left over from some testing, but had never been
+	implemented. Since we don't intend to have it, it has been
+	commented out. Done in the trunk, and intended for FJ 3.0.7 upwards. 
+
+2014-01-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/PseudoJet.cc:
+	comments for boost/unboost were exchanged in the .cc file
+
+2013-12-28  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/Pruner.cc:
+	* tools/fastjet/tools/Pruner.hh:
+
+	pruned_jet.structure_of<Pruner>() now has Rcut() and zcut() member
+	functions, which return the actual value of Rcut and zcut used for
+	that jet.
+
+	A preprocessor symbol is defined,
+	FASTJET_PRUNER_STRUCTURE_STORES_RCUT,
+	to indicate the availability of this information.
+
+	Also made the dynamic Rcut and zcut pointers "const", which they
+	should have been all along.
+
+	* doc/fastjet-doc.tex:
+	corresponding update to the documentation
+
+	* example/14-groomers.cc:
+	in the case of pruning, Rcut is now explicitly written out.
+
+2013-12-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	fixed an issue in the test for the presence of a C++ compiler.
+
+2013-12-17  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* regression-tests/nightly-check.pl: 
+	replaced ramses -> karnak
+
+2013-12-10  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* regression-tests/nightly-check.pl: 
+	ensured that tar's STDERR is also redirected to the $untar
+	variable. This (together with my locale variables change) should
+	help get the nightly check back on track with the new ramses (OS X
+	10.8). 
+
+	Also made sure that if the ssh output is not empty, the error
+	message is now explicit about the fact that this is the reason for
+	a failure. This should make future diagnostics easier.
+
+	replaced karnak -> ramses (temporarily)
+
+2013-12-09  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/CompositeJetStructure.hh:
+	extended comment for set_area_information(...)
+
+2013-12-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/CompositeJetStructure.cc (area_error): 
+	this was erroneously returning the sum of areas of the individual
+	pieces rather than the sum of their area_errors() as stated in the
+	comments. Now fixed.
+
+2013-12-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* fortran_wrapper/Makefile.alt: 
+	added explicit default -O compiler flags in Makefile.alt, which
+	can have a big effect on the speed of the wrapper for low
+	multiplicities. 
+
+2013-11-13  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory & Matteo
+
+	* tools/GridMedianBackgroundEstimator.cc (description):
+	description now prints information on the actual grid-cell size
+
+2013-11-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/ClusterSequenceVoronoiArea.cc (_initializeVA): 
+	explicitly reserved array size for vector 4-areas, intended to
+	bring small efficiency gain. (That this was missing was pointed
+	out by Vincenzo Innocente)
+
+2013-10-28  Gavin Salam  <gavin.salam@cern.ch>
+
+	[merges from fastjet-3.0.x branch]
+
+	* plugins/D0RunIICone/ConeSplitMerge.hpp:
+	made ProtoJet_ET_seedET_order::operator() const, to fix compilation
+	issue under OS X 10.9 (Mavericks). 
+
+	* plugins/CDFCones/CDFcode/JetCluAlgorithm.cc:
+	included <cstdlib> and switched abs -> std::abs to fix compilation
+	issue under OS X 10.9 (Mavericks). This and the above one reported
+	by David Grellscheid and Pere Mato Vila.
+
+	* example/11-filter.cc:
+	* tools/MassDropTagger.cc:
+	* tools/JHTopTagger.cc:
+	fixed bugs where (! a==b) was being used instead of
+	(a!=b) in certain consistency checks. In the two taggers, this
+	should only affect whether a warning is produced when called with
+	algorithms other than Cambridge/Aachen. Reported by David
+	Grellscheid. (The MDT case had already been fixed below; now the
+	fix is consistent across the board)
+
+2013-10-25  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo
+
+	* plugins/GridJet/fastjet/GridJetPlugin.hh:
+	added drap(), dphi(), rapmin() and rapmax() query functions to get
+	actual grid spacings.
+
+2013-09-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/Selector.hh:
+	* include/fastjet/NNH.hh:
+	* include/fastjet/internal/ClusterSequence_N2.icc:
+	these files had guards without FASTJET_ in their name, as a result
+	of which the fjcore files had identical guards, causing a
+	conflict. the FASTJET_ tag has now been added. 
+
+2013-09-13  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo
+
+	* src/Tiling3.cc: 
+	eliminated the uninitialised compilation warning (as done in the
+	other strategies).
+
+	* regression-tests/test-all-algs.pl:
+	updated checksums for background estimations with -rapmax option,
+	in light of yesterday's bugfix in
+	fastjet_timing_plugins. Internal program consistency should be OK
+	given that the nightly check from the night before last came out
+	OK (and we haven't touched core code since then).
+
+	Also added some extra checksums for quick tests with 10 events.
+
+2013-09-13  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* regression-tests/test-all-algs.pl:
+	replaced -etamax -> -rapmax (following yesterday's change);
+	fixed an issue where bkgds & areas were giving problems when
+	running more than one strategy (to do with copies v. aliases in
+	foreach loops).
+
+2013-09-12  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* example/fastjet_timing_plugins.cc: 
+	replaced -etamax option with -rapmax and fixed bug that it was
+	acting only as an upper limit of rapidity. (Not a lower limit)
+
+2013-08-17  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/ClusterSequence.hh (C):
+	* include/fastjet/PseudoJet.hh:
+	  small changes to comments for subdmerge.
+
+2013-07-31  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/data/Makefile.am (EXTRA_DIST):
+	  added the missing boosted top event to the distribution
+
+2013-07-12  Gregory Soyez  <soyez@fastjet.fr>
+
+	* regression-tests/nightly-check.pl:
+	  added tests with gcc-4.6 and gcc-4.7
+
+2013-07-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	  backported release notes for FastJet-3.0.4 from the 3.0.X branch
+
+2013-06-30  Gavin Salam  <gavin.salam@cern.ch> + Matteo (later):
+
+	* Tiling2.cc|hh
+	* Tiling25.cc|hh
+	* src/ClusterSequence.cc
+	  removed old Tiling2::run() and renamed Tiling2::run_alt() -> Tiling2::run()
+	  removed old Tiling25::run() and renamed Tiling25::run_alt() -> Tiling25::run()
+
+
+2013-06-30  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* merged changes from speed development branch. Things are
+	  currently a bit messy. Here's what we have
+
+	  - TilingAnalysis class 
+	    (inside Tiling2.hh|cc; it should be moved out & renamed TilingExtent?)
+	    tiling used to have an extent that stretched up to rapidity of
+	    most forward and backward particles; this new class limits the
+	    rapidity extent of the tiling so as not to have very sparse
+	    tiles at edges of the tiling. 
+
+	  - Tiling: this was the first attempt at a speed improvement. The
+	    main ingredient is that it tries not to search beyond the edge of
+	    a tile if a particle's distance to the edge is greater than
+	    than to its in-tile nearest neighbour. 
+	    Available as N2MinHeapTiled_experimental1   = -5
+
+	  - Tiling2, with its run_alt() call, is very similar to Tiling,
+	    but reorders some checks and is marginally (up to 5%?) faster
+	    Available as N2MinHeapTiled_experimental3   = -7
+
+	  - Tiling25 (with its run_alt() call), uses a patch of 25 tiles
+	    of size R/2 for its NN searches. Gains are most substantial at
+	    quite high multiplicities and/or large R values.
+	    Available as N2MinHeapTiled_experimental2   = -6
+
+          - Tiling3: intended just for the anti-kt algorithm, this avoids
+	    clustering ghosts with each other and so reduces some distance
+	    computations. Incorporates most of the mods from the Tiling
+	    approach as well
+	    Available as N2MinHeapTiled_separate_ghosts_antikt = -10
+
+2013-06-05  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo
+
+	* include/fastjet/SharedPtr.hh: 
+	  replaced USETR1SHAREDPTR -> __FASTJET_USETR1SHAREDPTR
+	  (merged from rev.3129 of 3.0.X branch)
+
+2013-05-22  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/MassDropTagger.cc (result):
+	  added a missing set of () when testing if the jet was obtained
+	  from a C/A clustering
+
+2013-05-13  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/BackgroundEstimatorBase.hh:
+	  corrected a typo in a comment
+
+2013-05-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/ClusterSequence.hh:
+	* src/ClusterSequence_Delaunay.cc
+	  moved inclusion of DynamicNearestNeighbours.hh from
+	  ClusterSequence.hh (a forward definition is sufficient) to the
+	  Delaunay file.
+
+	* include/fastjet/PseudoJet.hh:
+	  added explicit fastjet:: to cast_if_derived call, to avoid
+	  ambiguities when converting from fastjet to fjcore PseudoJets
+	  (and vice versa), where it wasn't clear whether to use fastjet::
+	  or fjcore:: cast_if_derived.
+
+2013-05-03  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo
+
+	* include/fastjet/internal/SearchTree.hh:
+	  renamed TRACK_DEPTH define as __FASTJET_SEARCHTREE_TRACK_DEPTH
+
+2013-05-01  Gavin Salam  <gavin.salam@cern.ch>
+
+	* regression-tests/nightly-check.pl: 
+	  added themis (32 bit) to the nightly check, and reordered the
+	  checks to make the structure more clearly visible.
+
+2013-04-30 Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+        * example/fastjet_timing_plugins.cc
+	  fixed a couple of harmless errors in the messages
+	  concerning missing plugins
+
+2013-04-30  Gregory Soyez  <soyez@fastjet.fr>
+
+	* regression-tests/nightly-check.pl:
+	  explicitly pointed to the correct version of libstdc++ when
+	  checking gcc-4.8
+
+2013-04-29  Gavin Salam  <gavin.salam@cern.ch>
+
+	* regression-tests/nightly-check.pl: 
+	  removed a couple more redundant machines for the nightly checks
+
+2013-04-28  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* regression-tests/nightly-check.pl: 
+	  switched intel compiler tests over to default args (used to rely
+	  on gcc34 libraries).
+
+2013-04-27  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* regression-tests/nightly-check.pl: 
+	  updated CGAL directory 
+	  removed explicit g++3.4 test (but we still have it on zetes)
+
+2013-04-06  Gavin Salam  <gavin.salam@cern.ch>
+
+	* configure.ac: 
+	  changed explicitly required autoconf to 2.63
+
+2013-03-30  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/PseudoJet.hh:
+	* src/PseudoJet.cc:
+	  in response to request from ATLAS, initialize PseudoJet::_rap to
+	  a dummy value even though it's not necessary, in order to avoid
+	  NaN's in ATLAS rigid NaN tests.
+
+	* configure.ac:
+	  replaced AM_CONFIG_HEADER with AC_CONFIG_HEADERS to get 
+	  compatibility with autoconf-2.69 + automake-1.13. This breaks
+	  very old autotools setups
+
+	  sorted out bug in sed commands for version numbers with OS X
+	  version of sed. (Some versions of sed and grep don't recognise
+	  "+").
+
+2013-02-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/mkfjcore.sh:
+	  made a couple of changes to get this to work on macs
+	  + a little extra output (also added TODO-fjcore and renamed
+	  preamble file)
+
+2013-02-20  Gregory Soyez  <soyez@fastjet.fr> + Gavin & Matteo
+
+	* src/CompositeJetStructure.cc (CompositeJetStructure):
+	  removed a compiler warning about recombiner being unused in
+	  fjcore
+
+	* src/ClusterSequence_TiledN2.cc:
+	  explicitly disabled a harmless gcc warning in
+	  _add_untagged_neighbours_to_tile_union
+	  Turned into a comment for future usage/bookkeeping
+
+	  Instead, explicitly initialise oldB.tile_index=0 in
+	  _tiled_N2_cluster(), _faster_tiled_N2_cluster() and
+	  _minheap_faster_tiled_N2_cluster().
+
+2013-02-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* m4/CGAL.m4:
+	  linked against gmp, gmpxx and mpfr if available (this provides a
+	  more robust CGAL support as in some cases -lgmp has to be
+	  explicitly included at link time)
+
+	* src/PseudoJetStructureBase.cc:
+	* include/fastjet/PseudoJetStructureBase.hh:
+	  forther #ifndef __FJCORE__ not included during the first round
+
+	* include/fastjet/Selector.hh:
+	* include/fastjet/PseudoJetStructureBase.hh:
+	* include/fastjet/PseudoJet.hh:
+	* include/fastjet/CompositeJetStructure.hh:
+	* include/fastjet/ClusterSequenceStructure.hh:
+	* src/Selector.cc:
+	* src/PseudoJetStructureBase.cc:
+	* src/PseudoJet.cc:
+	* src/CompositeJetStructure.cc:
+	* src/ClusterSequenceStructure.cc:
+	  FJCore work: code not included in the core has been placed inside
+	    #ifndef __FJCORE__
+	    ...
+	    #endif
+	  for automatic extraction of the core part of FastJet. This includes
+	   . area-related headers and code
+	   . CGAL support
+
+	* include/fastjet/internal/IsBase.hh (cast_if_derived):
+	  use 0 instead of NULL (which would potentially require an
+	  additional header)
+
+	* src/ClosestPair2D.cc (closest_pair):
+	  use std::swap instead of swap (i.e. make the namespace explicit
+	  to avoid conflict with fastjet::swap in SharedPtr (only needed
+	  because we are in the fastJet namespace)
+
+2013-02-14  Gavin Salam  <gavin.salam@cern.ch> + Matteo Cacciari
+
+	* include/fastjet/JetDefinition.hh:
+	* include/fastjet/ClusterSequence.hh:
+	  introduced JetDefinition::operator()(particles), which runs
+	  the jet algorithm and returns an appropriately sorted vector
+	  of jets
+
+	* src/JetDefinition.cc:
+	* include/fastjet/JetDefinition.hh:
+	  added is_spherical() member function, which returns true for
+	  algorithms intended for use in spherical coordinates (i.e. e+e-
+	  algorithms). Also extended the plugin interface so that plugins
+	  can provide this information (unmodified plugins return false,
+	  which makes sense because most current plugins are for hadron
+	  colliders).
+
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.hh:
+	* plugins/EECambridge/fastjet/EECambridgePlugin.hh:
+	  implemented is_spherical() members that return true.
+
+2013-01-29  Gavin Salam  <gavin.salam@cern.ch>
+        * many places:
+	  updated the svn ignore properties to ignore Makefile,
+	  Makefile.in .deps
+
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	* tools/JetMedianBackgroundEstimator.cc (description):
+	  description() now prints out the pt power if it differs from 1.
+
+	* autogen.sh: 
+	  fixed a minor bug when glibtool is missing.
+
+2013-01-29  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	  provided an access, using jets_used(), to the jets that have
+	  been used for the last call to rho() or sigma()
+	  + changed come of the comments
+
+2013-01-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/Selector.hh: 
+	  tiny change to comments so that in doxygen one sees that
+	  "pass()" is the routine needing to be overloaded. 
+
+2012-12-17  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	  brought the NEWS from 3.0.2 to 3.0.3 from the branch
+	  [3.0.3 was developed in a branch and consisted of a few bug
+	  fixes borrowed from the trunk. All the changes are in agreement
+	  between the trunk and the branch so there was just the summary
+	  of changes that needed to be updates]
+
+2012-12-11  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/Selector.cc:
+	* include/fastjet/Selector.hh:
+	  added Selector::sum(...), which returns the 4-vector sum of the
+	  input jets that pass the selection.
+
+2012-09-18  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* fortran_wrapper/fastjetfortran.cc: 
+	  added a fastjeteegenkt_ routine, similar to fastjetppgenkt_, but
+	  for e+e- generalised kt, as requested by Bryan.
+
+2012-09-14  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example/fastjet_timing_plugins.cc: 
+	  added protection in case of null extras for SISCone
+
+2012-08-21  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* include/fastjet/ClusterSequence.hh: 
+	  following question from Daniel Maitre about
+	  "jet_scale_for_algorithm()",  modified its doxygen comment to
+	  indicate that it is mainly for internal use.
+
+2012-07-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/JetMedianBackgroundEstimator.hh:
+	  When trying to access information relative to the last
+	  computation of rho (or sigma) --- i.e. in mean_area(),
+	  n_jets_used(), empty_area() and n_empty_jets() ---, throw an
+	  error if the configuration has changed in the meantime.
+
+	* tools/JetMedianBackgroundEstimator.cc:
+	  In BackgroundJetScalarPtDensity, explicitly exclude the ghosts
+	  from the list of constituents to avoid problematic behaviour
+	  when _pt_power <= 0.
+
+2012-06-25  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/ClusterSequence.cc (print_banner):
+	  updated references in the banner
+
+2012-06-19  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* doc/fastjet-doc.tex (section{Introduction}): 
+	  added a footnote about stopping the exclusive algorithm once it
+	  reaches a predetermined number of jets. (Thanks to Giulia
+	  Zanderighi for pointing out this omission).
+
+2012-06-13  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* include/fastjet/internal/SearchTree.hh (template): 
+	  a further fix for clang v1.1 (release 27) compilation
 
 2012-06-12  Gregory Soyez  <soyez@fastjet.fr>
 
@@ -38,13 +1673,279 @@
 	  lookups. See e.g. http://gcc.gnu.org/gcc-4.7/porting_to.html
 	  [Thanks to Gavin Hesketh and Jihun Kim for reporting this]
 
+2012-05-04  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* include/fastjet/JetDefinition.hh (): 
+	  small changes to comments
+
+2012-04-09  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+
+	* include/fastjet/JetDefinition.hh (enum Strategy):
+	* src/ClusterSequence.cc
+	  right now the strategies are as follows:
+	  -7 = latest version of 9-tile (Tiling2::run_alt)
+	  -6 = new 25-tile code.
+
+	* include/fastjet/Tiling2.hh
+	* src/Tiling2.cc
+	  this now contains run() and run_alt(); wrt run(), the latter
+	  reorders the updates, so that the new object's neighbours go
+	  first, blindly checking at each distance whether we've hit a
+	  neighbour of the old points; then it looks at the remaining
+	  tiles that might be relevant for the old points. Basically cuts
+	  down the number of jet-to-tile distances by 10-20%, though no
+	  measurable speed improvements.
+
+	  Also: added a new class TilingAnalysis, which tries to determine
+	  a sensible rapidity extent for the tiling. Reduces the reliance
+	  on nasty hand-coded limits compared to before.
+
+	* src/ClusterSequence_TiledN2.cc: 
+	  this now uses the TilingAnalysis to decide the rapidity
+	  extents. For N=30, on the simple trial event 
+
+            time ./fastjet_timing_plugins -antikt -R 0.5 -combine 1 -repeat 50000 < ~/work/fastjet/data/Pythia-1PtMin50+nMinBias-mansorted.dat -strategy -3 -nhardest 30
+
+	  there was a run-time reduction of 30%, presumably because one
+	  avoids grid initialisation. Some of the parameters inside
+	  TilingAnalysis are "inspired" guestimates.
+
+
+	* include/fastjet/Tiling25.hh:       *** ADDED ***
+	* src/Tiling25.cc:                   *** ADDED ***
+	* src/Makefile.am
+	* include/fastjet/Makefile.am
+	  trial of a 25-tile approach with tiles of size R/2. Becomes
+	  competitive only starting from N \sim 20k. For 44k, one gains a
+	  factor of 1.3 in speed. In this region, relative to the old -4
+	  strategy we have a factor 4 gain in speed -- so not negligible
+	  for HI. 
+	  
+	
+2012-04-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/ClusterSequence.cc: 
+	* include/fastjet/JetDefinition.hh: 
+	* src/Makefile.am: 
+	* include/fastjet/Makefile.am: 
+	* src/Tiling3.cc:              *** ADDED ***
+	* include/fastjet/Tiling3.hh:  *** ADDED ***
+	  addition of tiling routines that allow for ghosts to be treated
+	  separately from other particles. This is relevant for anti-kt
+	  type algorithms where ghosts cluster with each other only at the
+	  very end of the sequence. If one's not interested in the pure
+	  ghost jets, then one can neglect all ghost-ghost distances.
+	  Available as N2MinHeapTiled_separate_ghosts_antikt -- compiles
+	  and runs OK on normal events, and seems to behave OK also on
+	  ghosted events.  Note the ghost pt cutoff is currently
+	  hard-coded.
+
+2012-04-02  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory
+
+	* src/Tiling.cc:
+	* include/fastjet/Tiling.hh:
+	  Used pointers to functions in Tile that allow for a faster
+	  computation of the distance from a point to the edges and corners
+	  of its tile.
+
+2012-04-02  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/Tiling2.hh:
+	* include/fastjet/Tiling2.cc:
+	  copied Tile (from Tile.{hh,cc} into Tile2 for future mods of Tile
+
+	* include/fastjet/Tiling2.hh:
+	* include/fastjet/Tiling2.cc:
+	* src/ClusterSequence.cc:
+	* src/Makefile.am:
+	* include/fastjet/Makefile.am:
+	  inserted a copy of the current Tiling class for easier
+	  comparison between the present status and further developments.
+
+2012-04-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/ClusterSequence.hh: 
+	* src/ClusterSequence_TiledN2.cc: 
+	  put the N2MinHeapTiled back to the old code now that we have a
+	  dedicated strategy for developments from below. This also
+	  removes any risk of penalty associated with increased tile size,
+	  etc. in the old strategies.
+
+2012-04-02  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory
+
+	* include/fastjet/Tiling.hh: 
+	* src/Tiling.cc: 
+	  playing with the idea of two copies of bj_dist, with and without
+	  2pi periodicity.
+
+2012-04-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/JetDefinition.hh:
+	* src/ClusterSequence.cc:
+
+	  added N2MinHeapTiled_experimental1 and
+	  N2MinHeapTiled_experimental2 and instrumented the first one so
+	  that it uses the external tiling class.
+
+	* src/Tiling.cc:
+	* include/fastjet/Tiling.hh:
+	  completed and tested these so that it replicates the N2MinHeap
+	  strategy that has been developed in the past few days.
+
+2012-04-01  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/Tiling.cc:              *** ADDED ***
+	* include/fastjet/Tiling.hh:  *** ADDED ***
+	  added as-yet incomplete Tiling classes to provide handling of
+	  tiling that is external to the CS.
+	
+	* include/fastjet/ClusterSequence.hh: 
+	  moved guards right up to top of file.
+
+	* include/fastjet/internal/MinHeap.hh: 
+	* src/MinHeap.cc: 
+
+	  renamed _initialise(values) -> initialise(values) and added a
+	  constructor that just sets the size and no more.
+
+2012-03-31  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* include/fastjet/ClusterSequence.hh: 
+	* src/ClusterSequence_TiledN2.cc: 
+	  small improvement in _distance_to_tile computation (cache
+	  calculation of 0.5*tile spacing).
+
+2012-03-30  Gavin SALAM  <salam@lpthe.jussieu.fr> + Gregory
+
+	* include/fastjet/ClusterSequence.hh: 
+	* src/ClusterSequence_TiledN2.cc: 
+	  completed a first "draft" of the new tiling strategy that
+	  aims to avoid calculations with tiles that are too far away
+	  for the particular configuration of particles at hand.
+
+2012-03-30  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* example/fastjet_timing_plugins.cc (main): 
+	  added a "-skip n" option to skip the first n events
+
+2012-03-29  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* src/ClusterSequence_TiledN2.cc (_minheap_faster_tiled_N2_cluster): 
+	  development work to try out impact of keeping track of max NN
+	  distance within the tile. Currently just in the initial NN
+	  determination. For N=10^4, akt05, it saves 40-50% of the time in
+	  that calculation (10% overall). Line being used for speed checks is
+
+	    ./fastjet_timing_plugins -antikt -R 0.5 -combine 60 -repeat 100\
+	      < ~/work/fastjet/data/Pythia-1PtMin50+nMinBias-mansorted.dat
+
+	  Correctness tests come out OK on 10^3 events.
+
+	* include/fastjet/ClusterSequence.hh:
+	  additions to the Tile structure so that it can maintain info
+	  about tile centres and the max_NN_dist within a tile.
+
+2012-02-20  Gavin Salam  <salam@lpthe.jussieu.fr> + Gregory
+
+	* test-compare.sh: 
+	  changed the grep to correctly check the windows version number.
+
+	* include/fastjet/internal/DnnPlane.hh (class DnnPlane): 
+	* src/DnnPlane.cc: 
+	  moved a const double value specification into the .hh to fix
+	  compilation issue with g++ 4.4.
+
 2012-02-20  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/config_win.h:
+	  added the new version-number macros
+
+	* configure.ac:
+	* config.h.in:
+	* src/genconfig.sh:
+	  defined a series of macros to handle version numbers
+	    FASTJET_VERSION_{MAJOR,MINOR,PATCHLEVEL}
+	  and, above all,
+	    FASTJET_VERSION_NUMBER
+	  a 5-digit integer of the form XYYZZ (for version X.Y,Z) that
+	  allows to require specific versions of FastJet by using
+	    #if FASTJET_VERSION_NUMBER > 30100
+	      ....
+	    #endif
+	  For previous versions of FastJet, where this macro is not
+	  defined, it defaults to 0.
 
 	* configure.ac:
 	  fixed bug related to the --extra-warnings flag: it now sets its
 	  own internal variable (ENABLE_EXTRA_WARNINGS_FLAG rather than
-	  overwriting ENABLE_DEBUG_FLAG. Now, enabling/disabling debug info
+	  overwriting ENABLE_DEBG_FLAG. Now, enabling/disabling denug info
 	  should work fine again.
+
+
+2012-02-17  Gregory Soyez  <soyez@fastjet.fr> & Matteo
+
+	* reintegrated the modifications from the
+	  fastjet-3.0-CGAL-coincident branch. FastJet now allows for
+	  coincident points in the NlnN strategy (using CGAL)
+
+2012-02-17  Gregory Soyez  <soyez@fastjet.fr> & Matteo
+
+	* configure.ac:
+        * include/fastjet/config_win.h:
+        * Doxyfile:
+        * tex/fastjet-doc.tex:
+          changed version to 3.1.0-devel
+
+2012-02-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/DnnPlane.cc:
+	  added a comment about the commented out code which always uses
+	  CGAL's distance comparison
+
+	* include/fastjet/internal/DnnPlane.hh:
+	  Clarified a comment frow Gavin's query in its last commit.
+
+2012-02-16  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* include/fastjet/internal/DnnPlane.hh:
+	* src/DnnPlane.cc:
+	  modified comments in a few places.
+
+2012-02-15  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/internal/DnnPlane.hh:
+	* src/DnnPlane.cc:
+	  Fixed the longstanding issue that our NlnN strategies using CGAL
+	  were not supporting coincident points ("known bug 1" in earlier
+	  FastJet releases).
+
+	  This is achieved by adding a 'coincidence' integer to the
+	  SupoerVertex used in DnnPlane which keeps track of the
+	  coincidences reported by CGAL.
+
+	  In fixnig that issue, we became aware of rare situations where
+	  rounding errors in comparing distances (in situations with 3
+	  points a,b,c with dist(a,b)-dist(a,c)<<<1 and dist(b.c)<<<1)
+	  could create inconsistencies between our distamce comparison and
+	  CGAL's triangulation. This could is some particular setups lead
+	  to infinite loops in the Clustering. We fixed it by using
+	  explicitly CGAL's distance computation in these troublesome
+	  situations (we do not do it in general because it could
+	  introduce a 10-20% time penalty).
+
+	  Afterall, the new code has been tested to run nearly as fast as
+	  the previous one: 212.95s to cluster our reference 10000 events
+	  (with all 3 NlnN strategies3 times) compared to 211.46s with the
+	  code from the previous stable release (and 28.125s to read the
+	  events)) i.e. only a 0.7% penalty. And this is not worse in
+	  'grid' cases with real distance degeneracies.
+
+
+2012-02-08  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example/
+	  set the svn ignore properties a bit more sensibly.
 
 2012-02-06  Gregory Soyez  <soyez@fastjet.fr>
 
@@ -52,6 +1953,10 @@
 	* doc/Makefile.am:
 	* doc/figs/Makefile.am:              *** ADDED ***
 	  added the figures of the manual to the distributed tarball
+
+2012-01-17  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo & Gregory
+
+	* switched to 3.0.3-devel
 
 2012-01-17  Gavin SALAM  <salam@lpthe.jussieu.fr> + Matteo & Gregory
 

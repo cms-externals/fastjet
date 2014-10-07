@@ -14,6 +14,7 @@
 #include "CmdLine.hh"
 #include "fastjet/internal/numconsts.hh"
 
+#include <cstdio> // recent g++ compiler are a bit more picky
 
 /** Need to include these KtJet Headers */
 #include "KtJet/KtEvent.h"

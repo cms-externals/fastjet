@@ -28,4 +28,4 @@ sisconeinclude_HEADERS = area.h\
   vicinity.h
 
 # Don't distribute config.h. Note that it'll be accessible through -I.
-nodist_include_HEADERS = config.h
+nodist_noinst_HEADERS = config.h

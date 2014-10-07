@@ -3,6 +3,14 @@
 
 FASTJET_CONFIG=fastjet-config
 
+# optimisation is recommended when compiling the wrapper. It can make
+# a factor of two difference to speeds for low multiplicities (e.g. in
+# NLO calculations), where significant time is taken by copying
+# information to and from C++ vectors.
+CXXFLAGS = -O -g
+FFLAGS = -O 
+F77FLAGS = -O 
+
 CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
 LIBS += $(shell $(FASTJET_CONFIG) --libs --plugins )
 

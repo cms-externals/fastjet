@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: ClusterSequenceStructure.hh 2577 2011-09-13 15:11:38Z salam $
+//FJSTARTHEADER
+// $Id: ClusterSequenceStructure.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_CLUSTER_SEQUENCE_STRUCTURE_HH__
@@ -95,9 +97,11 @@ public:
   /// pointer to it; otherwise throw an error
   virtual const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   virtual const ClusterSequenceAreaBase * validated_csab() const;
+#endif  // __FJCORE__
 
   /// set the associated csw
   virtual void set_associated_cs(const ClusterSequence * new_cs){
@@ -236,6 +240,7 @@ public:
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   virtual bool has_area() const;
@@ -257,6 +262,7 @@ public:
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost(const PseudoJet &reference) const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 
 protected:

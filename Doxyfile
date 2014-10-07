@@ -31,7 +31,7 @@ PROJECT_NAME           = FastJet
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = 3.0.3
+PROJECT_NUMBER         = 3.1.0
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
@@ -602,7 +602,7 @@ FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.c++ \
                          *.h *.hh *.hxx *.hpp *.h++ \
                          *.ii *.ixx *.ipp *.i++ *.icc \
                          *.php *.php3 *.inc *.m *.py *.f90 *.f \
-                         NEWS
+                         NEWS INSTALL README AUTHORS BUGS COPYING
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.

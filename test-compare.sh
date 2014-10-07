@@ -64,7 +64,7 @@ fi
 # number
 packname=`grep '^ *AC_INIT' ${srcdir}/configure.ac | sed -e 's/AC_INIT(//' -e 's/\[//g' -e 's/\]//g' -e 's/)//'`
 packver=`echo $packname | sed 's/.*,//g'`
-winver=`grep VERSION ${srcdir}/include/fastjet/config_win.h | sed 's/.*VERSION *"//' | sed 's/"//'`
+winver=`grep FASTJET_PACKAGE_VERSION ${srcdir}/include/fastjet/config_win.h | sed 's/.*VERSION *"//' | sed 's/"//'`
 if [[ $winver != $packver ]]; then
   echo "ERROR: config_win.h version number not compatible with true version number"
   exit 1
@@ -100,12 +100,12 @@ untested_algs=""
 Rvalues="0.4 0.7 1.0"
 extra_args="-incl 0.0"
 
-echo ":#"      >  clear_patterns.orig
-echo "^#"      >> clear_patterns.orig
-echo "version" >> clear_patterns.orig
-echo "strategy" >> clear_patterns.orig
-echo "CGAL" >> clear_patterns.orig
-echo "SISCone" >> clear_patterns.orig  # avoids problems w version numbers
+echo ":#"          >  clear_patterns.orig
+echo "^#"          >> clear_patterns.orig
+echo "version"     >> clear_patterns.orig
+echo "[Ss]trategy" >> clear_patterns.orig
+echo "CGAL"        >> clear_patterns.orig
+echo "SISCone"     >> clear_patterns.orig  # avoids problems w version numbers
 echo "pxcone: +[a-zA-Z*]" >> clear_patterns.orig   # special treatment for PxCone whose fortran output
 echo "pxcone: *$"         >> clear_patterns.orig   # occurs in non-predicatble position (flushing issue)
 echo "WARNING"            >> clear_patterns.orig   # occurs in non-predicatble position (flushing issue)

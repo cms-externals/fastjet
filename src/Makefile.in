@@ -41,7 +41,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/CGAL.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/compiler_flags.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/compiler_flags.m4 \
+	$(top_srcdir)/m4/demangle.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/plugin.m4 $(top_srcdir)/configure.ac
@@ -102,7 +103,11 @@ am_libfastjet_la_OBJECTS = libfastjet_la-DnnPlane.lo \
 	libfastjet_la-RangeDefinition.lo \
 	libfastjet_la-CompositeJetStructure.lo \
 	libfastjet_la-FunctionOfPseudoJet.lo \
-	libfastjet_la-LimitedWarning.lo
+	libfastjet_la-LimitedWarning.lo libfastjet_la-TilingExtent.lo \
+	libfastjet_la-LazyTiling9.lo libfastjet_la-LazyTiling9Alt.lo \
+	libfastjet_la-LazyTiling25.lo \
+	libfastjet_la-LazyTiling9SeparateGhosts.lo \
+	libfastjet_la-RectangularGrid.lo
 libfastjet_la_OBJECTS = $(am_libfastjet_la_OBJECTS)
 libfastjet_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libfastjet_la_CXXFLAGS) \
@@ -157,7 +162,6 @@ CYGPATH_W = @CYGPATH_W@
 D0_CXXFLAGS = @D0_CXXFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -190,7 +194,6 @@ LIST_ALL_PLUGINS = @LIST_ALL_PLUGINS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -203,7 +206,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -216,7 +218,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -252,6 +253,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -284,7 +286,13 @@ libfastjet_la_SOURCES = DnnPlane.cc\
 	BasicRandom.cc JetDefinition.cc Error.cc AreaDefinition.cc\
 	RangeDefinition.cc CompositeJetStructure.cc \
 	FunctionOfPseudoJet.cc\
-	LimitedWarning.cc
+	LimitedWarning.cc\
+	TilingExtent.cc \
+	LazyTiling9.cc \
+        LazyTiling9Alt.cc \
+        LazyTiling25.cc \
+        LazyTiling9SeparateGhosts.cc \
+        RectangularGrid.cc
 
 EXTRA_DIST = makefile.static genconfig.sh
 all: all-am
@@ -387,12 +395,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-FunctionOfPseudoJet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-GhostedAreaSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-JetDefinition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-LazyTiling25.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-LazyTiling9.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-LazyTiling9Alt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-LazyTiling9SeparateGhosts.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-LimitedWarning.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-MinHeap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-PseudoJet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-PseudoJetStructureBase.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-RangeDefinition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-RectangularGrid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-Selector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-TilingExtent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfastjet_la-Voronoi.Plo@am__quote@
 
 .cc.o:
@@ -646,6 +660,48 @@ libfastjet_la-LimitedWarning.lo: LimitedWarning.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LimitedWarning.cc' object='libfastjet_la-LimitedWarning.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-LimitedWarning.lo `test -f 'LimitedWarning.cc' || echo '$(srcdir)/'`LimitedWarning.cc
+
+libfastjet_la-TilingExtent.lo: TilingExtent.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-TilingExtent.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-TilingExtent.Tpo -c -o libfastjet_la-TilingExtent.lo `test -f 'TilingExtent.cc' || echo '$(srcdir)/'`TilingExtent.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-TilingExtent.Tpo $(DEPDIR)/libfastjet_la-TilingExtent.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TilingExtent.cc' object='libfastjet_la-TilingExtent.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-TilingExtent.lo `test -f 'TilingExtent.cc' || echo '$(srcdir)/'`TilingExtent.cc
+
+libfastjet_la-LazyTiling9.lo: LazyTiling9.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-LazyTiling9.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-LazyTiling9.Tpo -c -o libfastjet_la-LazyTiling9.lo `test -f 'LazyTiling9.cc' || echo '$(srcdir)/'`LazyTiling9.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-LazyTiling9.Tpo $(DEPDIR)/libfastjet_la-LazyTiling9.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LazyTiling9.cc' object='libfastjet_la-LazyTiling9.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-LazyTiling9.lo `test -f 'LazyTiling9.cc' || echo '$(srcdir)/'`LazyTiling9.cc
+
+libfastjet_la-LazyTiling9Alt.lo: LazyTiling9Alt.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-LazyTiling9Alt.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-LazyTiling9Alt.Tpo -c -o libfastjet_la-LazyTiling9Alt.lo `test -f 'LazyTiling9Alt.cc' || echo '$(srcdir)/'`LazyTiling9Alt.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-LazyTiling9Alt.Tpo $(DEPDIR)/libfastjet_la-LazyTiling9Alt.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LazyTiling9Alt.cc' object='libfastjet_la-LazyTiling9Alt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-LazyTiling9Alt.lo `test -f 'LazyTiling9Alt.cc' || echo '$(srcdir)/'`LazyTiling9Alt.cc
+
+libfastjet_la-LazyTiling25.lo: LazyTiling25.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-LazyTiling25.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-LazyTiling25.Tpo -c -o libfastjet_la-LazyTiling25.lo `test -f 'LazyTiling25.cc' || echo '$(srcdir)/'`LazyTiling25.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-LazyTiling25.Tpo $(DEPDIR)/libfastjet_la-LazyTiling25.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LazyTiling25.cc' object='libfastjet_la-LazyTiling25.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-LazyTiling25.lo `test -f 'LazyTiling25.cc' || echo '$(srcdir)/'`LazyTiling25.cc
+
+libfastjet_la-LazyTiling9SeparateGhosts.lo: LazyTiling9SeparateGhosts.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-LazyTiling9SeparateGhosts.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-LazyTiling9SeparateGhosts.Tpo -c -o libfastjet_la-LazyTiling9SeparateGhosts.lo `test -f 'LazyTiling9SeparateGhosts.cc' || echo '$(srcdir)/'`LazyTiling9SeparateGhosts.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-LazyTiling9SeparateGhosts.Tpo $(DEPDIR)/libfastjet_la-LazyTiling9SeparateGhosts.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LazyTiling9SeparateGhosts.cc' object='libfastjet_la-LazyTiling9SeparateGhosts.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-LazyTiling9SeparateGhosts.lo `test -f 'LazyTiling9SeparateGhosts.cc' || echo '$(srcdir)/'`LazyTiling9SeparateGhosts.cc
+
+libfastjet_la-RectangularGrid.lo: RectangularGrid.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -MT libfastjet_la-RectangularGrid.lo -MD -MP -MF $(DEPDIR)/libfastjet_la-RectangularGrid.Tpo -c -o libfastjet_la-RectangularGrid.lo `test -f 'RectangularGrid.cc' || echo '$(srcdir)/'`RectangularGrid.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libfastjet_la-RectangularGrid.Tpo $(DEPDIR)/libfastjet_la-RectangularGrid.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='RectangularGrid.cc' object='libfastjet_la-RectangularGrid.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfastjet_la_CXXFLAGS) $(CXXFLAGS) -c -o libfastjet_la-RectangularGrid.lo `test -f 'RectangularGrid.cc' || echo '$(srcdir)/'`RectangularGrid.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

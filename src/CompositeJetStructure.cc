@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: CompositeJetStructure.cc 2696 2011-11-15 09:42:59Z soyez $
+//FJSTARTHEADER
+// $Id: CompositeJetStructure.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include <fastjet/CompositeJetStructure.hh>
 
@@ -44,6 +46,8 @@ using namespace std;
 CompositeJetStructure::CompositeJetStructure(const std::vector<PseudoJet> & initial_pieces, 
 					     const JetDefinition::Recombiner * recombiner)
   : _pieces(initial_pieces){
+
+#ifndef __FJCORE__
   // deal with area support (cache the area if needed)
   //--------------------------------------------------
   // check if all the pieces have area, in which case store it
@@ -67,6 +71,10 @@ CompositeJetStructure::CompositeJetStructure(const std::vector<PseudoJet> & init
   } else {
     _area_4vector_ptr = 0;
   }
+#else
+  if (recombiner){};  // ugly trick to prevent a gcc warning
+  _area_4vector_ptr = 0;
+#endif
 
 }
 
@@ -114,6 +122,7 @@ std::vector<PseudoJet> CompositeJetStructure::pieces(const PseudoJet & /*jet*/) 
 }
 
 
+#ifndef __FJCORE__
 // area-related material
 
 // check if it has a well-defined area
@@ -143,7 +152,7 @@ double CompositeJetStructure::area_error(const PseudoJet & /*reference*/) const{
 
   double a_err=0;
   for (unsigned i = 0; i < _pieces.size(); i++)
-    a_err += _pieces[i].area();
+    a_err += _pieces[i].area_error();
 
   return a_err;
 }
@@ -166,6 +175,7 @@ bool CompositeJetStructure::is_pure_ghost(const PseudoJet & /*reference*/) const
   return true;
 }
 
+#endif  // __FJCORE__
 
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh

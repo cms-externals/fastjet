@@ -1,7 +1,10 @@
-//STARTHEADER
-// $Id: PseudoJetStructureBase.hh 2670 2011-11-11 17:01:06Z salam $
+#ifndef __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
+#define __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
+
+//FJSTARTHEADER
+// $Id: PseudoJetStructureBase.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,11 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
-
-#ifndef __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
-#define __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
 
 #include "fastjet/internal/base.hh"
 
@@ -39,7 +41,9 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 class PseudoJet;
 class ClusterSequence;
+#ifndef __FJCORE__
 class ClusterSequenceAreaBase;
+#endif  // __FJCORE__
 
 /// @ingroup extra_info
 /// \class PseudoJetStructureBase
@@ -84,9 +88,11 @@ public:
   /// pointer to it; otherwise throw an error
   virtual const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   virtual const ClusterSequenceAreaBase * validated_csab() const;
+#endif
 
   //\}
 
@@ -151,6 +157,11 @@ public:
   /// just getting that list of constituents.
   ///
   /// By default, throws an Error
+  ///
+  /// Note: in a future major release of FastJet (4 or higher), 
+  /// "const double & dcut" may be replaced with "const double dcut",
+  /// requiring a modification of derived classes that overload
+  /// this function.
   virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
 
   /// return the size of exclusive_subjets(...); still n ln n with same
@@ -158,6 +169,11 @@ public:
   /// exclusive_subjets.size()
   ///
   /// By default, throws an Error
+  ///
+  /// Note: in a future major release of FastJet (4 or higher), 
+  /// "const double & dcut" may be replaced with "const double dcut",
+  /// requiring a modification of derived classes that overload
+  /// this function.
   virtual int n_exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
 
   /// return the list of subjets obtained by unclustering the supplied
@@ -202,6 +218,7 @@ public:
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   ///
@@ -229,6 +246,7 @@ public:
   /// By default, throws an Error
   virtual bool is_pure_ghost(const PseudoJet &reference) const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 };
 

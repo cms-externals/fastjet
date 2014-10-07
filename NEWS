@@ -1,5 +1,73 @@
-Release Notes for fastjet
+Release Notes for FastJet
 -------------------------
+
+================================================================
+Summary of changes from v3.0.6 -> v3.1.0: 2014-09-30
+================================================================
+* Significant speed improvements (x1.5-10) for large N (few thousand-10^5)
+* FASTJET_VERSION_NUMBER preprocessor symbol, for easy in-code version testing
+* New JetDefinition::operator(): jets = jet_def(particles);
+* Native particle-mass support in PU estimation (rho_m())
+* Subtraction can use rho_m (set_use_rho_m()) and force m>0 (set_safe_mass())
+* Addition of Winner-Takes-All recomb. schemes (WTA_pt_scheme, WTA_modp_scheme)
+* SISCone updated to v3.0.0 (addition of SISCone with progressive removal)
+* New Recluster class, serving as base for Filter
+* New RectangularGrid class, base for GridMedianEstimator & GridJetPlugin
+* Fixed long-standing issue with coincident points in NlnN strategies
+* Other small additions and changes include:
+  * Selector::sum(particles) to get 4-vector sum of particles that pass selector
+  * pruned_jet.structure_of<Pruner>() has Rcut() and zcut() functions
+  * easy copying of Recombiner info: jet_def1.set_recombiner(jet_def2)
+* Various bug-fixes, build-system tweaks (e.g. default -O2 instead of -O3)
+
+================================================================
+Summary of changes from v3.1.0-beta.1 -> v3.1.0: 2014-09-30
+================================================================
+* Addition of Winner-Takes-All recomb. schemes (WTA_pt_scheme, WTA_modp_scheme)
+* SISCone updated to v3.0.0 (addition of SISCone with progressive removal)
+* minor changes including doxygen doc fixes and elimination of gcc warnings
+
+================================================================
+Summary of changes from v3.0.6 -> v3.1.0-beta.1: 2014-08-15
+================================================================
+* Significant speed improvements (x1.5-10) for large N (few thousand-10^5)
+* FASTJET_VERSION_NUMBER preprocessor symbol, for easy in-code version testing
+* New JetDefinition::operator(): jets = jet_def(particles);
+* Native particle-mass support in PU estimation (rho_m())
+* Subtraction can use rho_m (set_use_rho_m()) and force m>0 (set_safe_mass())
+* New Recluster class, serving as base for Filter
+* New RectangularGrid class, base for GridMedianEstimator & GridJetPlugin
+* Fixed long-standing issue with coincident points in NlnN strategies
+* Other small additions and changes include:
+  * Selector::sum(particles) to get 4-vector sum of particles that pass selector
+  * pruned_jet.structure_of<Pruner>() has Rcut() and zcut() functions
+  * easy copying of Recombiner info: jet_def1.set_recombiner(jet_def2)
+* Various bug-fixes, build-system tweaks (e.g. default -O2 instead of -O3)
+
+================================================================
+Summary of changes from v3.0.5 -> v3.0.6: 2013-10-29
+================================================================
+This is a minor maintenance release. Main changes:
+* fixed compilation issues for two plugins under OS X 10.9 (Mavericks)
+* fixed incorrect warnings in JHTopTagger, MassDropTagger and an example
+* GridJetPlugin now has extra enquiry functions
+
+================================================================
+Summary of changes from v3.0.4 -> v3.0.5: 2013-09-16
+================================================================
+This is a minor maintenance release. Main changes:
+* modified include guards, to solve coexistence issue for fjcore
+* resolved (bogus) compiler warning about uninitialised variables
+* added an example event file that was missing from the distribution
+
+================================================================
+Summary of changes from v3.0.3 -> v3.0.4: 2013-06-05
+================================================================
+
+This is a minor maintenance release. Changes include:
+* dummy init of PseudoJet rapidity to avoid warnings with some configs.
+* minor code structure adjustments to allow for release of fjcore
+* inclusion of SISCone 2.0.6
 
 ================================================================
 Summary of changes from v3.0.2 -> v3.0.3: 26/06/12

@@ -10,6 +10,10 @@
 
 // History of changes compared to the original JetCluAlgorithm.cc file
 // 
+// 2014-08-13 Matteo Cacciari and Gavin Salam
+//        * commented out towers variable in JetCluAlgorithm::buildPreClusters
+//          interface to avoid compiler warning
+//
 // 2011-11-14  Gregory Soyez  <soyez@fastjet.fr>
 //
 //        * added a few parentheses suggested by the -Wparentheses gcc option
@@ -27,6 +31,7 @@
 #include "Centroid.hh"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 #include <fastjet/internal/base.hh>
 
@@ -53,7 +58,9 @@ void JetCluAlgorithm::makeSeedTowers(std::vector<PhysicsTower>& towers, std::vec
   sort(seedTowers.begin(),seedTowers.end(),ClusterCentroidEtGreater());
 }
 
-void JetCluAlgorithm::buildPreClusters(std::vector<Cluster>& seedTowers, std::vector<PhysicsTower>& towers,
+// MC+GPS 2014-08-13, commented out the towers variable to avoid an
+// unused variable warning
+void JetCluAlgorithm::buildPreClusters(std::vector<Cluster>& seedTowers, std::vector<PhysicsTower>& /*towers*/,
 				       std::vector<Cluster>& preClusters)
 {
   std::vector<Centroid> leadingSeedTowers;
@@ -78,8 +85,8 @@ void JetCluAlgorithm::buildPreClusters(std::vector<Cluster>& seedTowers, std::ve
 	  int iPhiPreClusterTower = preClusterTowerIter->iPhi();
 	  if ((iEtaPreClusterTower >= 8 && iEtaPreClusterTower < 14) || (iEtaPreClusterTower >= 38 && iEtaPreClusterTower < 44))
 	    iPhiPreClusterTower = iPhiPreClusterTower/2;
-	  int dIEta = abs(iEtaSeedTower - iEtaPreClusterTower);
-	  int dIPhi = abs(iPhiSeedTower - iPhiPreClusterTower);
+	  int dIEta = std::abs(iEtaSeedTower - iEtaPreClusterTower);
+	  int dIPhi = std::abs(iPhiSeedTower - iPhiPreClusterTower);
 	  if(dIPhi > 12)
 	    dIPhi = 24 - dIPhi;
 	  int adj = dIPhi*dIPhi + dIEta*dIEta;

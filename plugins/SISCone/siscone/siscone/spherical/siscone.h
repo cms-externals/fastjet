@@ -23,8 +23,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 325                                                          $//
-// $Date:: 2011-11-25 12:41:17 +0100 (Fri, 25 Nov 2011)                     $//
+// $Revision:: 369                                                          $//
+// $Date:: 2014-09-04 16:57:55 +0200 (Thu, 04 Sep 2014)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPH_SISCONE_H__
@@ -78,6 +78,24 @@ class CSphsiscone : public CSphstable_cones, public CSphsplit_merge{
 		   Esplit_merge_scale _split_merge_scale=SM_Etilde);
 
   /**
+   * compute the jets from a given particle set.
+   * We are doing multiple passes such pass n_pass looks for jets among 
+   * all particles not put into jets during previous passes.
+   * By default the number of passes is infinite (0). 
+   * \param _particles   list of particles
+   * \param _radius      cone radius
+   * \param _n_pass_max  maximum number of passes (0=full search)
+   * \param _Emin        minimum energy of the protojets
+   * \param _ordering_scale    the ordering scale to decide which stable
+   *                           cone is removed
+   *
+   * \return the number of jets found.
+   */
+  int compute_jets_progressive_removal(std::vector<CSphmomentum> &_particles, double _radius, 
+				       int _n_pass_max=0, double _Emin=0.0,
+				       Esplit_merge_scale _ordering_scale=SM_Etilde);
+
+  /**
    * recompute the jets with a different overlap parameter.
    * we use the same particles and R as in the preceeding call.
    * \param _f           shared energy threshold for splitting&merging
@@ -124,6 +142,10 @@ class CSphsiscone : public CSphstable_cones, public CSphsplit_merge{
  private:
   bool rerun_allowed;         ///< is recompute_jets allowed ?
   static std::ostream * _banner_ostr; ///< stream to use for banners
+
+  /// ensure things are initialised
+  void _initialise_if_needed();
+
 };
 
   

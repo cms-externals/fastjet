@@ -3,7 +3,7 @@
 include ../../makefile.static
 
 
-CXXSRC = SISConePlugin.cc SISConeSphericalPlugin.cc
+CXXSRC = SISConeBasePlugin.cc SISConePlugin.cc SISConeSphericalPlugin.cc
 OBJS = $(patsubst %.cc,%.o,$(CXXSRC)) 
 
 MAKESUBDIR = siscone_config siscone_src
