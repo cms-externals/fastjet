@@ -114,6 +114,8 @@ public:
 #endif
 
   };
+
+
 private:
   typedef std::pair<std::string, atomic_counter > Summary;
   const int _max_warn;
