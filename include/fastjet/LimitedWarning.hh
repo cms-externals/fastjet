@@ -62,11 +62,7 @@ public:
 
   /// outputs a warning to standard error (or the user's default
   /// warning stream if set)
-  void warn(const char * warning) {warn(warning, _default_ostr);}
-
-  /// outputs a warning to standard error (or the user's default
-  /// warning stream if set)
-  void warn(const std::string & warning) {warn(warning.c_str(), _default_ostr);}
+  void warn(const std::string & warning);
 
   /// outputs a warning to the specified stream
   void warn(const char * warning, std::ostream * ostr);
@@ -98,14 +94,6 @@ public:
   /// with this instance of the class.
   int n_warn_so_far() const {return _n_warn_so_far;}
 
-  /// the maximum number of warning messages that will be printed
-  /// by this instance of the class
-  int max_warn() const {return _max_warn;}
-
-  /// the number of times so far that a warning has been registered
-  /// with this instance of the class.
-  int n_warn_so_far() const {return _n_warn_so_far;}
-
   /// returns a summary of all the warnings that came through the
   /// LimiteWarning class
   static std::string summary();
@@ -126,6 +114,8 @@ public:
 #endif
 
   };
+
+
 private:
   typedef std::pair<std::string, atomic_counter > Summary;
   const int _max_warn;
