@@ -29,7 +29,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//FJENDHEADER
 
 #include "fastjet/internal/base.hh"     // namespace macros (include explicitly to help Doxygen)
 #include "fastjet/D0RunIBaseConePlugin.hh"
@@ -88,7 +87,12 @@ public:
   virtual void run_clustering(ClusterSequence &) const;
 
 private:
-  static bool _first_time;
+  // CMS change: _first_time is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

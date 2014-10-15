@@ -35,15 +35,30 @@
 #include "fastjet/ClusterSequenceAreaBase.hh"
 #include <algorithm>
 
+
+
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE
 
 using namespace std;
 
-
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 /// allow for warnings
-LimitedWarning ClusterSequenceAreaBase::_warnings;
-LimitedWarning ClusterSequenceAreaBase::_warnings_zero_area;
-LimitedWarning ClusterSequenceAreaBase::_warnings_empty_area;
+#if __cplusplus >= 201103L
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings;
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_zero_area;
+static std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_empty_area{0};
+#else
+static LimitedWarning _warnings;
+static LimitedWarning _warnings_zero_area;
+static LimitedWarning _warnings_empty_area = 0;
+#endif
 
 //----------------------------------------------------------------------
 /// return the total area, within the selector's range, that is free

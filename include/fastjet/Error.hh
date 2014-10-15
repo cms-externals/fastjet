@@ -62,9 +62,14 @@ public:
   /// the error message
   std::string message() const {return _message;}
 
+
+  // CMS change: the following three static functions 
+  //  are no longer defined in the header.
+  // Change not endorsed by fastjet collaboration 
+
   /// controls whether the error message (and the backtrace, if its printing is enabled) 
   /// is printed out or not
-  static void set_print_errors(bool print_errors) {_print_errors = print_errors;}
+  static void set_print_errors(bool print_errors);// {_print_errors = print_errors;}
 
   /// controls whether the backtrace is printed out with the error message or not.
   /// The default is "false".
@@ -72,9 +77,9 @@ public:
 
   /// sets the default output stream for all errors; by default
   /// cerr; if it's null then error output is suppressed.
-  static void set_default_stream(std::ostream * ostr) {
-    _default_ostr = ostr;
-  }
+  static void set_default_stream(std::ostream * ostr);// {
+  //  _default_ostr = ostr;
+  //}
 
 private:
 
@@ -86,12 +91,17 @@ private:
 #endif
 
   std::string _message;                ///< error message
-  static bool _print_errors;           ///< do we print anything?
-  static bool _print_backtrace;        ///< do we print the backtrace?
-  static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  static LimitedWarning _execinfo_undefined;
-#endif
+  // CMS change: the following are no longer class statics
+  //  moved to file static since they were changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool _print_errors;           ///< do we print anything?
+  //static bool _print_backtrace;        ///< do we print the backtrace?
+  //static std::ostream* _default_ostr; ///< the output stream (cerr if not set)
+  // ADDED to commented-out portion 2-Oct-2014 (SRR) :
+  // static LimitedWarning _execinfo_undefined;
+
 };
 
 

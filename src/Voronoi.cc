@@ -113,11 +113,21 @@
 #include <stdio.h>
 #include "fastjet/internal/Voronoi.hh"
 
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
+
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy;
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+  static std::atomic<LimitedWarning> VoronoiDiagramGenerator::_warning_degeneracy{0};
+#else
+  static LimitedWarning _warning_degeneracy=0;
+#endif
 
 VoronoiDiagramGenerator::VoronoiDiagramGenerator(){
   siteidx = 0;
