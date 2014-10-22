@@ -29,7 +29,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-
 //FJENDHEADER
 
 #include "fastjet/internal/base.hh"     // namespace macros (include explicitly to help Doxygen)

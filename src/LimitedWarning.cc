@@ -53,8 +53,6 @@ int _max_warn_default =5;
 #endif
 std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
 
-
-
   
 /// constructor that provides a default maximum number of warnings
 LimitedWarning::LimitedWarning() : _max_warn(_max_warn_default), _n_warn_so_far(0), _this_warning_summary(0) {}

@@ -129,7 +129,6 @@ FASTJET_BEGIN_NAMESPACE
   static LimitedWarning _warning_degeneracy=0;
 #endif
 
-
 VoronoiDiagramGenerator::VoronoiDiagramGenerator(){
   siteidx = 0;
   sites = NULL;

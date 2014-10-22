@@ -178,6 +178,26 @@ static LimitedWarning _exclusive_warnings;
 static LimitedWarning _changed_strategy_warning;
 #endif
 
+
+// these needs to be defined outside the class definition.
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+//     EDITED 2-Oct-2014 (SRR)
+//     - Added _changed_strategy_warning
+//     - Moved higher in the cc file
+//     - _n_exclusive_warnings no longer used
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+//static std::atomic<int> _n_exclusive_warnings{0};
+static std::atomic<LimitedWarning> _exclusive_warnings;
+static std::atomic<LimitedWarning> _changed_strategy_warning;
+#else
+static bool _first_time =true;
+//static int _n_exclusive_warnings =0;
+static LimitedWarning _exclusive_warnings;
+static LimitedWarning _changed_strategy_warning;
+#endif
+
 // destructor that guarantees proper bookkeeping for the CS Structure
 ClusterSequence::~ClusterSequence () {
   // set the pointer in the wrapper to this object to NULL to say that
@@ -435,9 +455,6 @@ void ClusterSequence::_initialise_and_run_no_decant () {
   }
 
 }
-
-
-
 
 //----------------------------------------------------------------------
 // the version string
