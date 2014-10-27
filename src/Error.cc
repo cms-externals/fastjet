@@ -160,7 +160,11 @@ Error::Error(const std::string & message_in) {
     *_default_ostr << oss.str();
     // get something written to file even 
     // if the program aborts
-    _default_ostr->flush(); 
+#if __cplusplus >= 201103L
+    _default_ostr.load()->flush();
+#else 
+    _default_ostr->flush();
+#endif
 
     // // output error message either to cerr or to the user-set stream
     // if (ostr) { *ostr << oss.str();

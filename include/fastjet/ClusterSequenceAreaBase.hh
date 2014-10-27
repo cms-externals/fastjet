@@ -297,16 +297,19 @@ protected:
 
 
 private:
-  // CMS change: _warnings are no longer a class static
-  //  moved to file static since they were changed to std::atomic
-  //  and we still need to allow this header to be parsed by
-  //  non C++11 compilers.
+  // CMS change: _warnings are now inside std::atomics
   // Change not endorsed by fastjet collaboration 
   //    (Performed 2-Oct-2014 by SRR)
   /// handle warning messages
-  // static LimitedWarning _warnings;
-  // static LimitedWarning _warnings_zero_area;
-  // static LimitedWarning _warnings_empty_area;
+#if __cplusplus >= 201103L
+  static std::atomic<LimitedWarning> _warnings;
+  static std::atomic<LimitedWarning> _warnings_zero_area;
+  static std::atomic<LimitedWarning> _warnings_empty_area;
+#else
+  static LimitedWarning _warnings;
+  static LimitedWarning _warnings_zero_area;
+  static LimitedWarning _warnings_empty_area;
+#endif
 
   /// check the jet algorithm is suitable (and if not issue a warning)
   void _check_jet_alg_good_for_median() const;

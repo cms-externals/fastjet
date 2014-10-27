@@ -49,12 +49,22 @@ FASTJET_BEGIN_NAMESPACE
 /// been issued.
 class LimitedWarning {
 public:
-  
+
   /// constructor that provides a default maximum number of warnings
+#if __cplusplus >= 201103L
+  LimitedWarning() noexcept;
+#else 
   LimitedWarning();
+#endif 
 
   /// constructor that provides a user-set max number of warnings
   LimitedWarning(int max_warn_in);
+
+
+#if __cplusplus >= 201103L
+  LimitedWarning( LimitedWarning const & rval );
+  LimitedWarning( LimitedWarning && rval );
+#endif
 
   /// outputs a warning to standard error (or the user's default
   /// warning stream if set)
@@ -128,8 +138,8 @@ private:
   std::atomic<Summary*> _this_warning_summary;
 #else
   int _n_warn_so_far;
-  //int _max_warn_default;
-  //std::ostream* _default_ostr;
+  static int _max_warn_default;
+  static std::ostream* _default_ostr;
   Summary* _this_warning_summary;
 #endif
   static std::list< Summary > _global_warnings_summary;

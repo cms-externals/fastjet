@@ -169,13 +169,13 @@ static std::ostream* _fastjet_banner_ostr = 0;
 #if __cplusplus >= 201103L
 static std::atomic<bool> _first_time{true};
 //static std::atomic<int> _n_exclusive_warnings{0};
-static std::atomic<LimitedWarning> _exclusive_warnings;
-static std::atomic<LimitedWarning> _changed_strategy_warning;
+static std::atomic<fastjet::LimitedWarning> _exclusive_warnings;
+static std::atomic<fastjet::LimitedWarning> _changed_strategy_warning;
 #else
 static bool _first_time =true;
 //static int _n_exclusive_warnings =0;
-static LimitedWarning _exclusive_warnings;
-static LimitedWarning _changed_strategy_warning;
+static fastjet::LimitedWarning _exclusive_warnings;
+static fastjet::LimitedWarning _changed_strategy_warning;
 #endif
 
 
@@ -362,7 +362,11 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 	  << " automatically changed to " << strategy_string()
 	  << " because the former is not supported for R = " << _Rparam
 	  << " >= 2pi";
+#if __cplusplus >= 201103L
+      _changed_strategy_warning.load().warn(oss.str());
+#else
       _changed_strategy_warning.warn(oss.str());
+#endif
     }
   }
 
@@ -1006,7 +1010,11 @@ vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int njets) const 
        (_jet_def.extra_param() <0)) &&
       ((_jet_def.jet_algorithm() != plugin_algorithm) ||
        (!_jet_def.plugin()->exclusive_sequence_meaningful()))) {
+#if __cplusplus >= 201103L
+    _exclusive_warnings.load().warn("dcut and exclusive jets for jet-finders other than kt, C/A or genkt with p>=0 should be interpreted with care.");
+#else
     _exclusive_warnings.warn("dcut and exclusive jets for jet-finders other than kt, C/A or genkt with p>=0 should be interpreted with care.");
+#endif
   }
 
 

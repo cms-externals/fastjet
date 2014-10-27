@@ -48,19 +48,27 @@ std::atomic<ostream*> LimitedWarning::_default_ostr{&cerr};
 std::atomic<int> LimitedWarning::_max_warn_default{5};
 static std::mutex _global_warnings_summary_mutex;
 #else
-ostream* _default_ostr =&cerr;
-int _max_warn_default =5;
+ostream* LimitedWarning::_default_ostr =&cerr;
+int LimitedWarning::_max_warn_default =5;
 #endif
 std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
 
   
 /// constructor that provides a default maximum number of warnings
-LimitedWarning::LimitedWarning() : _max_warn(_max_warn_default), _n_warn_so_far(0), _this_warning_summary(0) {}
+#if __cplusplus >= 201103L
+LimitedWarning::LimitedWarning() noexcept : _max_warn(_max_warn_default), _n_warn_so_far(0), _this_warning_summary(0) {}
+#else 
+LimitedWarning::LimitedWarning()  : _max_warn(_max_warn_default), _n_warn_so_far(0), _this_warning_summary(0) {}
+#endif
 
 /// constructor that provides a user-set max number of warnings
 LimitedWarning::LimitedWarning(int max_warn_in) : _max_warn(max_warn_in), _n_warn_so_far(0), _this_warning_summary(0) {}
 
-
+#if __cplusplus >= 201103L
+/// constructor that provides a default maximum number of warnings
+LimitedWarning::LimitedWarning( LimitedWarning const & rval ) : _max_warn(rval._max_warn), _n_warn_so_far(rval._n_warn_so_far.load()), _this_warning_summary(rval._this_warning_summary.load()) {}
+LimitedWarning::LimitedWarning( LimitedWarning && rval ) : _max_warn(rval._max_warn), _n_warn_so_far(rval._n_warn_so_far.load()), _this_warning_summary(rval._this_warning_summary.load()) {}
+#endif
 
 /// output a warning to default_ostr
 void LimitedWarning::warn(const std::string & warning) {

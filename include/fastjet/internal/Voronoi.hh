@@ -385,8 +385,11 @@ private:
   //  and we still need to allow this header to be parsed by
   //  non C++11 compilers.
   // Change not endorsed by fastjet collaboration 
-  // ADDED to commented-out portion 2-Oct-2014 (SRR) :
-  // static LimitedWarning _warning_degeneracy;
+#if __cplusplus >= 201103L
+  static std::atomic<LimitedWarning> _warning_degeneracy;
+#else
+  static LimitedWarning _warning_degeneracy;
+#endif
 };
 
 int scomp(const void *p1,const void *p2);
