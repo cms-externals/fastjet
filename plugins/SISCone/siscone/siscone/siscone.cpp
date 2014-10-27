@@ -250,7 +250,6 @@ void Csiscone::_initialise_if_needed(){
 
   // do not do this again
   init_done=true;
-  return;
 
   // print the banner
   if (_banner_ostr != 0){

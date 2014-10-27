@@ -48,6 +48,12 @@
 #include<string>
 #include<set>
 
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //----------------------------------------------------------------------
@@ -135,6 +141,8 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 
 
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 // The following variable can be modified from within user code
 // so as to redirect banners to an ostream other than cout.
 //
@@ -144,7 +152,31 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = 0;
+
+#if __cplusplus >= 201103L
+static std::atomic<std::ostream*> _fastjet_banner_ostr{nullptr};
+#else
+static std::ostream* _fastjet_banner_ostr = 0;
+#endif
+
+// these needs to be defined outside the class definition.
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+//     EDITED 2-Oct-2014 (SRR)
+//     - Added _changed_strategy_warning
+//     - Moved higher in the cc file
+//     - _n_exclusive_warnings no longer used
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+//static std::atomic<int> _n_exclusive_warnings{0};
+static std::atomic<fastjet::LimitedWarning> _exclusive_warnings;
+static std::atomic<fastjet::LimitedWarning> _changed_strategy_warning;
+#else
+static bool _first_time =true;
+//static int _n_exclusive_warnings =0;
+static fastjet::LimitedWarning _exclusive_warnings;
+static fastjet::LimitedWarning _changed_strategy_warning;
+#endif
 
 
 // destructor that guarantees proper bookkeeping for the CS Structure
@@ -330,7 +362,11 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 	  << " automatically changed to " << strategy_string()
 	  << " because the former is not supported for R = " << _Rparam
 	  << " >= 2pi";
+#if __cplusplus >= 201103L
+      _changed_strategy_warning.load().warn(oss.str());
+#else
       _changed_strategy_warning.warn(oss.str());
+#endif
     }
   }
 
@@ -405,25 +441,28 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 }
 
-
-// these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
-LimitedWarning ClusterSequence::_exclusive_warnings;
-
-
 //----------------------------------------------------------------------
 // the version string
 string fastjet_version_string() {
   return "FastJet version "+string(fastjet_version);
 }
 
+//CMS change: function definition no longer in header
+//   Change not endorsed by fastjet collaboration
+void ClusterSequence::set_fastjet_banner_stream(std::ostream * ostr) {_fastjet_banner_ostr = ostr;}
+std::ostream * ClusterSequence::fastjet_banner_stream() {return _fastjet_banner_ostr;}
 
 //----------------------------------------------------------------------
 // prints a banner on the first call
 void ClusterSequence::print_banner() {
 
-  if (!_first_time) {return;}
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if (! _first_time) return;
   _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   ostream * ostr = _fastjet_banner_ostr;
@@ -971,7 +1010,11 @@ vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int njets) const 
        (_jet_def.extra_param() <0)) &&
       ((_jet_def.jet_algorithm() != plugin_algorithm) ||
        (!_jet_def.plugin()->exclusive_sequence_meaningful()))) {
+#if __cplusplus >= 201103L
+    _exclusive_warnings.load().warn("dcut and exclusive jets for jet-finders other than kt, C/A or genkt with p>=0 should be interpreted with care.");
+#else
     _exclusive_warnings.warn("dcut and exclusive jets for jet-finders other than kt, C/A or genkt with p>=0 should be interpreted with care.");
+#endif
   }
 
 
@@ -1670,11 +1713,6 @@ void ClusterSequence::_do_iB_recombination_step(
 		       Invalid, diB);
 
 }
-
-
-// make sure the static member _changed_strategy_warning is defined. 
-LimitedWarning ClusterSequence::_changed_strategy_warning;
-
 
 //----------------------------------------------------------------------
 void ClusterSequence::_set_structure_shared_ptr(PseudoJet & j) {

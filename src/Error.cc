@@ -31,6 +31,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/config.h"
 #include <sstream>
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
 
 #ifndef __FJCORE__
 // printing the stack would need execinfo
@@ -48,12 +51,27 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
-bool Error::_print_errors = true;
-bool Error::_print_backtrace = false;
-ostream * Error::_default_ostr = & cerr;
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _print_errors{true};
+static std::atomic<bool> _print_backtrace{false};
+static std::atomic<ostream*> _default_ostr{& cerr};
 #if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  LimitedWarning Error::_execinfo_undefined;
+  static std::atomic<LimitedWarning> _execinfo_undefined;
 #endif
+#else
+static bool _print_errors = true;
+static bool _print_backtrace = false;
+static ostream* _default_ostr =& cerr;
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
+  LimitedWarning _execinfo_undefined;
+#endif
+#endif
+
+
+
+
 
 //----------------------------------------------------------------------
 #ifndef __FJCORE__ 
@@ -107,12 +125,11 @@ string Error::_demangle(const char* symbol) {
 #endif  // FASTJET_HAVE_DEMANGLING_SUPPORT && FASTJET_HAVE_EXECINFO_H
 #endif  // __FJCORE__
 
-
 //----------------------------------------------------------------------
 Error::Error(const std::string & message_in) {
   _message = message_in; 
-
   if (_print_errors && _default_ostr){
+
     ostringstream oss;
     oss << "fastjet::Error:  "<< message_in << endl;
 
@@ -143,26 +160,37 @@ Error::Error(const std::string & message_in) {
     *_default_ostr << oss.str();
     // get something written to file even 
     // if the program aborts
-    _default_ostr->flush(); 
+#if __cplusplus >= 201103L
+    _default_ostr.load()->flush();
+#else 
+    _default_ostr->flush();
+#endif
 
     // // output error message either to cerr or to the user-set stream
-    // if (_default_ostr) { *_default_ostr << oss.str();
+    // if (ostr) { *ostr << oss.str();
     //                       // get something written to file even 
     // 			  // if the program aborts
-    //                       _default_ostr->flush(); }
+    //                       ostr->flush(); }
     // else               { std::cerr << oss.str(); }
     
   }
 }
 
-//----------------------------------------------------------------------
+
+void Error::set_print_errors(bool print_errors) {_print_errors = print_errors;}
+
 void Error::set_print_backtrace(bool enabled) {
 #if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
   if (enabled) {
     _execinfo_undefined.warn("Error::set_print_backtrace(true) will not work with this build of FastJet");
   }
-#endif    
+#endif
   _print_backtrace = enabled;
+
+}
+
+void Error::set_default_stream(std::ostream * ostr) {
+    _default_ostr = ostr;
 }
 
 FASTJET_END_NAMESPACE
