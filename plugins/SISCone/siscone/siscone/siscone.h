@@ -116,8 +116,13 @@ class Csiscone : public Cstable_cones, public Csplit_merge{
   /// list of protocones found pass-by-pass (not filled by compute_jets_progressive_removal)
   std::vector<std::vector<Cmomentum> > protocones_list;
 
+  // CMS change: init_done is no longer a class static
+  //  moved to file static since it was changed to thread_local
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
   // random number initialisation
-  static bool init_done;      ///< check random generator initialisation
+  //static bool init_done;      ///< check random generator initialisation
 
 #ifdef DEBUG_STABLE_CONES
   int nb_hash_cones_total, nb_hash_occupied_total;

@@ -65,7 +65,14 @@ Csiscone::~Csiscone(){
   rerun_allowed = false;
 }
 
-bool Csiscone::init_done=false;
+
+//CMS change: separate generators for each thread.
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static thread_local bool init_done=false;
+#else
+static bool init_done=false;
+#endif
 std::ostream* Csiscone::_banner_ostr = 0;
 
 /*
@@ -243,32 +250,31 @@ int Csiscone::recompute_jets(double _f, double _ptmin,
 // ensure things are initialised
 void Csiscone::_initialise_if_needed(){
   // initialise random number generator
-  if (init_done) return;
+  if (!init_done){
+    // initialise random number generator
+    ranlux_init();
 
-  // initialise random number generator
-  ranlux_init();
+    // do not do this again
+    init_done=true;
 
-  // do not do this again
-  init_done=true;
-  return;
-
-  // print the banner
-  if (_banner_ostr != 0){
-    (*_banner_ostr) << "#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo" << endl;
-    (*_banner_ostr) << "#                    SISCone   version " << setw(28) << left << siscone_version() << "o" << endl;
-    (*_banner_ostr) << "#              http://projects.hepforge.org/siscone                o" << endl;
-    (*_banner_ostr) << "#                                                                  o" << endl;
-    (*_banner_ostr) << "# This is SISCone: the Seedless Infrared Safe Cone Jet Algorithm   o" << endl;
-    (*_banner_ostr) << "# SISCone was written by Gavin Salam and Gregory Soyez             o" << endl;
-    (*_banner_ostr) << "# It is released under the terms of the GNU General Public License o" << endl;
-    (*_banner_ostr) << "#                                                                  o" << endl;
-    (*_banner_ostr) << "# A description of the algorithm is available in the publication   o" << endl;
-    (*_banner_ostr) << "# JHEP 05 (2007) 086 [arXiv:0704.0292 (hep-ph)].                   o" << endl;
-    (*_banner_ostr) << "# Please cite it if you use SISCone.                               o" << endl;
-    (*_banner_ostr) << "#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo" << endl;
-    (*_banner_ostr) << endl;
-
-    _banner_ostr->flush();
+    // print the banner
+    if (_banner_ostr != 0){
+//      (*_banner_ostr) << "#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo" << endl;
+//      (*_banner_ostr) << "#                    SISCone   version " << setw(28) << left << siscone_version() << "o" << endl;
+//      (*_banner_ostr) << "#              http://projects.hepforge.org/siscone                o" << endl;
+//      (*_banner_ostr) << "#                                                                  o" << endl;
+//      (*_banner_ostr) << "# This is SISCone: the Seedless Infrared Safe Cone Jet Algorithm   o" << endl;
+//      (*_banner_ostr) << "# SISCone was written by Gavin Salam and Gregory Soyez             o" << endl;
+//      (*_banner_ostr) << "# It is released under the terms of the GNU General Public License o" << endl;
+//      (*_banner_ostr) << "#                                                                  o" << endl;
+//      (*_banner_ostr) << "# A description of the algorithm is available in the publication   o" << endl;
+//      (*_banner_ostr) << "# JHEP 05 (2007) 086 [arXiv:0704.0292 (hep-ph)].                   o" << endl;
+//      (*_banner_ostr) << "# Please cite it if you use SISCone.                               o" << endl;
+//      (*_banner_ostr) << "#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo" << endl;
+//      (*_banner_ostr) << endl;
+//
+//      _banner_ostr->flush();
+    }
   }
 }
 

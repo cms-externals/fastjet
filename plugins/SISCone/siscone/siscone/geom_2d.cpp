@@ -44,8 +44,15 @@ using namespace std;
 
 // static member default init
 //----------------------------
-double Ceta_phi_range::eta_min = -100.0;
-double Ceta_phi_range::eta_max = 100.0;
+//CMS change: separate eta range per thread
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static thread_local double g_eta_min = -100.0;
+static thread_local double g_eta_max = 100.0;
+#else
+static double g_eta_min = -100.0;
+static double g_eta_max = 100.0;
+#endif
 
 // default ctor
 //--------------
@@ -63,8 +70,8 @@ Ceta_phi_range::Ceta_phi_range(){
 Ceta_phi_range::Ceta_phi_range(double c_eta, double c_phi, double R){
   // determination of the eta range
   //-------------------------------
-  double xmin = max(c_eta-R,eta_min+0.0001);
-  double xmax = min(c_eta+R,eta_max-0.0001);
+  double xmin = max(c_eta-R,g_eta_min+0.0001);
+  double xmax = min(c_eta+R,g_eta_max-0.0001);
 
   unsigned int cell_min = get_eta_cell(xmin);
   unsigned int cell_max = get_eta_cell(xmax);
@@ -118,6 +125,19 @@ int Ceta_phi_range::add_particle(const double eta, const double phi){
   return 0;
 }
 
+// CMS change: function no longer defined in header
+// Change not endorsed by fastjet collaboration 
+inline unsigned int Ceta_phi_range::get_eta_cell(double eta){
+  return (unsigned int) (1 << ((int) (32*((eta-g_eta_min)/(g_eta_max-g_eta_min)))));
+}
+
+double& Ceta_phi_range::eta_min() {
+  return g_eta_min;
+}
+
+double& Ceta_phi_range::eta_max() {
+  return g_eta_max;
+}
 
 // test overlap
 //  - r1  first range

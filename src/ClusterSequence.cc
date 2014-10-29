@@ -48,6 +48,12 @@
 #include<string>
 #include<set>
 
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //----------------------------------------------------------------------
@@ -135,6 +141,8 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 
 
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 // The following variable can be modified from within user code
 // so as to redirect banners to an ostream other than cout.
 //
@@ -144,7 +152,12 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = 0;
+
+#if __cplusplus >= 201103L
+static std::atomic<std::ostream*> _fastjet_banner_ostr{nullptr};
+#else
+static std::ostream* _fastjet_banner_ostr = 0;
+#endif
 
 
 // destructor that guarantees proper bookkeeping for the CS Structure
@@ -407,8 +420,16 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 
 // these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
-LimitedWarning ClusterSequence::_exclusive_warnings;
+
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+static std::atomic<int> _n_exclusive_warnings{0};
+#else
+static bool _first_time =true;
+static int _n_exclusive_warnings =0;
+#endif
 
 
 //----------------------------------------------------------------------
@@ -417,13 +438,22 @@ string fastjet_version_string() {
   return "FastJet version "+string(fastjet_version);
 }
 
+//CMS change: function definition no longer in header
+//   Change not endorsed by fastjet collaboration
+void ClusterSequence::set_fastjet_banner_stream(std::ostream * ostr) {_fastjet_banner_ostr = ostr;}
+std::ostream * ClusterSequence::fastjet_banner_stream() {return _fastjet_banner_ostr;}
 
 //----------------------------------------------------------------------
 // prints a banner on the first call
 void ClusterSequence::print_banner() {
 
-  if (!_first_time) {return;}
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
+  if (! _first_time) return;
   _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   ostream * ostr = _fastjet_banner_ostr;
