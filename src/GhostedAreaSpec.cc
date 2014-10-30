@@ -32,6 +32,9 @@
 #include "fastjet/Error.hh"
 #include<iostream>
 #include<sstream>
+#if __cplusplus >= 201103L
+#include <thread>
+#endif
 
 using namespace std;
 
