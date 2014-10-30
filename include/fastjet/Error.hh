@@ -92,14 +92,6 @@ private:
 #endif
 
   std::string _message;                ///< error message
-<<<<<<< HEAD
-  static bool _print_errors;           ///< do we print anything?
-  static bool _print_backtrace;        ///< do we print the backtrace?
-  static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  static LimitedWarning _execinfo_undefined;
-#endif
-=======
 
   // CMS change: the following are no longer class statics
   //  moved to file static since they were changed to std::atomic
@@ -109,7 +101,6 @@ private:
   //static bool _print_errors;           ///< do we print anything?
   //static bool _print_backtrace;        ///< do we print the backtrace?
   //static std::ostream* _default_ostr; ///< the output stream (cerr if not set)
->>>>>>> remotes/origin/cms/v3.0.3
 };
 
 
