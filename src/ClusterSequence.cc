@@ -430,6 +430,8 @@ static std::atomic<int> _n_exclusive_warnings{0};
 static bool _first_time =true;
 static int _n_exclusive_warnings =0;
 #endif
+LimitedWarning ClusterSequence::_exclusive_warnings(0);
+LimitedWarning ClusterSequence::_changed_strategy_warning(0);
 
 
 //----------------------------------------------------------------------
@@ -1700,10 +1702,6 @@ void ClusterSequence::_do_iB_recombination_step(
 		       Invalid, diB);
 
 }
-
-
-// make sure the static member _changed_strategy_warning is defined. 
-LimitedWarning ClusterSequence::_changed_strategy_warning;
 
 
 //----------------------------------------------------------------------
