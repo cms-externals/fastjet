@@ -31,11 +31,24 @@
 #include "fastjet/internal/LazyTiling9SeparateGhosts.hh"
 #include "fastjet/internal/TilingExtent.hh"
 #include <iomanip>
+
+
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
+
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
-double LazyTiling9SeparateGhosts::ghost_pt2_threshold = 1e-100; 
+#if __cplusplus >= 201103L
+std::atomic<double> ghost_pt2_threshold(1e-100); 
+#else
+double ghost_pt2_threshold = 1e-100;
+#endif
+
+
 
 LazyTiling9SeparateGhosts::LazyTiling9SeparateGhosts(ClusterSequence & cs) :
   _cs(cs), _jets(cs.jets())
