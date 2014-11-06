@@ -44,10 +44,8 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 #if __cplusplus >= 201103L
 std::atomic<double> ghost_pt2_threshold(1e-100);
-static std::atomic<std::ostream*> _safe_cout{& std::cout};
 #else
 double ghost_pt2_threshold = 1e-100;
-static std::ostream* _safe_cout =& std::cout;
 #endif
 
 
@@ -248,18 +246,18 @@ void LazyTiling9SeparateGhosts::_bj_remove_from_tiles(TiledJet3 * const jet) {
 //----------------------------------------------------------------------
 /// output the contents of the tiles
 void LazyTiling9SeparateGhosts::_print_tiles(TiledJet3 * briefjets ) const {
-  for (vector<Tile3>::const_iterator tile = _tiles.begin(); 
-       tile < _tiles.end(); tile++) {
-    (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
-    vector<int> list;
-    for (TiledJet3 * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
-      list.push_back(jetI-briefjets);
-      //(*_safe_cout) <<" "<<jetI-briefjets;
-    }
-    sort(list.begin(),list.end());
-    for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
-    (*_safe_cout) <<"\n";
-  }
+  // for (vector<Tile3>::const_iterator tile = _tiles.begin(); 
+  //      tile < _tiles.end(); tile++) {
+  //   (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
+  //   vector<int> list;
+  //   for (TiledJet3 * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
+  //     list.push_back(jetI-briefjets);
+  //     //(*_safe_cout) <<" "<<jetI-briefjets;
+  //   }
+  //   sort(list.begin(),list.end());
+  //   for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
+  //   (*_safe_cout) <<"\n";
+  // }
 }
 
 

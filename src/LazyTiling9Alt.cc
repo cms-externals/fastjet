@@ -47,13 +47,6 @@ using namespace std;
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 
-//CMS change: use std::atomic for thread safety.
-//   Change not endorsed by fastjet collaboration
-#if __cplusplus >= 201103L
-static std::atomic<std::ostream*> _safe_cout{& std::cout};
-#else
-static std::ostream* _safe_cout =& std::cout;
-#endif
 
 LazyTiling9Alt::LazyTiling9Alt(ClusterSequence & cs) :
   _cs(cs), _jets(cs.jets())
@@ -274,18 +267,18 @@ void LazyTiling9Alt::_bj_remove_from_tiles(TiledJet * const jet) {
 //----------------------------------------------------------------------
 /// output the contents of the tiles
 void LazyTiling9Alt::_print_tiles(TiledJet * briefjets ) const {
-  for (vector<Tile>::const_iterator tile = _tiles.begin(); 
-       tile < _tiles.end(); tile++) {
-    (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
-    vector<int> list;
-    for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
-      list.push_back(jetI-briefjets);
-      //(*_safe_cout) <<" "<<jetI-briefjets;
-    }
-    sort(list.begin(),list.end());
-    for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
-    (*_safe_cout) <<"\n";
-  }
+  // for (vector<Tile>::const_iterator tile = _tiles.begin(); 
+  //      tile < _tiles.end(); tile++) {
+  //   (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
+  //   vector<int> list;
+  //   for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
+  //     list.push_back(jetI-briefjets);
+  //     //(*_safe_cout) <<" "<<jetI-briefjets;
+  //   }
+  //   sort(list.begin(),list.end());
+  //   for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
+  //   (*_safe_cout) <<"\n";
+  // }
 }
 
 

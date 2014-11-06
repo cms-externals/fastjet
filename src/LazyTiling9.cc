@@ -49,15 +49,6 @@ using namespace std;
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 
-//CMS change: use std::atomic for thread safety.
-//   Change not endorsed by fastjet collaboration
-#if __cplusplus >= 201103L
-static std::atomic<std::ostream*> _safe_cout{& std::cout};
-#else
-static std::ostream* _safe_cout =& std::cout;
-#endif
-
-
 
 
 LazyTiling9::LazyTiling9(ClusterSequence & cs) :
@@ -300,18 +291,18 @@ void LazyTiling9::_bj_remove_from_tiles(TiledJet * const jet) {
 //----------------------------------------------------------------------
 /// output the contents of the tiles
 void LazyTiling9::_print_tiles(TiledJet * briefjets ) const {
-  for (vector<Tile2>::const_iterator tile = _tiles.begin(); 
-       tile < _tiles.end(); tile++) {
-    (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
-    vector<int> list;
-    for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
-      list.push_back(jetI-briefjets);
-      //(*_safe_cout) <<" "<<jetI-briefjets;
-    }
-    sort(list.begin(),list.end());
-    for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
-    (*_safe_cout) <<"\n";
-  }
+  // for (vector<Tile2>::const_iterator tile = _tiles.begin(); 
+  //      tile < _tiles.end(); tile++) {
+  //   (*_safe_cout) << "Tile " << tile - _tiles.begin()<<" = ";
+  //   vector<int> list;
+  //   for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
+  //     list.push_back(jetI-briefjets);
+  //     //(*_safe_cout) <<" "<<jetI-briefjets;
+  //   }
+  //   sort(list.begin(),list.end());
+  //   for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
+  //   (*_safe_cout) <<"\n";
+  // }
 }
 
 
@@ -621,9 +612,9 @@ void LazyTiling9::run() {
     }
   }
 
-#ifdef INSTRUMENT2
-  (*_safe_cout) << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+// #ifdef INSTRUMENT2
+//   (*_safe_cout) << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
+// #endif // INSTRUMENT2
 
   vector<double> diJs(n);
   for (int i = 0; i < n; i++) {
@@ -757,9 +748,9 @@ void LazyTiling9::run() {
 
   // final cleaning up;
   delete[] briefjets;
-#ifdef INSTRUMENT2
-  (*_safe_cout) << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+// #ifdef INSTRUMENT2
+//   (*_safe_cout) << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
+// #endif // INSTRUMENT2
 
 }
 
