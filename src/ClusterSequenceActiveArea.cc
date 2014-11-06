@@ -47,13 +47,6 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //CMS change: use std::atomic for thread safety.
 //   Change not endorsed by fastjet collaboration
-#if __cplusplus >= 201103L
-static std::atomic<std::ostream*> _safe_cerr{& std::cerr};
-static std::atomic<std::ostream*> _safe_cout{& std::cout};
-#else
-static std::ostream* _safe_cerr =& std::cerr;
-static std::ostream* _safe_cout =& std::cout;
-#endif
 
 using namespace std;
 
@@ -361,18 +354,18 @@ double ClusterSequenceActiveArea::pt_per_unit_area(
       trunc_sumsqr += ratio*ratio;
       means[i] = trunc_sum / (i+1);
       sd[i]    = sqrt(abs(means[i]*means[i]  - trunc_sumsqr/(i+1)));
-      (*_safe_cerr) << "i, means, sd: " <<i<<", "<< means[i] <<", "<<sd[i]<<", "<<
-	sd[i]/sqrt(i+1.0)<<endl;
+      // (*_safe_cerr) << "i, means, sd: " <<i<<", "<< means[i] <<", "<<sd[i]<<", "<<
+      // 	sd[i]/sqrt(i+1.0)<<endl;
     }
-    (*_safe_cout) << "-----------------------------------"<<endl;
-    for (unsigned i = 0; i <= pt_over_areas.size()/2 ; i++ ) {
-      (*_safe_cout) << "Median "<< i <<" = " << pt_over_areas[i]<<endl;
-    }
-    (*_safe_cout) << "Number of non-jets: "<<_non_jet_number<<endl;
-    (*_safe_cout) << "Area of non-jets: "<<_non_jet_area<<endl;
-    (*_safe_cout) << "Default median position: " << (pt_over_areas.size()-1)/2.0<<endl;
-    (*_safe_cout) << "NJ median position: " << nj_median_pos <<endl;
-    (*_safe_cout) << "NJ median value: " << nj_median_ratio <<endl;
+    // (*_safe_cout) << "-----------------------------------"<<endl;
+    // for (unsigned i = 0; i <= pt_over_areas.size()/2 ; i++ ) {
+    //   (*_safe_cout) << "Median "<< i <<" = " << pt_over_areas[i]<<endl;
+    // }
+    // (*_safe_cout) << "Number of non-jets: "<<_non_jet_number<<endl;
+    // (*_safe_cout) << "Area of non-jets: "<<_non_jet_area<<endl;
+    // (*_safe_cout) << "Default median position: " << (pt_over_areas.size()-1)/2.0<<endl;
+    // (*_safe_cout) << "NJ median position: " << nj_median_pos <<endl;
+    // (*_safe_cout) << "NJ median value: " << nj_median_ratio <<endl;
     return 0.0;
   }
 
