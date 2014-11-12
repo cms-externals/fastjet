@@ -407,8 +407,18 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 
 // these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
-LimitedWarning ClusterSequence::_exclusive_warnings;
+
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+static std::atomic<int> _n_exclusive_warnings{0};
+#else
+static bool _first_time =true;
+static int _n_exclusive_warnings =0;
+#endif
+LimitedWarning ClusterSequence::_exclusive_warnings(0);
+LimitedWarning ClusterSequence::_changed_strategy_warning(0);
 
 
 //----------------------------------------------------------------------
@@ -437,7 +447,6 @@ void ClusterSequence::print_banner() {
   (*ostr) << "#	                                                                      \n";
   (*ostr) << "# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package\n";
   (*ostr) << "# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   \n";
-  (*ostr) << "#                                                                       \n";
   (*ostr) << "# FastJet is provided without warranty under the terms of the GNU GPLv2.\n";
   (*ostr) << "# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code";
 #ifndef DROP_CGAL
@@ -1670,10 +1679,6 @@ void ClusterSequence::_do_iB_recombination_step(
 		       Invalid, diB);
 
 }
-
-
-// make sure the static member _changed_strategy_warning is defined. 
-LimitedWarning ClusterSequence::_changed_strategy_warning;
 
 
 //----------------------------------------------------------------------
