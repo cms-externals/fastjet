@@ -86,6 +86,7 @@ private:
 #endif
 
   std::string _message;                ///< error message
+  static std::ostream* _default_ostr;
   // CMS change: the following are no longer class statics
   //  moved to file static since they were changed to std::atomic
   //  and we still need to allow this header to be parsed by
