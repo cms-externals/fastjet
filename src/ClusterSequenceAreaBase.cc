@@ -35,15 +35,30 @@
 #include "fastjet/ClusterSequenceAreaBase.hh"
 #include <algorithm>
 
+
+
+//CMS change: 
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
+
 FASTJET_BEGIN_NAMESPACE
 
 using namespace std;
 
-
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 /// allow for warnings
-LimitedWarning ClusterSequenceAreaBase::_warnings;
-LimitedWarning ClusterSequenceAreaBase::_warnings_zero_area;
+#if __cplusplus >= 201103L
+std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings{0};
+std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_zero_area{0};
+std::atomic<LimitedWarning> ClusterSequenceAreaBase::_warnings_empty_area{0};
+#else
+LimitedWarning ClusterSequenceAreaBase::_warnings = 0;
+LimitedWarning ClusterSequenceAreaBase::_warnings_zero_area = 0;
 LimitedWarning ClusterSequenceAreaBase::_warnings_empty_area = 0;
+#endif
 
 //----------------------------------------------------------------------
 /// return the total area, within the selector's range, that is free
@@ -200,7 +215,11 @@ void ClusterSequenceAreaBase::get_median_rho_and_sigma(
       if (this_area>0) {
 	pt_over_areas.push_back(all_jets[i].perp()/this_area);
       } else {
+#if __cplusplus >= 201103L
+	_warnings_zero_area.load().warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): discarded jet with zero area. Zero-area jets may be due to (i) too large a ghost area (ii) a jet being outside the ghost range (iii) the computation not being done using an appropriate algorithm (kt;C/A).");
+#else
 	_warnings_zero_area.warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): discarded jet with zero area. Zero-area jets may be due to (i) too large a ghost area (ii) a jet being outside the ghost range (iii) the computation not being done using an appropriate algorithm (kt;C/A).");
+#endif
       }
 
       total_area  += this_area;
@@ -257,8 +276,11 @@ void ClusterSequenceAreaBase::get_median_rho_and_sigma(
   // -1, negating it, etc. All of these operations go crazy with unsigned ints.
   int pt_over_areas_size = pt_over_areas.size();
   if (n_empty < -pt_over_areas_size/4.0)
+#if __cplusplus >= 201103L
+    _warnings_empty_area.load().warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): the estimated empty area is suspiciously large and negative and may lead to an over-estimation of rho. This may be due to (i) a rare statistical fluctuation or (ii) too small a range used to estimate the background properties.");
+#else
     _warnings_empty_area.warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): the estimated empty area is suspiciously large and negative and may lead to an over-estimation of rho. This may be due to (i) a rare statistical fluctuation or (ii) too small a range used to estimate the background properties.");
-
+#endif
   for (int i = 0; i < 2; i++) {
     double nj_median_pos = 
       (pt_over_areas_size-1.0 + n_empty)*posn[i] - n_empty;
@@ -396,7 +418,11 @@ void ClusterSequenceAreaBase::_check_jet_alg_good_for_median() const {
   if (jet_def().jet_algorithm() != kt_algorithm
       && jet_def().jet_algorithm() != cambridge_algorithm
       && jet_def().jet_algorithm() !=  cambridge_for_passive_algorithm) {
+#if __cplusplus >= 201103L
+    _warnings.load().warn("ClusterSequenceAreaBase: jet_def being used may not be suitable for estimating diffuse backgrounds (good options are kt, cam)");
+#else
     _warnings.warn("ClusterSequenceAreaBase: jet_def being used may not be suitable for estimating diffuse backgrounds (good options are kt, cam)");
+#endif
   }
 }
 

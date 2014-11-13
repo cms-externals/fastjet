@@ -113,11 +113,21 @@
 #include <stdio.h>
 #include "fastjet/internal/Voronoi.hh"
 
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
+
 using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy = 0;
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+  std::atomic<LimitedWarning> VoronoiDiagramGenerator::_warning_degeneracy{0};
+#else
+LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy=0;
+#endif
 
 VoronoiDiagramGenerator::VoronoiDiagramGenerator(){
   siteidx = 0;
@@ -213,7 +223,11 @@ bool VoronoiDiagramGenerator::generateVoronoi(vector<VPoint> *_parent_sites,
 
   if (offset>0){
     nsites-=offset;
+#if __cplusplus >= 201103L
+    _warning_degeneracy.load().warn("VoronoiDiagramGenerator: two (or more) particles are degenerate in rapidity and azimuth, Voronoi cell assigned to the first of each set of degenerate particles.");
+#else
     _warning_degeneracy.warn("VoronoiDiagramGenerator: two (or more) particles are degenerate in rapidity and azimuth, Voronoi cell assigned to the first of each set of degenerate particles.");
+#endif
   }
 
   siteidx = 0;

@@ -63,6 +63,9 @@
 #include <cmath>
 #include <vector>
 #include <sstream>
+#if __cplusplus >= 201103L
+#include <atomic>
+#endif
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -88,7 +91,13 @@ public:
 // implementation of the TrackJet plugin
 //------------------------------------------------------------------
 
-bool TrackJetPlugin::_first_time = true;
+//CMS change: use std::atomic for thread safety
+// Change not endorsed by fastjet collaboration
+#if __cplusplus >= 201103L
+static std::atomic<bool> _first_time{true};
+#else
+static bool _first_time = true;
+#endif
 
 string TrackJetPlugin::description () const {
   ostringstream desc;
@@ -187,8 +196,13 @@ void TrackJetPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void TrackJetPlugin::_print_banner(ostream *ostr) const{
+#if __cplusplus >= 201103L
+  bool expected = true;
+  if (! _first_time.compare_exchange_strong(expected,false)) return;
+#else
   if (! _first_time) return;
-  _first_time=false;
+  _first_time = false;
+#endif
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
