@@ -37,7 +37,6 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/internal/BasicRandom.hh"
 #include "fastjet/Selector.hh"
-#include "fastjet/LimitedWarning.hh"
 
 // 
 #define STATIC_GENERATOR 1
@@ -179,19 +178,21 @@ public:
   inline int nphi() const {return _nphi;}
   inline int nrap() const {return _nrap;}
 
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// get all relevant information about the status of the 
   /// random number generator, so that it can be reset subsequently
   /// with set_random_status.
-  inline void get_random_status(std::vector<int> & __iseed) const {
-    _random_generator.get_status(__iseed);}
+  void get_random_status(std::vector<int> & __iseed) const;
 
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// set the status of the random number generator, as obtained
   /// previously with get_random_status. Note that the random
   /// generator is a static member of the class, i.e. common to all
   /// instances of the class --- so if you modify the random for this
   /// instance, you modify it for all instances.
-  inline void set_random_status(const std::vector<int> & __iseed) {
-    _random_generator.set_status(__iseed);}
+  void set_random_status(const std::vector<int> & __iseed);
   
   inline void checkpoint_random() {get_random_status(_random_checkpoint);}
   inline void restore_checkpoint_random() {set_random_status(_random_checkpoint);}
@@ -206,9 +207,10 @@ public:
   /// very deprecated public access to a random number 
   /// from the internal generator
   inline double random_at_own_risk() const {return _our_rand();}
+  //CMS change: can no longer be inlined
+  // Change not endorsed by fastjet collaboration
   /// very deprecated public access to the generator itself
-  inline BasicRandom<double> & generator_at_own_risk() const {
-    return _random_generator;}
+  BasicRandom<double> & generator_at_own_risk() const;
 
 private:
   
@@ -230,12 +232,16 @@ private:
 
 
   std::vector<int> _random_checkpoint;
-  static BasicRandom<double> _random_generator;
+  //CMS change: _random_generator no longer class static since
+  // thread safety requires it to be thread_local but the header
+  // needs to be parsed by non C++11 compilers 
+  // Change not endorsed by fastjet collaboration
+  //static BasicRandom<double> _random_generator;
   //mutable BasicRandom<double> _random_generator;
 
-  static LimitedWarning _warn_fj2_placement_deprecated;
-
-  inline double _our_rand() const {return _random_generator();}
+  //CMS change: no longer inlined
+  // Change not endorsed by fastjet collaboration
+  double _our_rand() const;
   
 };
 

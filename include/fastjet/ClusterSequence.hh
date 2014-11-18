@@ -553,7 +553,7 @@ public:
   /// by default. This requirement reflects the spirit of
   /// clause 2c of the GNU Public License (v2), under which
   /// FastJet and its plugins are distributed.
-  static void set_fastjet_banner_stream(std::ostream * ostr) {_fastjet_banner_ostr = ostr;}
+  static void set_fastjet_banner_stream(std::ostream * ostr);
   //  [this line must be left as is to hide the doxygen comment]
   /// \endcond
 
@@ -561,13 +561,18 @@ public:
   /// (cout by default). This function is used by plugins to determine
   /// where to direct their banners. Plugins should properly handle
   /// the case where the pointer is null.
-  static std::ostream * fastjet_banner_stream() {return _fastjet_banner_ostr;}
+  static std::ostream * fastjet_banner_stream();
 
 private:
   /// \cond internal_doc
 
+  // CMS change: _fastjet_banner_ostr is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
   /// contains the actual stream to use for banners 
-  static std::ostream * _fastjet_banner_ostr;
+  //static std::ostream* _fastjet_banner_ostr;
 
   /// \endcond
 
@@ -755,11 +760,17 @@ protected:
   			      const DynamicNearestNeighbours * DNN);
 
 
+  // CMS change: _first_time is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
   /// will be set by default to be true for the first run
-  static bool _first_time;
+  //static bool _first_time;
 
   /// manage warnings related to exclusive jets access
   static LimitedWarning _exclusive_warnings;
+
 
   /// the limited warning member for notification of user that 
   /// their requested strategy has been overridden (usually because
