@@ -347,7 +347,10 @@ inline void LazyTiling9::_add_untagged_neighbours_to_tile_union_using_max_info(
   
   for (Tile2 ** near_tile = tile.begin_tiles; near_tile != tile.end_tiles; near_tile++){
     if ((*near_tile)->tagged) continue;
-    double dist = _distance_to_tile(jet, *near_tile);
+    //----- Copy of fix from fastjet authors fastjet-3.1.2-devel-20150224-rev3823.tar
+    // here we are not allowed to miss a tile due to some rounding
+    // error. We therefore allow for a margin of security
+    double dist = _distance_to_tile(jet, *near_tile) - tile_edge_security_margin;
     // cout << "      max info looked at tile " << *near_tile - &_tiles[0] 
     // 	 << ", dist = " << dist << " " << (*near_tile)->max_NN_dist
     // 	 << endl;
