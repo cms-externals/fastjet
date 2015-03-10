@@ -1500,10 +1500,26 @@ void ClusterSequence::_add_step_to_history (
   int local_step = _history.size()-1;
   assert(local_step == step_number);
 
+  //----- Copy of fix from fastjet authors fastjet-3.1.2-devel-20150224-rev3823.tar
+  // sanity check: make sure the particles have not already been recombined
+  //
+  // Note that good practice would make this an assert (since this is
+  // a serious internal issue). However, we decided to throw an
+  // InternalError so that the end user can decide to catch it and
+  // retry the clustering with a different strategy.
+ 
   assert(parent1 >= 0);
+  if (_history[parent1].child != Invalid){
+    throw InternalError("trying to recomine an object that has previsously been recombined");
+  }
   _history[parent1].child = local_step;
-  if (parent2 >= 0) {_history[parent2].child = local_step;}
-
+  if (parent2 >= 0) {
+    if (_history[parent2].child != Invalid){
+      throw InternalError("trying to recomine an object that has previsously been recombined");
+    }
+    _history[parent2].child = local_step;
+  }
+  
   // get cross-referencing right from PseudoJets
   if (jetp_index != Invalid) {
     assert(jetp_index >= 0);
