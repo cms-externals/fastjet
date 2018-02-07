@@ -2,7 +2,7 @@
 #define __FASTJET_CLUSTERSEQUENCE_HH__
 
 //FJSTARTHEADER
-// $Id: ClusterSequence.hh 3709 2014-09-29 13:19:11Z soyez $
+// $Id: ClusterSequence.hh 4214 2017-02-09 09:07:42Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -48,6 +48,8 @@
 #include "fastjet/FunctionOfPseudoJet.hh"
 #include "fastjet/ClusterSequenceStructure.hh"
 
+#include "fastjet/internal/deprecated.hh"
+
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 
@@ -79,6 +81,9 @@ class ClusterSequence {
     transfer_from_sequence(cs);
   }
 
+  /// explicit assignment operator for a ClusterSequence
+  ClusterSequence & operator=(const ClusterSequence & cs);
+  
   // virtual ClusterSequence destructor, in case any derived class
   // thinks of needing a destructor at some point
   virtual ~ClusterSequence (); //{}
@@ -361,9 +366,14 @@ class ClusterSequence {
   /// 
   /// As of FJ v3.1, this is deprecated, in line with the deprecation
   /// of auto_ptr in C++11
-  inline void plugin_associate_extras(std::auto_ptr<Extras> extras_in) {
+#ifndef SWIG
+#ifdef FASTJET_HAVE_AUTO_PTR_INTERFACE
+  FASTJET_DEPRECATED_MSG("Please use ClusterSequence::plugin_associate_extras(Extras * extras_in)) instead")
+  inline void plugin_associate_extras(std::auto_ptr<Extras> extras_in){
     _extras.reset(extras_in.release());
   }
+#endif
+#endif //SWIG
 
   /// returns true when the plugin is allowed to run the show.
   inline bool plugin_activated() const {return _plugin_activated;}
@@ -729,9 +739,10 @@ protected:
   // NSqrtN method for C/A
   void _fast_NsqrtN_cluster();
 
-  void _add_step_to_history(const int step_number, const int parent1, 
-			       const int parent2, const int jetp_index,
-			       const double dij);
+  void _add_step_to_history( //const int step_number,
+                            const int parent1, 
+			    const int parent2, const int jetp_index,
+			    const double dij);
 
   /// internal routine associated with the construction of the unique
   /// history order (following children in the tree)
@@ -990,6 +1001,7 @@ inline unsigned int ClusterSequence::n_particles() const {return _initial_n;}
 //----------------------------------------------------------------------
 // implementation of JetDefinition::operator() is here to avoid nasty
 // issues of order of implementations and includes
+#ifndef __CINT__
 template<class L>
 std::vector<PseudoJet> JetDefinition::operator()(const std::vector<L> & particles) const {
   // create a new cluster sequence
@@ -1014,7 +1026,7 @@ std::vector<PseudoJet> JetDefinition::operator()(const std::vector<L> & particle
 
   return jets;
 }
-
+#endif // __CINT__
 
 
 //----------------------------------------------------------------------
@@ -1035,9 +1047,17 @@ template <class J> inline void ClusterSequence::_bj_set_jetinfo(
 //----------------------------------------------------------------------
 template <class J> inline double ClusterSequence::_bj_dist(
                 const J * const jetA, const J * const jetB) const {
+  //#define FASTJET_NEW_DELTA_PHI
+#ifndef FASTJET_NEW_DELTA_PHI
+  //GPS+MC old version of Delta phi calculation
   double dphi = std::abs(jetA->phi - jetB->phi);
   double deta = (jetA->eta - jetB->eta);
   if (dphi > pi) {dphi = twopi - dphi;}
+#else 
+  //GPS+MC testing for 2015-02-faster-deltaR2
+  double dphi = pi-std::abs(pi-std::abs(jetA->phi - jetB->phi));
+  double deta = (jetA->eta - jetB->eta);
+#endif 
   return dphi*dphi + deta*deta;
 }
 

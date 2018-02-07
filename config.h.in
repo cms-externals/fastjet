@@ -36,6 +36,12 @@
 /* The TrackJet plugin is enabled */
 #undef ENABLE_PLUGIN_TRACKJET
 
+/* compile the deprecated parts of the interface using auto-ptr */
+#undef HAVE_AUTO_PTR_INTERFACE
+
+/* compiler supports c++14 deprecated keyword */
+#undef HAVE_CXX14_DEPRECATED
+
 /* defined if demangling is enabled at configure time and is supported through
    the GNU C++ ABI */
 #undef HAVE_DEMANGLING_SUPPORT
@@ -46,6 +52,12 @@
 /* Define to 1 if you have the <execinfo.h> header file. */
 #undef HAVE_EXECINFO_H
 
+/* compiler supports the "explicit" keyword for operators */
+#undef HAVE_EXPLICIT_FOR_OPERATORS
+
+/* compiler supports GNU c++ deprecated attribute */
+#undef HAVE_GNUCXX_DEPRECATED
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -54,6 +66,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* compiler supports the "override" keyword */
+#undef HAVE_OVERRIDE
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -76,8 +91,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Name of package */
@@ -94,6 +108,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

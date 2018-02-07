@@ -22,8 +22,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 255                                                          $//
-// $Date:: 2008-07-12 17:40:35 +0200 (Sat, 12 Jul 2008)                     $//
+// $Revision:: 378                                                          $//
+// $Date:: 2016-02-24 15:10:38 +0100 (Wed, 24 Feb 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "geom_2d.h"
@@ -82,6 +82,8 @@ CSphtheta_phi_range::CSphtheta_phi_range(double c_theta, double c_phi, double R)
   //---------------------------------
   double ymin,ymax;
   double extra = asin(R/M_PI);
+  // if the theta range comes too close to the endpoints (theta=0 or
+  // theta=pi), then keep the full phi range
   if (xmin<=theta_min+extra){
     ymin = -M_PI+0.00001;
     ymax =  M_PI-0.00001;
@@ -126,11 +128,20 @@ CSphtheta_phi_range& CSphtheta_phi_range::operator = (const CSphtheta_phi_range 
 // \return 0 on success, 1 on error
 //----------------------------------------
 int CSphtheta_phi_range::add_particle(const double theta, const double phi){
+  // get the theta cell
+  unsigned int theta_cell = get_theta_cell(theta);
+  
   // deal with the eta coordinate
-  theta_range |= get_theta_cell(theta);
+  theta_range |= theta_cell;
 
   // deal with the phi coordinate
-  phi_range |= get_phi_cell(phi);
+  //
+  // watch out: if the theta_cell includes theta==0 or theta==pi,
+  // incude the full phi range
+  if ((theta_cell == 0x1) || (theta_cell == 0x80000000))
+    phi_range = 0xffffffff;
+  else
+    phi_range |= get_phi_cell(phi);
 
   return 0;
 }

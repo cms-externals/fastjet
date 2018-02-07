@@ -22,8 +22,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 370                                                          $//
-// $Date:: 2014-09-04 17:03:15 +0200 (Thu, 04 Sep 2014)                     $//
+// $Revision:: 390                                                          $//
+// $Date:: 2016-03-03 11:06:52 +0100 (Thu, 03 Mar 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <siscone/siscone_error.h>
@@ -55,6 +55,8 @@ CSphjet::CSphjet(){
   v = CSphmomentum();
   E_tilde = 0.0;
   sm_var2 = 0.0;
+  pass = CJET_INEXISTENT_PASS; // initialised to a value that should
+                               // notappear in the end (after clustering)
 }
 
 // default dtor
@@ -516,6 +518,14 @@ int CSphsplit_merge::add_protocones(vector<CSphmomentum> *protocones, double R2,
 
 #ifdef DEBUG_SPLIT_MERGE
     cout << "adding protojet: ";
+
+    unsigned int phirange=jet.range.phi_range;
+    for (unsigned int i2=0;i2<32;i2++) fprintf(stdout, "%d", (phirange&(1<<i2)) >> i2 );
+    fprintf(stdout, "\t");
+    unsigned int thetarange=jet.range.theta_range;
+    for (unsigned int i2=0;i2<32;i2++) fprintf(stdout, "%d", (thetarange&(1<<i2)) >> i2);
+    fprintf(stdout, "\t");
+
     for (int i2=0;i2<jet.n;i2++)
       cout << jet.contents[i2] << " ";
     cout << endl;
@@ -649,7 +659,7 @@ int CSphsplit_merge::add_hardest_protocone_to_jets(std::vector<CSphmomentum> *pr
   jets[jets.size()-1].v.build_norm();
 
 #ifdef DEBUG_SPLIT_MERGE
-  cout << "PR-Jet " << jets.size() << " [size " << next_jet.contents.size() << "]:";
+  cout << "PR-Jet " << jets.size() << " [size " << jet.contents.size() << "]:";
 #endif
     
   // update the list of what particles are left
@@ -744,7 +754,8 @@ int CSphsplit_merge::perform(double overlap_tshold, double Emin){
 
       while (j2 != candidates->end()){
 #ifdef DEBUG_SPLIT_MERGE
-	show();
+        if (j2_relindex==1) show();
+        cout << "check overlap between cdt 1 and cdt " << j2_relindex+1 << " with overlap " << endl;
 #endif
 	// check overlapping
 	if (get_overlap(*j1, *j2, &overlap2)){
@@ -756,6 +767,9 @@ int CSphsplit_merge::perform(double overlap_tshold, double Emin){
 #endif
 	  // We use the energy for the overlap computation
 	  if (overlap2<overlap_tshold2*sqr(j2->v.E)){
+#ifdef DEBUG_SPLIT_MERGE
+            cout << "  --> split" << endl<<endl;
+#endif
 	    // split jets
 	    split(j1, j2);
 	    
@@ -763,6 +777,9 @@ int CSphsplit_merge::perform(double overlap_tshold, double Emin){
 	    j2 = j1 = candidates->begin();
             j2_relindex = 0;
 	  } else {
+#ifdef DEBUG_SPLIT_MERGE
+            cout << "  --> merge" << endl<<endl;
+#endif
 	    // merge jets
 	    merge(j1, j2);
 	    
@@ -853,6 +870,14 @@ int CSphsplit_merge::show(){
     j = &(*it_j);
     fprintf(stdout, "jet %2d: %e\t%e\t%e\t%e\t", i1+1,
 	    j->v.px, j->v.py, j->v.pz, j->v.E);
+
+    unsigned int phirange=j->range.phi_range;
+    for (i2=0;i2<32;i2++) fprintf(stdout, "%d", (phirange&(1<<i2)) >> i2 );
+    fprintf(stdout, "\t");
+    unsigned int thetarange=j->range.theta_range;
+    for (i2=0;i2<32;i2++) fprintf(stdout, "%d", (thetarange&(1<<i2)) >> i2);
+    fprintf(stdout, "\t");
+    
     for (i2=0;i2<j->n;i2++)
       fprintf(stdout, "%d ", j->contents[i2]);
     fprintf(stdout, "\n");
@@ -862,6 +887,14 @@ int CSphsplit_merge::show(){
     c = &(*it_c);
     fprintf(stdout, "cdt %2d: %e\t%e\t%e\t%e\t%e\t", i1+1,
 	    c->v.px, c->v.py, c->v.pz, c->v.E, sqrt(c->sm_var2));
+
+    unsigned int phirange=c->range.phi_range;
+    for (i2=0;i2<32;i2++) fprintf(stdout, "%d", (phirange&(1<<i2)) >> i2 );
+    fprintf(stdout, "\t");
+    unsigned int thetarange=c->range.theta_range;
+    for (i2=0;i2<32;i2++) fprintf(stdout, "%d", (thetarange&(1<<i2)) >> i2);
+    fprintf(stdout, "\t");
+    
     for (i2=0;i2<c->n;i2++)
       fprintf(stdout, "%d ", c->contents[i2]);
     fprintf(stdout, "\n");
@@ -1142,7 +1175,7 @@ double CSphsplit_merge::get_sm_var2(CSphmomentum &v, double &E_tilde){
 				  + ptcomparison.SM_scale_name());
   }
 
-  return 0.0;
+  //return 0.0;
 }
 
 

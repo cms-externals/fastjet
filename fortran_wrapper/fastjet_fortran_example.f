@@ -10,9 +10,9 @@ C     mileage may vary...
 C     
 C     To use, type: ./fastjet_fortran_example < ../example/data/single-event.dat
 C     
-C     $Id: fastjet_fortran_example.f 2027 2011-03-27 17:08:02Z cacciari $
+C     $Id: fastjet_fortran_example.f 4006 2015-10-05 21:39:13Z cacciari $
 C     
-      program siscone_example
+      program fastjet_fortran_example
       implicit none
 c ... maximum number of particles
       integer n

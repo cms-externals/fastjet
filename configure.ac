@@ -1,4 +1,4 @@
-AC_INIT([FastJet],[3.1.0])
+AC_INIT([FastJet],[3.3.0])
 AC_CONFIG_SRCDIR([src/JetDefinition.cc])
 AM_INIT_AUTOMAKE(tar-ustar)
 
@@ -134,8 +134,83 @@ AC_ARG_ENABLE(extra-warnings,
 	[ENABLE_EXTRA_WARNINGS_FLAG="$enableval"],
 	[ENABLE_EXTRA_WARNINGS_FLAG="no"])
 if [[ "$ENABLE_EXTRA_WARNINGS_FLAG" == "yes" ]] ; then
-   AM_CXXFLAGS=${AM_CXXFLAGS}" -ansi -pedantic -Wextra -Wshadow "
+   AM_CXXFLAGS=${AM_CXXFLAGS}" -pedantic -Wextra -Wshadow "
 fi
+
+
+dnl-------------------------------------------------------------------
+dnl check if a few modern compiler options are availabble
+
+dnl --------- disable deprecated auto_ptr interface ------------------
+dnl This requires the --disable-auto-ptr option 
+dnl which is currently not the default but will become in a future
+dnl release (or might disappear altogether)
+AC_ARG_ENABLE(auto-ptr,
+	[  --enable-auto-ptr  compile the deprecated parts of the interface using auto-ptr [default=yes]],
+	[ENABLE_AUTO_PTR_INTERFACE="$enableval"],
+	[ENABLE_AUTO_PTR_INTERFACE="yes"])
+if [[ "$ENABLE_AUTO_PTR_INTERFACE" == "yes" ]] ; then
+   AC_DEFINE(HAVE_AUTO_PTR_INTERFACE, [], [compile the deprecated parts of the interface using auto-ptr])   
+fi
+
+
+dnl---------- [[deprecated]] --> HAVE_CXX14_DEPRECATED ---------------
+AC_MSG_CHECKING([[if $CXX ${AM_CXXFLAGS} $CXXFLAGS supports the "[[deprecated]]" keyword]])
+AC_LANG_PUSH(C++)
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="${AM_CXXFLAGS} $CXXFLAGS -Werror -Wno-error=deprecated-declarations"
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[class A{public:  [[deprecated]] void test() {}}; int main(void){ A a; a.test(); return 0;}]])],
+    [ac_compiler_has_requested_support="yes"],[ac_compiler_has_requested_support="no"])
+CXXFLAGS="$save_CXXFLAGS"
+AC_LANG_POP(C++)
+if [[ "$ac_compiler_has_requested_support" == "yes" ]] ; then
+   AC_DEFINE(HAVE_CXX14_DEPRECATED, [], [compiler supports c++14 deprecated keyword])
+fi
+AC_MSG_RESULT([$ac_compiler_has_requested_support])
+
+dnl------ _attribute__((deprecated)) --> HAVE_GNUCXX_DEPRECATED ------
+AC_MSG_CHECKING([[if $CXX ${AM_CXXFLAGS} $CXXFLAGS supports the "__attribute__((deprecated))" keyword]])
+AC_LANG_PUSH(C++)
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="${AM_CXXFLAGS} $CXXFLAGS -Werror -Wno-error=deprecated-declarations"
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[class A{public: __attribute__((__deprecated__)) void test() {}};int main(void){ A a; a.test(); return 0;}]])],
+    [ac_compiler_has_requested_support="yes"],[ac_compiler_has_requested_support="no"])
+CXXFLAGS="$save_CXXFLAGS"
+AC_LANG_POP(C++)
+if [[ "$ac_compiler_has_requested_support" == "yes" ]] ; then
+   AC_DEFINE(HAVE_GNUCXX_DEPRECATED, [], [compiler supports GNU c++ deprecated attribute])
+fi
+AC_MSG_RESULT([$ac_compiler_has_requested_support])
+
+dnl------------------- override --> HAVE_OVERRIDE ---------------------
+AC_MSG_CHECKING([[if $CXX ${AM_CXXFLAGS} $CXXFLAGS supports the "override" keyword]])
+AC_LANG_PUSH(C++)
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="${AM_CXXFLAGS} $CXXFLAGS -Werror"
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[class A{public: virtual void test(){}}; class B : public A{public: virtual void test() override{}}; int main(void){ B b; b.test(); return 0;}]])],
+    [ac_compiler_has_requested_support="yes"],[ac_compiler_has_requested_support="no"])
+CXXFLAGS="$save_CXXFLAGS"
+AC_LANG_POP(C++)
+if [[ "$ac_compiler_has_requested_support" == "yes" ]] ; then
+   AC_DEFINE(HAVE_OVERRIDE, [], [compiler supports the "override" keyword])
+fi
+AC_MSG_RESULT([$ac_compiler_has_requested_support])
+
+dnl--- explicit (for operators in class) --> HAVE_EXPLICIT_FOR_OPERATORAS ---
+AC_MSG_CHECKING([[if $CXX ${AM_CXXFLAGS} $CXXFLAGS supports the "explicit" keyword for operators]])
+AC_LANG_PUSH(C++)
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="${AM_CXXFLAGS} $CXXFLAGS -Werror"
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[class A{public: explicit operator bool(){return true;}}; int main(void){ A a; bool b=bool(a); if (b) b=false; return 0;}]])],
+    [ac_compiler_has_requested_support="yes"],[ac_compiler_has_requested_support="no"])
+CXXFLAGS="$save_CXXFLAGS"
+AC_LANG_POP(C++)
+if [[ "$ac_compiler_has_requested_support" == "yes" ]] ; then
+   AC_DEFINE(HAVE_EXPLICIT_FOR_OPERATORS, [], [compiler supports the "explicit" keyword for operators])
+fi
+AC_MSG_RESULT([$ac_compiler_has_requested_support])
+
+
 
 dnl-------------------------------------------------------------------
 dnl deal with the choice of shared/static libs
@@ -430,7 +505,7 @@ AC_CONFIG_FILES( tools/Makefile tools/fastjet/Makefile tools/fastjet/tools/Makef
 dnl-------------------------------------------------------------------
 dnl make sure examples dir is there
 dnl-------------------------------------------------------------------
-AC_CONFIG_FILES( example/Makefile example/data/Makefile example/root/Makefile )
+AC_CONFIG_FILES( example/Makefile example/python/Makefile example/data/Makefile example/root/Makefile )
 
 dnl-------------------------------------------------------------------
 dnl and the documentation
@@ -446,6 +521,56 @@ dnl-------------------------------------------------------------------
 dnl sample fortran wrapper
 dnl-------------------------------------------------------------------
 AC_CONFIG_FILES( fortran_wrapper/Makefile )
+
+dnl-------------------------------------------------------------------
+dnl python interface
+dnl-------------------------------------------------------------------
+AC_MSG_CHECKING([whether to build the python interface])
+AC_ARG_ENABLE(pyext,
+	[  --enable-pyext          Enable the python interface [default=no]],
+	[ENABLE_PYEXT_FLAG="$enableval"],
+	[ENABLE_PYEXT_FLAG="no"])
+AC_MSG_RESULT(${ENABLE_PYEXT_FLAG})
+if [[ "$ENABLE_PYEXT_FLAG" == "yes" ]] ; then
+    AM_PATH_PYTHON
+    AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+    AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+    AS_IF([test -z "$PYTHON_INCLUDE"], [
+        AS_IF([test -z "$PYTHON_CONFIG"], [
+            AC_PATH_PROGS([PYTHON_CONFIG],
+                          [python$PYTHON_VERSION-config python-config],
+                          [no],
+                          [`dirname $PYTHON`])
+            AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+        ])
+        AC_MSG_CHECKING([python include flags])
+        PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+        AC_MSG_RESULT([$PYTHON_INCLUDE])
+    ])
+
+    # at a deeper level, one may want to be able to run swig dynamically
+    #   
+    # In the end we want to ship swig_wrapper.cpp and fastjet.py together
+    # with the distribution but for development purposes (and possile
+    # incoherences w end-user configurations) it is good to have teh
+    # option to run swig automatically
+    AC_MSG_CHECKING([whether to run swig])
+    AC_ARG_ENABLE(swig,
+                  [  --enable-swig          Runs swig to update the python interface [default=no]],
+                  [ENABLE_SWIG_FLAG="$enableval"],
+                  [ENABLE_SWIG_FLAG="no"])
+    AC_MSG_RESULT(${ENABLE_SWIG_FLAG})
+    if [[ "$ENABLE_SWIG_FLAG" == "yes" ]] ; then
+        AX_PKG_SWIG([3.0.0], [], [AC_MSG_ERROR([SWIG explicitly requested but not found...]) ])
+        SWIG_ENABLE_CXX
+        SWIG_PYTHON
+    fi
+else
+    ENABLE_SWIG_FLAG="no"
+fi
+AM_CONDITIONAL(BUILD_PYEXT, test x$ENABLE_PYEXT_FLAG = xyes)
+AM_CONDITIONAL(BUILD_INCLUDES_SWIG, test x$ENABLE_SWIG_FLAG = xyes)
+AC_CONFIG_FILES( pyinterface/Makefile )
 
 dnl-------------------------------------------------------------------
 dnl split the version number in major.minor.patch[prerelease] version
@@ -523,8 +648,11 @@ CONFIG_SUMMARY+="  Shared libraries           "${enable_shared}"\n"
 CONFIG_SUMMARY+="  Static libraries           "${enable_static}"\n"
 CONFIG_SUMMARY+="  Debug flag                 "$ENABLE_DEBUG_FLAG"\n"
 CONFIG_SUMMARY+="  CGAL support               "${ENABLE_CGAL_FLAG}"\n"
+#CONFIG_SUMMARY+="  C++11 features             "${ENABLE_CXX11FEATURES_FLAG}"\n"
 AC_PLUGIN_SUMMARY([yes])
 CONFIG_SUMMARY+="  Monolithic plugins lib     "$monolithic"\n"
+CONFIG_SUMMARY+="  Python interface           "${ENABLE_PYEXT_FLAG}"\n"
+CONFIG_SUMMARY+="  Swig python generator      "${ENABLE_SWIG_FLAG}"\n"
 AC_SUBST(CONFIG_SUMMARY)
 
 

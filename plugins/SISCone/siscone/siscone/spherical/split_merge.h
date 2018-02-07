@@ -23,14 +23,15 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 367                                                          $//
-// $Date:: 2014-09-04 15:57:37 +0200 (Thu, 04 Sep 2014)                     $//
+// $Revision:: 404                                                          $//
+// $Date:: 2016-05-22 12:14:42 +0200 (Sun, 22 May 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPH_SPLIT_MERGE_H__
 #define __SPH_SPLIT_MERGE_H__
 
 #include <siscone/defines.h>
+#include <siscone/config.h>
 #include "geom_2d.h"
 #include "momentum.h"
 #include <stdio.h>
@@ -40,6 +41,8 @@
 #include <string>
 
 namespace siscone_spherical{
+
+const int CJET_INEXISTENT_PASS = -2;
 
 /**
  * \class CSphjet
@@ -81,6 +84,8 @@ class CSphjet{
 
   /// pass at which the jet has been found
   /// It starts at 0 (first pass), -1 means infinite rapidity
+  /// (it will be initialised to "CJET_INEXISTENT_PASS" which should
+  /// never appear after clustering)
   int pass;
 };
 
@@ -440,7 +445,11 @@ class CSphsplit_merge{
 
   // jet information
   /// list of jet candidates
+#ifdef SISCONE_USES_UNIQUE_PTR_AS_AUTO_PTR
+  std::unique_ptr<std::multiset<CSphjet,CSphsplit_merge_ptcomparison> > candidates;
+#else
   std::auto_ptr<std::multiset<CSphjet,CSphsplit_merge_ptcomparison> > candidates;
+#endif
 
   /// minimal E
   double E_min;

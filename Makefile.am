@@ -1,5 +1,8 @@
 # redirect to subdirectories
 SUBDIRS = src include plugins tools example fortran_wrapper doc
+if BUILD_PYEXT
+SUBDIRS += pyinterface
+endif
 
 # install the fastjet-config script in the bin directory
 bin_SCRIPTS = fastjet-config

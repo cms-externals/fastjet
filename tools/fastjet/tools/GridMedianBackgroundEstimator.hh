@@ -2,7 +2,7 @@
 #define __GRID_MEDIAN_BACKGROUND_ESTIMATOR_HH__
 
 //FJSTARTHEADER
-// $Id: GridMedianBackgroundEstimator.hh 3610 2014-08-13 09:49:28Z salam $
+// $Id: GridMedianBackgroundEstimator.hh 3969 2015-09-21 08:57:59Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -76,7 +76,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 ///
 class GridMedianBackgroundEstimator : public BackgroundEstimatorBase
 #ifdef FASTJET_GMBGE_USEFJGRID
-                                                                    , RectangularGrid
+                                    , public RectangularGrid
 #endif 
 {
 
@@ -101,6 +101,23 @@ public:
     if (!RectangularGrid::is_initialised()) 
       throw Error("attempt to construct GridMedianBackgroundEstimator with uninitialised RectangularGrid");
   }    
+
+  //---------------------------------------------------------------- 
+  /// Constructor with the explicit parameters for the underlying
+  /// RectangularGrid
+  ///
+  ///  \param rapmin         the minimum rapidity extent of the grid
+  ///  \param rapmax         the maximum rapidity extent of the grid
+  ///  \param drap           the grid spacing in rapidity
+  ///  \param dphi           the grid spacing in azimuth
+  ///  \param tile_selector  optional (geometric) selector to specify 
+  ///                        which tiles are good; a tile is good if
+  ///                        a massless 4-vector at the center of the tile passes
+  ///                        the selection
+  GridMedianBackgroundEstimator(double rapmin_in, double rapmax_in, double drap_in, double dphi_in,
+                                Selector tile_selector = Selector()) :
+    RectangularGrid(rapmin_in, rapmax_in, drap_in, dphi_in, tile_selector),
+    _has_particles(false), _enable_rho_m(true) {}
 
 #else  // alternative in old framework where we didn't have the rectangular grid
   GridMedianBackgroundEstimator(double ymax, double requested_grid_spacing) :
@@ -176,7 +193,7 @@ public:
   /// Returns true if this background estimator has support for
   /// determination of rho_m.
   ///
-  /// Note that support for sigma_m is automatic is one has sigma and
+  /// Note that support for sigma_m is automatic if one has sigma and
   /// rho_m support.
   bool has_rho_m() const {return _enable_rho_m;}
 

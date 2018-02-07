@@ -77,7 +77,7 @@
 
 \title{\sf FastJet user manual%
   \\ \large (for version
-  3.1.0%  %%%-VERSION-NUMBER (do not remove this comment; used
+  3.3.0%  %%%-VERSION-NUMBER (do not remove this comment; used
              %  for automatic version-number changes; version number must
              %  stay one a single line)
   )
@@ -4350,6 +4350,169 @@ standard location.\footnote{For events with near degeneracies in their
 The \ttt{NlnNCam} strategy does not require CGAL, since it is based on
 a considerably simpler computational-geometry structure~\cite{Chan}.
 
+%======================================================================
+\section{Python interface}
+
+As of version 3.3, \fastjet ships with a Python interface.
+%
+In version 3.3 this interface is to be considered at a beta-release
+stage.
+%
+While we expect it to remain largely stable, some details may evolve
+in future releases.
+
+%
+Its compilation can be enabled at configure time with the option
+\ttt{--enable-pyext}.
+%
+It includes access to much of the functionality in FastJet, except
+plugins and certain features that are difficult to map to Python.
+%
+In particular templated types, nested classes and user-derived classes
+are not currently supported (with a few exceptions, see below).
+%
+The Python interface was largely created automatically, using
+SWIG~\cite{swig}.
+%
+The Python documentation was generated automatically using Doxygen and
+the \ttt{doxy2swig} program~\cite{doxy2swig}.
+
+%----------------------------------------------------------------------
+\subsection{Essential usage}
+\label{sec:python-essential-usage}
+
+The following points are useful to keep in mind:
+\begin{itemize}
+\item You can pass a Python list such as \ttt{[PseudoJet0, PseudoJet1,
+    ...]}  to any FastJet call that expects a vector of
+  \ttt{PseudoJet}s.
+
+\item Any FastJet call that in C++ returns a vector of \ttt{PseudoJet}s will
+  in Python return a tuple of \ttt{PseudoJet}s
+
+\item For many objects that provide definitions of some kind, a
+  pythonic \ttt{\_\_str\_\_} call maps to \ttt{description()}.
+
+\item When combining selectors, \ttt{\&\&}, \ttt{||} and \ttt{!} in
+  C++ map to \ttt{\&}, \ttt{|} and \ttt{\~} in Python.
+
+\item Any python variable \ttt{var} (which may be a simple variable or
+  a more complicated object) can be associated with a \ttt{PseudoJet}
+  \ttt{pj} using
+  the \ttt{pj.set\_python\_info(var)} call; it can be retrieved with
+  \ttt{pj.python\_info()}.
+  %
+  This is based on the C++ \ttt{PseudoJet} \ttt{user\_info}
+  functionality described in Appendix~\ref{app:user-info}.
+
+\item Python functions can be used to create \fastjet\ \ttt{Selector}
+  objects, using \ttt{SelectorPython(some\_python\_function)}. The
+  function must accept a \ttt{PseudoJet} as its single argument and
+  return \ttt{True} or \ttt{False}.
+  %
+  You can also supply a class, in which case it should implement a
+  \ttt{\_\_call\_\_(self,particle)} member to indicate whether a
+  particle passes the selector and a \ttt{\_\_str\_\_(self)} member
+  for the description (see \ttt{example/python/06-selector.py}).
+  %
+  
+\item A Python class can also be used to construct a recombiner, which
+  must have \ttt{preprocess(self,pa)}, \ttt{recombine(self,pa,pb)} and
+  \ttt{\_\_str\_\_(self)} members, in analogy with the C++ structure,
+  Appendix \ref{sec:recombiner} (with \ttt{\_\_str\_\_} providing the
+  functionality of the C++ \ttt{description} member).
+  %
+  \ttt{preprocess(self,pa)} should (optionally) modify \ttt{pa}
+  directly, while \ttt{recombine(self,pa,pb)} should return a new
+  \ttt{PseudoJet}, resulting from the recombination of \ttt{pa} and
+  \ttt{pb}.
+  %
+  You can then assign the python-based recombiner using a call such as
+  \ttt{jet\_def.set\_python\_recombiner(python\_recombiner)}, cf.\
+  example \ttt{example/python/07-recombiner.py}.
+
+\item When a \fastjet \ttt{Error} exception is thrown from C++, a
+  corresponding \ttt{fastjet.Error(...)} exception is raised in
+  Python. 
+  % 
+  This allows for graceful handling of exceptions, notably in
+  an interactive Python session.
+
+\item Remember that Python uses references, e.g.\ \ttt{a = b} means
+  that \ttt{a} is a reference to \ttt{b}. If you need to copy a
+  \ttt{PseudoJet} \ttt{pj} with a view to altering it, do ``\ttt{pjcopy =
+    PseudoJet(pj)}''.
+\end{itemize}
+
+%----------------------------------------------------------------------
+\subsection{Known issues as of version 3.3.x}
+\label{sec:python-issues}
+
+\begin{itemize}
+\item C++ enums are replaced by integers in Python. 
+  %
+  This causes complications for some overloaded interfaces, notably
+  that of \ttt{JetDefinition}, which takes a jet algorithm
+  specification, followed by zero, one or two C++ \ttt{double} arguments
+  (e.g.\ jet radius $R$ and the power $p$ of the generalised-$k_t$
+  algorithm), then specifications of the recombination scheme and
+  clustering strategy (both enums).
+  %
+  With Python the arguments corresponding to the C++ doubles
+  \emph{must} be Python \ttt{float}s.
+  %
+  If instead they are integers, then they are interpreted as
+  specifying the recombination scheme and clustering strategy.
+
+  As an alternative there are Python calls \texttt{JetDefinition0Param(...)},
+  \texttt{JetDefinition1Param(...)},
+  \texttt{JetDefinition2Param(...)}, which explicitly expect 0, 1 or 2
+  parameters that are automatically converted to double.
+
+  This issue is relevant also if you write code for other users that
+  takes the parameters as an argument and then passes them on to
+  FastJet: you may want to either explicitly call the \ttt{NParam}
+  versions, or explicitly convert the user parameters to \ttt{float}
+  in your own code.
+
+\item For the \ttt{Selector::sift(jets, jets\_that\_pass,
+    jets\_that\_fail)} C++ member, the last two arguments are 
+  references to \ttt{vector<PseudoJet>} objects.
+  %
+  In this case, it is not possible to use a Python list in place of
+  those arguments.
+  %
+  Instead you should pass variables initialised to be \ttt{vectorPJ()}
+  (which corresponds to the C++ \ttt{vector<PseudoJet>}).
+
+\item Plugins and \fjcontrib code do not yet have a Python interface,
+  nor does \fjcore.
+\end{itemize}
+
+
+%----------------------------------------------------------------------
+\subsection{A simple example}
+\label{sec:python-example}
+
+A short example of Python usage is as follows:
+%
+\begin{lstlisting}[language=Python]
+  from fastjet import *
+  particles = []
+  particles.append(PseudoJet(100.0, 0.0, 0.0, 100.0)) # px, py, pz, E
+  particles.append(PseudoJet(150.0, 0.0, 0.0, 150.0))
+
+  R = 0.4
+  jet_def = JetDefinition(antikt_algorithm, R)
+
+  jets = jet_def(particles)
+
+  print jet_def
+  for jet in jets: print jet
+\end{lstlisting}
+Further examples are to be found in the \ttt{example/python/}
+directory.
+
 %=======================================================================
 \section{FJcore}
 \label{sec:fjcore}
@@ -4419,11 +4582,16 @@ If these functionalities are needed, the full \fastjet installation must be
 used. The code will be fully compatible, with the sole replacement of the
 header files and of the \ttt{fjcore} namespace with the \ttt{fastjet} one.
 
+Note that the \fjcore package comes with a basic example
+\ttt{01-basic.cc} as well as a fortran interface and an associated
+example.
+
 The \fjcore package has been available since release 3.0.4 of
 \fastjet, and tracks \fastjet versions.
 %
 It is available for download from the \url{http://fastjet.fr/} web
 site.
+
 
 %=======================================================================
 \section{FastJet Contrib}
@@ -5278,25 +5446,85 @@ about individual jets.
 \label{sec:new-seq-rec}
 
 To enable users to more easily build plugins for new sequential
-recombination algorithms, \fastjet also provides a class \verb|NNH|,
-which provides users with access to an implementation of the
-nearest-neighbour heuristic for establishing and maintaining
-information about the closest pair of objects in a dynamic set of
-objects (see \cite{EppsteinHierarchical} for an introduction to this
-and other generic algorithms).
+recombination algorithms, \fastjet also provides several classes that
+give access to implementations of dynamic nearest neighbour finding: 
+\begin{itemize}
+\item A class \verb|NNH|, which provides users with access to an
+  implementation of the nearest-neighbour heuristic for establishing
+  and maintaining information about the closest pair of objects in a
+  dynamic set of objects with generic distance measures (see
+  \cite{EppsteinHierarchical} for an introduction to this and other
+  generic algorithms). In good cases (e.g.\ C/A-like distances) this
+  allows one to construct clustering that runs in $N^2$ time, though
+  its worst case can be as bad as $N^3$ (e.g.\ anti-$k_t$).
 %
-In good cases (C/A-like) this allows one to construct clustering that runs in
-$N^2$ time, though its worst case can be as bad as $N^3$ (e.g.\ anti-$k_t$).
+\item A class \verb|NNFJN2Plain|, for distances that can be written in
+  the form $d_{ij}= \min(x_i, x_j) D_{ij}$, $d_{iB} = x_i D_{iB}$,
+  making use of the FastJet lemma and maintaining a nearest neighbour
+  table for the $D_{ij}$ part of the distance measure.
+  %
+  Closely related code forms the basis of the internal \verb|N2Plain|
+  strategy for the generalised-$k_t$ algorithms, where
+  $x_i \equiv p_{ti}^{2p}$ and $D_{ij} \equiv \Delta R_{ij}^2/R^2$,
+  $D_{iB} = 1$.
+  %
+  If $D_{ij}$ is geometrical, then the nearest-neighbour maintenance
+  for the $D_{ij}$ can be done in $N^2$ time, ensuring an overall
+  $N^2$ algorithm.
 %
-It is a templated class and the template argument should be a class
-that stores the minimal information for each jet so as to be able to
-calculate interjet distances.
+\item A class \verb|NNFJN2Tiled|. This is intended for problems with a
+  cylindrical geometry. 
+  %
+  The user specifies the tile size and then the algorithm facilitates
+  clustering with distance measures of the form
+  $d_{ij}= \min(x_i, x_j) D_{ij}$ (like \verb|NNFJN2Plain|), with
+  the additional assumption that for a pair of particles $i$ and $j$
+  on non-identical, non-neighbouring tiles, $D_{iB}, D_{jB} <D_{ij}$, so
+  that $i$ and $j$ will never cluster with each other.
+  %
+  The code is closely related to that used for the internal
+  \verb|N2Tiled| strategy for generalised-$k_t$ algorithms.
+  %
+  The asymptotic scaling is also $N^2$, but at high multiplicities the
+  coefficient is usually significantly smaller than for
+  \verb|NNFJN2Tiled|.
+\end{itemize}
+All three classes derive from \texttt{NNBase}.\footnote{The \ttt{NNBase},
+  \ttt{NNFJN2Plain} and \ttt{NNFJN2Tiled} classes were introduced in
+  version 3.2 of \fastjet.}
 %
-It underlies the implementations of the Jade and $\ee$ Cambridge
-plugins.
+They are templated with an underlying (``BriefJet'') class, which
+stores the minimal information for each particles so as to be able to
+calculate interparticle and particle--beam distances.
 %
-The interested user should consult those codes for more information,
-as well as the header for the \verb|NNH| class.
+The $\ee$ Cambridge plugin relies on the \verb|NNH| class, the
+\ttt{JadePlugin} can use both \ttt{NNH} and \ttt{NNFJN2Plain}, while all
+three \verb|NN***| classes are used in the VariableR contrib's plugin.
+%
+The interested user should consult those plugins for examples, and the
+headers of the \verb|NN***| classes for more detailed information.
+
+
+% To enable users to more easily build plugins for new sequential
+% recombination algorithms, \fastjet also provides a class \verb|NNH|,
+% which provides users with access to an implementation of the
+% nearest-neighbour heuristic for establishing and maintaining
+% information about the closest pair of objects in a dynamic set of
+% objects (see \cite{EppsteinHierarchical} for an introduction to this
+% and other generic algorithms).
+% %
+% In good cases (C/A-like) this allows one to construct clustering that runs in
+% $N^2$ time, though its worst case can be as bad as $N^3$ (e.g.\ anti-$k_t$).
+% %
+% It is a templated class and the template argument should be a class
+% that stores the minimal information for each jet so as to be able to
+% calculate interjet distances.
+% %
+% It underlies the implementations of the Jade and $\ee$ Cambridge
+% plugins.
+% %
+% The interested user should consult those codes for more information,
+% as well as the header for the \verb|NNH| class.
 
 
 
@@ -5715,7 +5943,12 @@ The period in between versions 3.0.0 and 3.1.0 also saw the first
 releases of the \fjcore compact subset of \fastjet
 (section~\ref{sec:fjcore}) and of the \fjcontrib project
 (section~\ref{sec:fjcontrib}).
-
+%
+Version~3.2 exposed more of \fastjet's core clustering functionality
+to third-party code (\ttt{NNFJN2Plain} and \ttt{NNFJN2Tiled} classes).
+%
+Version~3.3 brought a Python interface to \fastjet.
+ 
 %......................................................................
 \subsection{Deprecated and removed features}
 \label{sec:deprecated}
@@ -5727,6 +5960,16 @@ are demanded of a program that is increasingly widely used.
 %
 Table~\ref{tab:deprecated} lists the cases where such considerations
 have led us to deprecate and/or remove functionality.
+%
+Note that the series of ``CSAB'' methods marked as deprecated in
+\fastjet~v3.2 are direct consequences of
+CSAB::median\_pt\_per\_unit\_area() already being marked as deprecated in
+v3.0.
+
+As of \fastjet~v3.2, whenever supported by the compiler, a
+``deprecation'' message will be issued at compilation
+time.\footnote{This is not available for all deprecated methods due
+  to a bug with gcc 5.1 amd 5.2.}
 
 
 \begin{table}
@@ -5741,10 +5984,10 @@ have led us to deprecate and/or remove functionality.
     CS::set\_jet\_finder(...)    & 2.1 & 3.0 & pass a JetDefinition to constructor\\
     CS::set\_jet\_algorithm(...) & 2.1 & 3.0 & pass a JetDefinition to constructor\\
     CS::CS(particles, R, ...)    & 2.1 & 3.0 & CS::CS(particles, jet\_def)\\
-    JD(jet\_alg, R, strategy)    & 2.1 & -   & JD(jet\_alg, R, recomb\_scheme, strategy)\\
+    JD(jet\_alg, R, strategy)    & 2.1 & --  & JD(jet\_alg, R, recomb\_scheme, strategy)\\
     \midrule
     %----------------------------------------------------------------------
-    JetFinder       & 2.3    & -   & JetAlgorithm \\
+    JetFinder       & 2.3    & --  & JetAlgorithm \\
     SISConePlugin.hh  
                     & 2.3    & 3.0  & fastjet/SISConePlugin.hh (idem.\ other plugins)\\
     ActiveAreaSpec  & 2.3   &  --  & AreaDefinition \& GhostedAreaSpec\\
@@ -5768,6 +6011,19 @@ have led us to deprecate and/or remove functionality.
     CS::plugin\_associate\_extras(auto\_ptr) 
                    & 3.1    &  --  &
                    CS::plugin\_associate\_extras(Extras *)\\
+    \midrule %------------------------------------------------------------
+    SharedPtr::operator()
+                   & 3.2    &  --  & SharedPtr::get()\\
+    CSAB::median\_rho\_*()
+                   & 3.2    &  --  & BackgroundEstimator\\
+    CSAB::get\_median\_rho\_and\_sigma()
+                   & 3.2    &  --  & BackgroundEstimator\\ 
+    CSAB::subtracted\_jet()
+                   & 3.2    &  --  & Subtractor\\
+    CSAB::subtracted\_jets()
+                   & 3.2    &  --  & Subtractor\\
+    CSAB::subtracted\_pt()
+                   & 3.2    &  --  & Subtractor\\
     \bottomrule %=========================================================
   \end{tabular}
   \caption{Summary of interfaces and features of earlier versions that have been
@@ -5979,6 +6235,23 @@ Comp.~Geom.~{\bf 22} (2001) 5; \url{http://www.cgal.org/}
   %``Techniques for improved heavy particle searches with jet substructure,''
   Phys.\ Rev.\  {\bf D80 } (2009)  051501.
   [arXiv:0903.5081 [hep-ph]].
+
+\bibitem{Bertolini:2013iqa}
+  D.~Bertolini, T.~Chan and J.~Thaler,
+  %``Jet Observables Without Jet Algorithms,''
+  JHEP {\bf 1404} (2014) 013
+  [arXiv:1310.7584 [hep-ph]];\\
+  %%CITATION = ARXIV:1310.7584;%%
+  %7 citations counted in INSPIRE as of 12 Sep 2014
+  %
+%\bibitem{Larkoski:2014uqa}
+  A.~J.~Larkoski, D.~Neill and J.~Thaler,
+  %``Jet Shapes with the Broadening Axis,''
+  JHEP {\bf 1404} (2014) 017
+  [arXiv:1401.2158 [hep-ph]];\\
+  %%CITATION = ARXIV:1401.2158;%%
+%  
+  G.~P.~Salam, unpublished.
 
 
 \bibitem{CamOrig}
@@ -6227,6 +6500,10 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   in Proc.\ 13th ACM-SIAM Symposium on Discrete Algorithms (SODA),
   p.~472 (2002).
 
+\bibitem{swig} \url{http://www.swig.org/}
+
+\bibitem{doxy2swig} \url{https://github.com/m7thon/doxy2swig/}
+
 \bibitem{Sjostrand:2007gs}
   T.~Sjostrand, S.~Mrenna, P.~Z.~Skands,
   %``A Brief Introduction to PYTHIA 8.1,''
@@ -6261,23 +6538,6 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
   %``Fast hierarchical clustering and other applications of dynamic
   %closest pairs,''
   J. Experimental Algorithmics {\bf 5} (2000) 1-23 [cs.DS/9912014].
-
-\bibitem{Bertolini:2013iqa}
-  D.~Bertolini, T.~Chan and J.~Thaler,
-  %``Jet Observables Without Jet Algorithms,''
-  JHEP {\bf 1404} (2014) 013
-  [arXiv:1310.7584 [hep-ph]];\\
-  %%CITATION = ARXIV:1310.7584;%%
-  %7 citations counted in INSPIRE as of 12 Sep 2014
-  %
-%\bibitem{Larkoski:2014uqa}
-  A.~J.~Larkoski, D.~Neill and J.~Thaler,
-  %``Jet Shapes with the Broadening Axis,''
-  JHEP {\bf 1404} (2014) 017
-  [arXiv:1401.2158 [hep-ph]];\\
-  %%CITATION = ARXIV:1401.2158;%%
-%  
-  G.~P.~Salam, unpublished.
 \end{thebibliography}
 
 
@@ -6285,3 +6545,5 @@ in {\it Proc. of the APS/DPF/DPB Summer Study on the Future of
 \end{document}
 
 
+
+%  LocalWords:  NNBase

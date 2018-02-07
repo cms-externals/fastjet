@@ -3,6 +3,26 @@ we give a short summary of the important changes from the previous
 version. If you want to see a more detailed list of changes, please
 read the ChangeLog file.
 
+SISCone version 3.0.3 (August 3 2016)
+=====================
+
+* Minor release, installing config.h to include flags decided at
+  configure time. (version to be included in FastJet>=3.2.1)
+
+SISCone version 3.0.2 (March 16 2016)
+=====================
+
+* Minor release, fixing a bug due to an array being used uninitialised
+  (no impact on results). Also replaced auto_ptr by unique_ptr when
+  supported by compiler (version to be included in FastJet>=3.2.0)
+
+SISCone version 3.0.1 (February 29 2016)
+=====================
+
+* Minor release, fixing a bug due to a rounding issue that occurs the
+  theta range in (rare) specific configurations where theta=pi in the
+  split-merge procedure for spherical SISCone
+
 SISCone version 3.0.0 (September 9 2014)
 =====================
 

@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: Filter.cc 3633 2014-08-15 13:23:52Z soyez $
+// $Id: Filter.cc 4080 2016-03-09 15:01:57Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -30,6 +30,7 @@
 
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/tools/Recluster.hh"
+#include "fastjet/tools/Subtractor.hh"
 #include <fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh>
 #include <cassert>
 #include <algorithm>
@@ -97,9 +98,10 @@ PseudoJet Filter::result(const PseudoJet &jet) const {
     subjets = (*_subtractor)(subjets);
   } else if (_rho!=0){
     if (subjets.size()>0){
-      const ClusterSequenceAreaBase *csab = subjets[0].validated_csab();
+      //const ClusterSequenceAreaBase *csab = subjets[0].validated_csab();
       for (unsigned int i=0;i<subjets.size();i++){
-        subjets[i]=csab->subtracted_jet(subjets[i], _rho);
+        //subjets[i]=csab->subtracted_jet(subjets[i], _rho);
+        subjets[i]=Subtractor(_rho)(subjets[i]);
       }
     }
   }
@@ -163,8 +165,8 @@ PseudoJet Filter::_finalise(const PseudoJet & /*jet*/,
   // information about empty areas)
   if ((ca_optimisation_used) && (kept.size()+rejected.size()>0)){
     bool has_non_explicit_ghost_area = (kept.size()>0)
-      ? (kept[0].has_area()     && kept[0].validated_csab()->has_explicit_ghosts())
-      : (rejected[0].has_area() && rejected[0].validated_csab()->has_explicit_ghosts());
+      ? (kept[0].has_area()     && (!(kept[0].validated_csab()->has_explicit_ghosts())))
+      : (rejected[0].has_area() && (!(rejected[0].validated_csab()->has_explicit_ghosts())));
     if (has_non_explicit_ghost_area)
       fs->discard_area();
   }

@@ -1,3 +1,1363 @@
+2017-07-12  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Release of FastJet 3.3.0
+
+2017-07-12  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	minor tweaks to the 3.3.0 release text
+
+	* NEWS:
+	set release date to today (tentative)
+
+	* scripts/preamble-fjcore.txt:
+	updated the copyright dates
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	changed version to 3.3.0
+
+2017-06-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	inserted the NEWS for the 3.2.2 relaese (from the branch)
+
+2017-06-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS
+	extended template for 3.3.0 (including thanks)
+
+        * doc/fastjet-doc.tex
+	added discussion of JetDefinitionXParam
+
+        * example/python/01-basic.py
+        * example/python/02-area.py
+        * example/python/03-tools.py
+        * example/python/04-multi-event.py
+        * example/python/05-user-info.py
+        * example/python/06-selector.py
+        * example/python/07-recombiner.py
+	updated docstring to mention use of fastjet-config --pythonpath
+	(rather than some fixed path) and in some cases added missing
+	brief explanation of what the example does.
+
+        * example/python/08-exception.py:
+	revamped the example to illustrate errors raised with invalid R
+	for a JetDefinition (makes example simple, and arguably more useful?)
+
+2017-06-22  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/08-exception.py:          *** ADDED ***
+	started to work on an example showing how to handle fastjet::Error
+	exceptions in python
+
+	* pyinterface/FastJetPythonExtensions.hh (JetDefinition*Param):
+	added helpers to solve the issue that integer parameters in JD
+	ctors are handled as values for the eRecombinationScheme enum
+	rather ythan float arguments (R or xtra_param). One can now use
+	  JetDefinition0Param(scheme, strategy)
+	  JetDefinition1Param(R, scheme, strategy)
+	  JetDefinition2Param(R, xtra_param, scheme, strategy)
+	where the scheme and strategy are optional.
+
+	* doc/fastjet-doc.tex:
+	fixed a trivial typo + added a sentence to the description of the
+	user-defined recombiners in python.
+
+2017-06-21  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/mksnapshot.sh:
+	this now generates a patch for the snapshots.html file and echoes
+	commands to apply it; mostly tested, but not yet with an actual
+	snapshot. (Implementation not necessarilly optimally efficient?)
+
+2017-06-20  Gavin Salam  <gavin.salam@cern.ch>
+
+	* pyinterface/tests/:                      *** ADDED ***
+	* pyinterface/tests/sel_str_memcheck.py:   *** ADDED ***
+	* pyinterface/tests/fjexception.py:        *** ADDED ***
+	added some of the code used for tests...
+
+	* pyinterface/fastjet.i:
+	added handling of fastjet::Error exceptions.
+
+	* include/fastjet/Error.hh (Error):
+	added description() member function, in line with what's provided
+	by other classes.
+
+2017-06-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/Makefile.am:
+	added examples 06 (selector) and 07 (recombiner) to the
+	distributed tarball
+
+2017-06-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/python/01-basic.py:
+	* example/python/02-area.py:
+	* example/python/04-multi-event.py:
+	* example/python/05-user-info.py:
+	* example/python/06-selector.py:
+	* example/python/07-recombiner.py:
+
+	removed use of builtins (still seems to work Python 2.7 and 3.6). 
+
+2017-06-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/FastJetPythonExtensions.hh:
+	tried to use the __name__ attribute to disentangle python objects
+	from functions and return the proper description for selectors
+	accordingly
+
+2017-06-18  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/python/07-recombiner.py (main):
+	also prints out jet definition with a user-defined recombiner.
+
+	* pyinterface/FastJetPythonExtensions.hh:
+	added cpp_string_from_py_str(...) and
+	pp_string_from_str_py_obj(...) helper functions to get the
+	str output of a python object and convert into a C++ string.
+
+	This uses PyUnicode_AsUTF8 calls for Py3 and normal
+	PyString_AsString calls for Py2. To be seen how robust this is,
+	but seems to solve the issue found below with segfaults.
+
+	The implementation also solves a memory leak issue (failure to
+	XDECREF result of PyObject_Str).
+
+2017-06-16  Gavin Salam  <gavin.salam@cern.ch>
+
+	* pyinterface/FastJetPythonExtensions.hh (SelectorWorker):
+
+	The issue with 06-selector.py seems to be in processing the string
+	from the python selector, and in particular the worker calls
+	PyString_AsString -- see line 90 for details. No solution found as
+	yet...
+
+	* example/python/01-basic.py:
+	* example/python/02-area.py:
+	* example/python/03-tools.py: *** FIX (UGLY OUTPUT) ***
+	* example/python/04-multi-event.py:
+	* example/python/05-user-info.py:
+	* example/python/06-selector.py: *** FIX (SEGFAULT PY3) ***
+	* example/python/07-recombiner.py:
+
+	modified them to be compatible simultaneously with python 2.7 and
+	python 3.x
+
+2017-06-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/README-for-devel:
+	added a few replies/thoughts to open questions
+
+	* pyinterface/FastJetPythonExtensions.hh:
+	removed (seemingly) unnecessary local copies of PseudoJet
+
+	* pyinterface/fastjet.i:
+	corrected a misleading comment
+
+2017-06-15  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* pyinterface/fastjet.i: 
+	* pyinterface/FastJetPythonExtensions.hh: 
+	* pyinterface/README-for-devel: 
+
+	added some notes / queries (see GPS tags in code)
+
+	* example/python/06-selector.py (HasPID):
+	made this a new-style class (i.e. added (object) at the end). 
+
+2017-05-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	*** BROUGHT FROM THE 3.2.X-devel BRANCH ON 2017-07-12 ***
+
+	Note: issues found when compiling fjcore with [[deprecated]]. This
+	is related to the fact that fjcore is built w -ansi which
+	conflicts w the normal build with gcc6 (with support for
+	[[deprecated]]). Compiling w --enable-extra-warnings instead shows
+	some issues with SISCone replacement of auto_ptr by unique_ptr
+	(SISCone sees it as supported but then it conflicts with the -ansi
+	in FJ). The two fixes below go around those issues.
+
+	* configure.ac:
+	removed the -ansi flag from the "--enable-extra-warnings" option
+	since this is asking for trouble with default c++11 support (like
+	gcc6)
+
+	* include/fastjet/internal/deprecated.hh:
+	explicitly excluded the [[deprecated]] variant from fjcore.
+
+2017-05-22  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/07-recombiner.py:
+	* example/python/06-selector.py:
+	* pyinterface/FastJetPythonExtensions.hh:
+	cleaned and added comments + fixed a few typos
+
+2017-05-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/fastjet/tools/MassDropTagger.hh:
+	* tools/MassDropTagger.cc:
+	Following report of issue 2017-05-FPE-in-MDT associated with
+	negative (squared) masses in MassDropTagger, changed behaviour of
+	pathological cases:
+
+	- if the parent has zero or negative mass, an empty jet is
+	returned (and a warning is printed) [before the program just
+	carried on running using the negative mass^2]
+
+	- if the heavier child subjet has negative (squared) mass, then mu
+	is set to subjet.m()/parent.m(), which is also negative [before
+	you could get NaN, zero or a postive ratio of two negative things]
+
+
+2017-04-24  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/07-recombiner.py:             *** ADDED ***
+
+	added an eample of a user-defined recombiner
+
+	* pyinterface/fastjet.i:
+	* pyinterface/FastJetPythonExtensions.hh:
+
+	added functionalities to specify a user-defined recombiner in
+	Python. The user should implement a class that provides
+	    def __init__(self):
+	    def __str__(self):
+            def preprocess(self, pa):
+	    def recombine(self, pa, pb): # returns the recombined PseudoJet
+	and then call
+	    jet_def.set_python_recombiner(...)
+	with an instance of that class as an argument.
+
+2017-02-28  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/06-selector.py:
+	used a class-based selector and wrote is_photon as HasPID(22)
+
+	* pyinterface/FastJetPythonExtensions.hh:
+	descrpition now uses the "class_or_function" __str__ if available
+
+	Note that for functions this currently produces a message of the
+	form "function at address ..." which is not 100% elegant (but
+	we'll live with it for the time being)
+
+2017-02-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* fastjet-config.in (usage):
+	edited the --pythonpath help text (+ one typo)
+
+2017-02-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	* fastjet-config.in:
+	added a --pythonpath option
+
+2017-02-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/mksnapshot.sh:
+	another fix for remote snapshots...
+
+2017-02-12  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/python/06-selector.py:
+	moved the example over to selectors also for pileup selection.
+
+	* scripts/mksnapshot.sh:
+	tried to update this so that links for tagging and copying are
+	correct even remotely from Jussieu.
+
+2017-02-11  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/python/06-selector.py (print_jets):
+	* pyinterface/FastJetPythonExtensions.hh:
+	small tweaks to comments, details of how example is written, etc.
+
+2017-02-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/python/06-selector.py:      *** ADDED ***
+	* pyinterface/FastJetPythonExtensions.hh:
+	added a SelectorPython that currently takes a function (jet->Bool)
+	controlling what passes the selector. See 06-selector.py for a
+	simple usage.
+
+	At this stage, more testing (incl memory management) is needed
+
+	* pyinterface/Makefile.am:
+	fixed fate of swig_wrp.cpp and fastjet.i during make dist
+
+2017-02-10  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/genconfig.sh:
+	fixed issue with sed on some platforms that cannot handle "+" in
+	the regexp.
+
+	* example/python/05-user-info.py:  *** ADDED ***
+	* example/python/Makefile.am (EXTRA_DIST): 
+	added an example that show how one can use Python user information
+
+	* pyinterface/FastJetPythonExtensions.hh: *** ADDED ***
+	* pyinterface/makefile.internal:
+	* pyinterface/Makefile.am:
+	started adding tools to allow extensions of FastJet functionality
+	through python, in particular PseudoJet user-info support.
+
+2017-02-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/Makefile.am:
+	added some workarounds to avoid libtool install showing a
+	potentially misleading message about where python modules have
+	been instsalled (this can differ between the fastjet.py and
+	_fastjet.so files on some installations)
+	Instead print a message of our own.
+
+2017-02-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* regression-tests/nightly-check.pl:
+	added minimal checks that the python interface compiles smoothly
+
+2017-02-09  Gavin Salam  <gavin.salam@cern.ch>
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	changed version to 3.3.0-devel
+
+	* example/python/README: *** ADDED ***
+	with info on path settings, etc.
+
+	* NEWS:
+	started to prepare release info
+
+	* pyinterface/fastjet-doc.i: ** ADDED **
+	automatically generated as follows (but do this manually)
+
+	   doxygen
+	   cd pyinterface
+	   make -f makefile.internal fastjet-doc.i
+
+	Currently using doxygen v. 1.8.x
+
+	* m4/ax_swig_python.m4 (AX_SWIG_PYTHON):
+	fixed issue with AX_PYTHON_DEVEL
+
+2017-02-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	generated the makefile in the example/python directory
+
+	* pyinterface/Makefile.am:
+	removed unnecessary _ that generated (harmless) warnings with
+	automake
+
+	* m4/ax_swig_python.m4:              *** ADDED ***
+	* m4/ax_swig_enable_cxx.m4:          *** ADDED ***
+	added missing m4 macros (on some systems)
+
+	* CHECKLIST:
+	added a note about running doxy2swig.py and swig
+
+	* example/python/Makefile.am:        *** ADDED ***
+	* example/Makefile.am:
+	shipped the python examples with the distribution
+
+	* configure.ac:
+	* pyinterface/Makefile.am:
+	* m4/ax_pkg_swig.m4:                 *** ADDED ***
+	added support, via --enable-swig, to run swi instead of using the
+	swig_wrap.cpp provided in the distriution..
+
+2017-02-09  Gavin Salam  <gavin.salam@cern.ch>
+
+	* pyinterface/fastjet.i:
+	added more __str__ implementations.
+
+	* example/python/01-basic.py: (moved from pyinterface/)
+	simplified it, made output more similar to ../01-basic.cc
+
+	* example/python/02-areas.py:
+	small changes to output
+
+	* example/python/04-multi-event.py
+	this now contains the more advanced multi-event reading framework
+
+2017-02-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/makefile.internal:
+	pointed to the correct doxy2swig.py sccript (was missing the .py
+	extension) + removed fastjet-doc.i during make clean.
+
+	* Doxyfile:
+	updated to doxygen-1.8.12
+
+	explicitly excluded ILConeAlgorithm.hpp in the D0RunIICone
+	(causing trouble w swig xml doc and not being used anyway in the
+	html)
+
+2017-02-09  Gavin Salam  <gavin.salam@cern.ch>
+
+	* pyinterface/fastjet.i:
+	work in progress on docstring
+
+	* pyinterface/...:
+	work in progress on the examples, etc.
+
+	* Doxyfile:
+	enabled generator of XML documentation, for use by doxy2swig
+
+	* include/fastjet/PseudoJet.hh:
+	removed "[NOT FULLY TESTED]" from the boost and unboost function
+	documentation. 
+
+	* scripts/doxy2swig *** ADDED ***
+	to aid generation of documentation for the python interface
+
+
+2017-02-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/Makefile.am:
+	installed the python module in the site-packages directly (without
+	a fastjet subdirectory)
+
+	* pyinterface/__init__.py:
+	added (and installed) this so that python automatically finds the
+	fsatjet module from te parent directory
+
+	* include/fastjet/ClusterSequence.hh:
+	explicitly excluded the (deprecated) auto_ptr version of
+	ClusterSequence::plugin_associate_extras from the swig interface
+	(it seems like the auto_ptr was causing troubles with swig)
+
+	* pyinterface/Makefile.am (_fastjet_la_LIBADD):
+	added missing CGAL libs (when configured w CGAL enabled)
+
+2017-02-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* pyinterface/test.py       -> pyinterface/01-basic.py:
+	* pyinterface/test-area.py  -> pyinterface/02-area.py:
+	* pyinterface/test-tools.py -> pyinterface/03-tools.py:
+	renamed the files
+
+	* configure.ac:
+	* Makefile.am:
+	* pyinterface/Makefile.am:             *** ADDED ***
+	configure now acquired a --enable-pyext flag which builds
+	thepython interface.
+	Note: swig has to be run first to generate swig_wrap.cpp amf
+	fastjet.py. These files are included in the tarball (as well as
+	fastjet.i for completeness)
+
+	* pyinterface/test-area.py:            *** ADDED ***
+	added an example with areas and subtraction
+
+	* pyinterface/test-tools.py:           *** ADDED ***
+	added an example showing usage of tools
+
+	* pyinterface/fastjet.i:
+	added area support and tool (still in progress)
+
+	* pyinterface/Makefile:
+	also include tools
+
+2017-02-07  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/PseudoJet.hh:
+	excluded the templated PseudoJet constructor from the python
+	interface (creates nasty issues w swig (e.g. vector allocators
+	with fastjet::PseudoJet::PseudoJet>)
+
+2017-02-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* testsuite/TestPseudoJet.hh (TestBase):
+	fixed issue in testing boosts
+
+2017-02-07  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* include/fastjet/PseudoJet.hh:
+	disabled the templated reset<T> with swig
+
+	* include/fastjet/internal/deprecated.hh:
+	playing with swig: some advanced deprecated features do not behave
+	properly do disable them in swig
+
+2017-02-06  Gavin Salam  <gavin.salam@cern.ch>
+
+	* testsuite/TestSpecialEvents.hh:
+	modified constructors of JetDefs to eliminate a large number of
+	compilation warnings.
+
+	* testsuite/run_tests.cc (main):
+	* testsuite/TestPseudoJet.hh:
+	Added TestPJOperations to test various binary operations
+
+	* include/fastjet/PseudoJet.hh|cc:
+	operator+=, -=, *=, /= all had "void" as their return type;
+	now fixed this bug so that they return PseudoJet &
+	(observed to be an issue with Swig)
+
+2017-02-06  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* pyinterface:
+	started to work on a swig-based pythin interface
+
+2016-10-25  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* include/fastjet/NNFJN2Tiled.hh:
+	fixed type mismatched for diJ_plus_link (was pre-declared as a
+	class then declared as a struct)
+
+2016-08-05  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	changed version to 3.2.2-devel
+	+ reset the SISCone link to the trunk
+
+2016-08-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Release of FastJet 3.2.1
+
+2016-08-03  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	added a mention of the SISCone update in the NEWS file
+
+2016-07-22  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	  changed version to 3.2.1
+
+	* NEWS:
+	prepared release notes for 3.2.1
+
+2016-07-21  Gregory Soyez  <soyez@fastjet.fr>
+
+	* CHECKLIST:
+	updated the part related to the distribution of the doxygen doc to
+	avoid including spurious files
+
+2016-07-20  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/ClusterSequence.cc:
+	. made sure the compiler does not complain about unused variables
+	  if assert is disabled (e.g. if NDEBUG is defined)
+	. removed the "step_number" argument in _add_step_to_history() [it
+	  is only used in an assertion that we are confident would not fail]
+	This fixed an issue reported by Andy Buckley.
+
+2016-05-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	* plugins/SISCone/Makefile.am:
+	included the ./siscone in the list of include path (equivalement
+	to $builddir)/siscone so that config.h is found
+
+2016-05-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* regression-tests/nightly-check.pl:
+	added gcc-6.1 to the nightly check
+
+2016-05-18  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/ClusterSequence.cc (operator=):
+	* include/fastjet/ClusterSequence.hh:
+	added an explicit assignment operator, to solve an issue reported
+	by Roberto Franceschini (where structure wasn't being properly
+	transferred with assignment, though it was fine on construction).
+	[issue 2016-05-CS-assignment-issue]
+
+2016-03-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	changed version to 3.2.1-devel
+
+2016-03-17  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Release of FastJet 3.2.0
+
+2016-03-17  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	set the correct release date
+	(starting the release process again)
+
+	* scripts/mkfjcore.sh:
+	explicitly removed the FASTJET_ENABLE_AUTO_PTR_INTERFACE (and
+	FASTJET_HAVE_DEMANGLING_SUPPORT) from fjcore
+
+	fixed a few issues of replacements FASTJET -> FJCORE that had to
+	be done.
+
+	* NEWS:
+	updated to mention the --disable-auto-ptr configure option
+
+	* include/fastjet/ClusterSequence.hh:
+	disabled CS::plugin_associate_extras(std::auto_ptr<Extras>
+	extras_in) when auto_ptr are disabled at configure time
+
+	* configure.ac:
+	added a --disable-auto-ptr configure option that removes the part
+	of the interface that uses std::auto_ptr (by default, auto_ptr
+	will be enabled)
+
+2016-03-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	* scripts/preamble-fjcore.txt:
+	updated copyright dates
+
+	* NEWS:
+	set the correct release date (and included SISCone version)
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	changed version to 3.2.0
+
+	* doc/fastjet-doc.tex:
+	added a brief mention of the examples and fortran interface
+	shipped w fjcore
+
+2016-03-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	added fjcore fortran wrapper mention
+
+	* src/PseudoJet.cc (has_structure):
+	minor change to return bool(_structure) instead of
+	(bool)_structure (should be functionally identical) + fixed a
+	typo. 
+
+	* include/fastjet/internal/deprecated.hh:
+	* include/fastjet/ClusterSequenceAreaBase.hh:
+	* include/fastjet/ClusterSequenceArea.hh:
+	fixed typos in comments and clarified a comment
+
+2016-03-14  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/fastjet-doc.tex:
+	worked on the list of deprecated features.
+
+	* include/fastjet/ClusterSequenceArea.hh:
+	* include/fastjet/ClusterSequenceAreaBase.hh:
+	removed the FASTJET_DEPRECATED_MSG tag from virtual members
+	because of the following bug in gcc 5.1 and 5.2 (leading to bogus
+	deprecation warnings)
+	   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65974
+
+	* configure.ac:
+	* include/fastjet/internal/deprecated.hh:
+	((deprecated)) -> ((__deprecated__)) to avoid potential
+	replacements by the precompiler
+
+2016-03-10  Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+	* fortran_wrapper/fastjet_fortran_example.f:
+	it now runs antikt by default (it was kt)
+
+        * fortran_wrapper/fjcore_fortran_interface.f:
+	renamed to fjcore_fortran_example.f
+
+	* scripts/Makefile-fjcore.txt:
+	* scripts/mkfjcore.sh:
+	changes for inclusion of fortran example
+
+        *scripts/preamble-fjcore.txt:
+	added mention of fortran interface
+
+2016-03-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	included AM_CXXFLAGS in our compiler tests (+ tidied up the
+	-Werror options) to stay as close as possible to the actual
+	behaviour during compilation
+
+2016-03-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/Filter.cc:
+	no longer rely on the deprecated CSAB interface to subtract jets
+	when Filter is constructed using a "rho" number (use
+	Subtractor(rho) instead)
+
+	* include/fastjet/ClusterSequenceArea.hh:
+	* include/fastjet/ClusterSequenceAreaBase.hh:
+	* src/ClusterSequenceArea.cc:
+	* src/ClusterSequenceAreaBase.cc:
+	marked as deprecated the background estimation and subtraction
+	methods. One should use the BackgroundEstimator series of tools
+	and the Subtractor tool instead.
+
+	Internal note: since some of these methods were called internally
+	by other deprecated methods, we have moved the implementation to
+	private (or protected when needed) methods to avoid deprecation
+	warnings when compiling FastJet itself. As mentioned in the
+	comments, these methods are also deprecated (although they are not
+	explicitly marked with FASTJET_DEPRECATED)
+
+	List of concerned methods:
+	. CSAB::median_rho_per_unit_area()
+            Used by CSAB::subtracted_jets()
+            Used by CSAB::subtracted_jet()
+            Used by CSAB::subtracted_pt()
+            Added   CSAB::_median_rho_per_unit_area() [private]
+	. CSAB::median_rho_per_unit_area_4vector()
+            Added   CSAB::_median_rho_per_unit_area_4vector() [private]
+	. CSAB::median_rho_per_unit_something()
+	    Used by CSAB::_median_rho_per_unit_area_4vector()
+	    Used by CSAB::_median_rho_per_unit_area()
+	    Added   CSAB::_median_rho_per_unit_something() [private]
+	. CSAB::get_median_rho_and_sigma(...) (3 variants)
+	    Used by CSA::get_median_rho_and_sigma()
+	    Used by CSA::median_pt_per_unit_something()
+	    Added   CSAB::_get_median_rho_and_sigma() (3 variants) [protected]
+	. CSAB::subtracted_jets(...) (2 variants)
+	    One variant calls the other so, added the "other" with an _
+	. CSAB::subtracted_jet(...) (2 variants)
+	    Used by CSAB::subtracted_jets()
+	    Used by CSAB::subtracted_pt()
+	    Added   CSAB::_subtracted_jet()
+	    STILL USED BY Filter
+	. CSAB::subtracted_pt(...) (2 variants)
+	    One variant calls the other so, added the "other" with an _
+	. CSAB::parabolic_pt_per_unit_area()
+	    Used by CSA::parabolic_pt_per_unit_area()
+	    Added   CSAB::_parabolic_pt_per_unit_area() [protected]
+	. CSA::parabolic_pt_per_unit_area()
+	    Added   CSA::_parabolic_pt_per_unit_area() [private]
+	. CSA::get_median_rho_and_sigma() (3 variants)
+
+	One occurence still left to fix: Filter uses
+	CSAB::subtracted_jet(...) with a fixed rho.
+
+2016-03-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	small tweaks
+
+2016-03-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/fastjet_areas.cc:
+	* example/fastjet_timing_plugins.cc:
+	fixed a use of a deprecated JetDefinition ctor
+
+	* NEWS:
+	drafted for the 3.2.0 release
+
+	* src/PseudoJet.cc (has_structure):
+	explicit conversion of _structure to bool
+
+2016-03-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/fastjet-doc.tex:
+	added SharedPtr<T>::operator() to the deprecation list
+
+	* include/fastjet/CircularRange.hh:
+	* include/fastjet/RangeDefinition.hh:
+	marked deprecated features with FASTJET_DEPRECATED_MSG
+
+	* include/fastjet/JetDefinition.hh:
+	added a (moslty internal) ctor
+	  JetDefinition(jet_alg, R, recomb_scheme, strategy, nparameters);
+	and added a FASTJET_DEPRECATED for the
+	  JetDefinition(jet_alg, R, strategy, recomb_scheme, nparameters);
+	which was already deprecated since FastJet 2.1
+
+	* fortran_wrapper/fjcore_fortran_interface.f:
+	added an example of the fjcore fortran interface (still to be
+	polished!)
+
+	* scripts/mkfjcore.sh:
+	included fjcorefortran.cc
+
+	* fortran_wrapper/fjcorefortran.cc:
+	removed a leftover trace of (unsupported) areas
+
+2016-03-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/cppcheck-run.sh: *** ADDED ***
+	added script to run cppcheck and put results into a reports/
+	directory. 
+
+2016-03-04  Gavin SALAM  <gavin.salam@cern.ch> + Gregory & Matteo
+
+	* fortran_wrapper/fjcorefortran.cc: *** ADDED ***
+	Added an fjcore fortran wrapper. This will not get distributed
+	with the fastjet tarball, but is intended for distribution as part
+	of fjcore.
+
+2016-03-03  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/NNBase.hh:
+	added a missing virtual destructor.
+
+	* example/fastjet_timing_plugins.cc:
+	added -jade-strategy flag (by default 1=NNFJN2Plain, but can also
+	be 0=NNH).
+
+	* plugins/Jade/fastjet/JadePlugin.hh:
+	* plugins/Jade/JadePlugin.cc:
+	Extended JadePlugin to have a strategy subclass
+	(JadePlugin::Strategy) and optional strategy argument to the
+	constructor. By default it now uses the new NNFJN2Plain
+	clustering, instead of the old NNH, but by changing the strategy
+	that can be changed.
+
+	Timings show that for higher multiplicities, NNFJN2Plain is about
+	a factor of two faster:
+
+        |                               | NNFJN2Plain | NNH   |
+        |-------------------------------+-------------+-------|
+        | all 70 particles, 10^5 events | 3.65s       | 6.94s |
+        | 20 hardest part,  10^6 events | 5.12s       | 4.74s |
+
+        Commands were:
+        ./fastjet_timing_plugins -jade -excly 0.001 -repeat 100000   < data/single-ee-event.dat
+        ./fastjet_timing_plugins -jade -excly 0.001 -repeat 1000000 -nhardest 20  < data/single-ee-event.dat
+
+	with -jade-strategy 1 or 0
+
+	Both strategies give identical clustering sequences and dij values
+	on 10^4 events.
+
+	Note: there are two implementations of the strategy selection, one
+	using a virtual base class to choose between the two strategies,
+	the other using a template. The template was selected in the end,
+	with the other code just commented out for now.
+
+2016-03-03  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example/fastjet_timing_plugins.cc:
+	* fortran_wrapper/fastjetfortran.cc:
+	* plugins/SISCone/fastjet/SISConePlugin.hh:
+	* plugins/SISCone/fastjet/SISConeSphericalPlugin.hh:
+	* plugins/SISCone/SISConePlugin.cc:
+	* plugins/SISCone/SISConeSphericalPlugin.cc:
+	* src/ClosestPair2D.cc:
+	* src/ClusterSequence_Delaunay.cc:
+	* include/fastjet/internal/ClosestPair2D.hh:
+	* include/fastjet/ClusterSequenceArea.hh:
+	replaced auto_ptr with SharedPtr (following auto_ptr deprecation
+	in C++11)
+
+	Note that we could have used std::unique_ptr but SharedPtr has the
+	advantage of being available independently of the C++ standard.
+
+	* include/fastjet/Makefile.am:
+	* include/fastjet/NNPlainN2.hh --> include/fastjet/NNFJN2Plain.hh:
+	* include/fastjet/NNTiledN2.hh --> include/fastjet/NNFJN2Tiled.hh:
+	renamed the file to follow the class names
+
+	* include/fastjet/NNBase.hh:
+	* include/fastjet/NNPlainN2.hh:
+	* include/fastjet/NNTiledN2.hh:
+	renamed the classes:
+	  NNPlainN2  --> NNFJN2Plain
+	  NNTiledN2  --> NNFJN2Tiled
+
+	* scripts/mkfjcore.sh:
+	handled the pre-compiler macros defined by configure (for
+	supported compiler features), as well as the DEPRECATED and
+	OVERRIDE ones.
+
+	By default, they are not available but one can define
+
+	  FJCORE_HAVE_OVERRIDE
+	  FJCORE_HAVE_GNUCXX_DEPRECATED
+	  FJCORE_HAVE_CXX14_DEPRECATED
+	  FJCORE_HAVE_EXPLICIT_FOR_OPERATORS
+
+	before including fjcore.hh to switch on the appropriate support.
+
+	* include/fastjet/internal/deprecated.hh:
+	fixed typo
+
+	* include/fastjet/SharedPtr.hh:
+	if supported, declared the conversion to bool as explicit
+
+	* configure.ac:
+	added a check for the "explicit" keyword for (conversion)
+	operators in a class (typically requires C++11)
+
+	* include/fastjet/SharedPtr.hh:
+	* include/fastjet/ClusterSequence.hh:
+	used the new FASTJET_DEPRECATED syntax
+
+	* configure.ac:
+	* include/fastjet/internal/deprecated.hh:
+	__attribute__((deprecated)) can be placed before the function
+	declaration. This means that we cam simply have a simple define
+	FASTJET_DEPRECATED or a macro FASTJET_DEPRECATED_MSG("...")
+
+	These are to be placed bofore the function declaration
+
+	* scripts/mkfjcore.sh:
+	fasjet_internal_headers incorporated into fasjet_headers
+
+	* include/fastjet/WrappedStructure.hh:
+	* include/fastjet/CompositeJetStructure.hh:
+	* include/fastjet/ClusterSequenceStructure.hh:
+	* include/fastjet/ClusterSequenceVoronoiArea.hh:
+	* include/fastjet/ClusterSequencePassiveArea.hh:
+	* include/fastjet/ClusterSequenceArea.hh:
+	* include/fastjet/ClusterSequenceActiveArea.hh:
+	* include/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh:
+	* include/fastjet/ClusterSequence1GhostPassiveArea.hh:
+	* include/fastjet/RectangularGrid.hh:
+	* include/fastjet/JetDefinition.hh:
+	* include/fastjet/CircularRange.hh:
+	used the FASTJET_OVERRIDE macro whenever appropriate
+
+	* config.h.in:
+	* include/fastjet/internal/base.hh:
+	defined a FASTJET_OVERRIDE macro that translates into the
+	"override" keyword if supported.
+
+	Reminder: adding the the override keyword to a class member means
+	that it should verload an equivalent member function in a base
+	class. If it does not, the compiler will issue an error. This is
+	therefore mostly meant as a safeguard (avoiding typos in
+	overloaded function names)
+
+	* tools/JetMedianBackgroundEstimator.cc:
+	* src/PseudoJet.cc:
+	* src/JetDefinition.cc:
+	* src/ClusterSequence.cc:
+	* include/fastjet/WrappedStructure.hh:
+	* include/fastjet/PseudoJet.hh:
+	* include/fastjet/JetDefinition.hh:
+
+	replaced
+	  if (shared_ptr())
+	by
+	  if (shared_ptr)
+	which correctly uses the casting to bool
+
+	also used SharedPtr::get() instead of SharedPtr::operator ().
+
+	* include/fastjet/SharedPtr.hh:
+	deprecated T* operator() [one should use get() instead]
+
+	* config.h.in:
+	* include/fastjet/internal/deprecated.hh:   *** ADDED ***
+	* include/fastjet/internal/Makefile.am:
+	* scripts/mkfjcore.sh:
+	added FASTJET_DEPRECATED(func) and 
+	FASTJET_DEPRECATED_MSG(func,message) macros that use compile-time
+	deprecation when available
+
+	* configure.ac:
+	added tests for modern compiler options
+          [[deprecated]]             --> FASTJET_HAVE_CXX14_DEPRECATED
+	  _attribute__((deprecated)) --> FASTJET_HAVE_GNUCXX_DEPRECATED
+	  override                   --> FASTJET_HAVE_OVERRIDE
+
+2016-03-03  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/internal/ClosestPair2DBase.hh (Coord2D):
+	initialised members in default constructor to keep static code
+	checkers happy.
+
+	* src/ClusterSequence_Delaunay.cc (_delaunay_cluster):
+	made verbose const to keep static code checkers happy
+
+	* src/ClusterSequence_CP2DChan.cc:
+	in default constructor for Mirror, set dummy values for members
+
+	* include/fastjet/JetDefinition.hh:
+	set _extra_param also in the plugin-based constructor
+
+2016-03-03  FastJet service account  <fastjet@buildcoverity.cern.ch> [Gavin]
+
+	* scripts/coverity-run.sh:     *** ADDED ***
+	* scripts/coverity-commit.sh:  *** ADDED ***
+
+	added these scripts to run coverity and commit the results to the
+	server. 
+
+2016-03-02  Gregory Soyez  <soyez@fastjet.fr>
+
+	* scripts/mkfjcore.sh:
+	added NNBase.hh to fjcore (needed by NNH.hh)
+
+	tried several options for the inclusion of the NN interface (NNH
+	alone does not work since it requires at lease NNHBase).
+
+	nothing: 1619  64470 fjcore.hh
+                 6095 230792 fjcore.cc
+                 7714 295262 total
+
+	NNH:     1808  70250 fjcore.hh
+                 6095 230792 fjcore.cc
+                 7903 301042 total
+
+	all:     2348  89874 fjcore.hh
+                 6079 230145 fjcore.cc
+                 8427 320019 total
+
+	for the moment, picked up the intermediate option since it's
+	what we've had so far
+
+2016-03-02  Gavin Salam  <gavin.salam@cern.ch>
+
+
+	* include/fastjet/NNBase.hh:
+	* include/fastjet/NNPlainN2.hh:
+	* include/fastjet/NNTiledN2.hh:
+
+	* include/fastjet/PseudoJet.hh:
+	added doxygen comment for dot_product
+
+2016-03-02  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/NNBase.hh:         *** ADDED ***
+	* include/fastjet/NNH.hh:
+	* include/fastjet/NNPlainN2.hh:      *** ADDED ***
+	* include/fastjet/NNTiledN2.hh:      *** ADDED ***
+	* include/fastjet/Makefile.am:
+	this provides a structure which exposes the N2Plain and N2Tiled
+	strategies along the lines of the existing NNH class. They now all
+	derive from a common abstract NNBase base class.
+
+	Note that different classes have different requirements on the
+	underlying BJ (brief jet) class, both in terms of the methods that
+	have to be implemented and in terms of the supported physical
+	distances. See the documentation for details.
+
+	* src/TilingExtent.cc:
+	* include/fastjet/internal/TilingExtent.hh:
+	allowed the construction of TilingExtent from a list of PseudoJet
+
+2016-03-01  Gavin Salam  <gavin.salam@cern.ch>
+
+	* include/fastjet/NNH.hh:
+	added comment about need for distance part of the class to be symmetric.
+
+2016-02-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* fastjet-config.in:
+	restored lines mistakenly commented out
+
+	* include/fastjet/PseudoJet.hh:
+	* src/PseudoJet.cc:
+	moved the (templated) implementation of "objects_sorted_by_values"
+	to the header so as to make it public (requested by S. Alioli)
+
+	In the test for a size mismatch, replaced the assertion by a
+	fastjet::Error
+
+	* regression-tests/regression-test.pl:
+	added test results for spherical SISCone
+
+	* fastjet-config.in:
+	added a "--guess-prefix" option that tries deducing the prefix
+	from the location of the fastjet-config script (it follows
+	symlinks if needed)
+	Q: do we want to add a "--enable-guess-prefix" option to configure
+	   to have this the default behaviour?
+
+2016-02-17  Gregory Soyez  <soyez@fastjet.fr>
+
+	* NEWS:
+	brought in changes between releases 3.1.1 and 3.1.3
+
+	Note: to-date, all modifications implemented in the 3.1.X-devel
+	branch have been backported to the trunk
+
+2015-10-05  Matteo Cacciari  <cacciari@lpthe.jussieu.fr>
+
+        * fortran_wrapper/fastjet_fortran_example.f
+	name of program inside file renamed from siscone_example
+	to fastjet_fortran_example
+
+2015-10-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example/fastjet_timing.cc:
+	fixed bug in placement of abs (revealed by cppcheck)
+
+2015-09-21  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/Subtractor.cc:
+	* tools/fastjet/tools/Subtractor.hh:
+	fixed bug where Subtractor::_unused_rho_m_warning was a
+	mutable. It is now a static, as it should be.
+
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh (RectangularGrid):
+	fixed typo in comment
+
+2015-07-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* m4/CGAL.m4 (ACX_CHECK_CGAL):
+	Now check for -frounding-math (gcc) and -fp=-model strict (intel)
+
+	Note that when using the intel compiler, chances are you'll get
+	both but -frounding-math will just be ignored [issuing a #10006
+	command-line warning]
+
+2015-07-03  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/ClusterSequence_Delaunay.cc:
+	* src/DnnPlane.cc:
+	added various extra output for when verbose is true, which was
+	used to help debug the issue that was eventually traced to
+	DnnPlane.h 
+
+	* include/fastjet/internal/DnnPlane.hh:
+	added DnnPlane::_is_not_null(vertex_handle) to centralize checks
+	of whether a vertex_handle is null. This provides a workaround for
+	the issue that (vertex_handle != NULL) seems not to work with
+	clang-3.6.1 and CGAL-4.6.1.
+
+2015-06-30  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* include/fastjet/ClusterSequence.hh:
+
+	added #ifndef __CINT__ around the (templated)
+	JetDefinition::operator() to solve issues with root5 reported by
+	Adrian Sevcenco.
+
+2015-04-22  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	added a --enable-cxx11-features argument to configure which in
+	turn defines a FASTJET_HAVE_CXX11_FEATURES pre-processor symbol in
+	fastjet/config.h
+
+2015-03-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/Filter.hh:
+	removed a harmless "shadow" warning in set_subtractor()
+
+2015-02-27  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* scripts/mkfjcore.sh:
+	directory used to create fjcore now gets removed
+
+	* regression-tests/nightly-check.pl:
+	- exchanged order of make dist and mkfjcore
+	- fjcore tarball now left in the main directory and extracted each
+	  time to $tmpDir
+	- make check test adapted to also handle newer autotools output
+
+2015-02-27  Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+        * scripts/mkfjcore.sh
+	added the option to extract fjcore into any given directory rather
+	that only as a subdirectory of scripts. Useful when running mkfjcore.sh
+	in the nightly checks script.
+	
+	* regression-tests/nightly-check.pl
+	added the extraction (and test) of fjcore, and the running of a 
+	version of fastjet_timing_plugins compiled with fjcore. Also added
+	a couple of basic fjcore tests to setups list.
+
+2015-02-25  Gavin Salam  <gavin.salam@cern.ch>
+
+	* testsuite/TestSpecialEvents.hh:
+	* testsuite/special-events/2015-02-out-of-bounds-reduced.txt: *** ADDED ***
+	added a test to check the 2015-02-out-of-bounds issue
+
+2015-02-23  Gavin Salam  <gavin.salam@cern.ch> + Matteo
+
+	* include/fastjet/ClusterSequence.hh (_bj_dist):
+	added (possibly temporary) code for testing 2015-02-faster-deltaR2
+	issue, with a define FASTJET_NEW_DELTA_PHI, which determines
+	whether to use a new delta phi calculation suggested by Keith
+	Pedersen. We are trying to establish if it brings significant
+	improvements. 
+	
+2015-02-21  Gavin Salam  <gavin.salam@cern.ch>
+
+	* testsuite/run_tests.cc:
+	* testsuite/TestSpecialEvents.hh: *** ADDED ***
+	* testsuite/special-events/2015-02-infinite-loop-simplified.txt: *** ADDED ***
+	added class for testing special events (e.g. events known to have
+	caused problems in older FJ versions, so that we don't run the
+	risk of the same identical issue reappearing).
+
+	Also added the event from the 2015-02-infinite-loop issue and
+	checked that the test "fails" if we remove the fix for the issue.
+
+	And added check in run_tests.cc that all command-line options have
+	been used.
+
+	* testsuite/TestBase.hh:
+	added VERIFY_RUNS as a check (with graceful catch) that something
+	runs rather than throws.
+
+	* testsuite/mkmk: *** ADDED ***
+	to generate Makefile automatically (requires Gavin's mkcxx.pl)
+
+2015-02-20  Matteo Cacciari <cacciari@lpthe.jussieu.fr
+
+        example/fastjet_timing_plugins.cc
+	regression-tests/test-all-algs.pl
+	
+	Modified fastjet_timing_plugins.cc so that it can be compiled with
+	fjcore using something like
+
+        g++ -D__FJCORE__ fastjet_timing_plugins_fjcore.cc \
+	../scripts/fjcore-3.2.0-devel/fjcore.cc CmdLine.cc \
+	-I ../scripts/fjcore-3.2.0-devel/ -o fastjet_timing_plugins_fjcore
+
+        Modified test-all-algs.pl so that it now takes a command line
+	option "-fjcore" that runs the version of fastjet_timing_plugins
+	compiled with fjcore instead of the one compiled with the 
+	full fastjet
+	
+	Not fully robust yet, e.g. running test-all-algs.pl using -areas
+	or -bkgds options together with -fjcore will break, because
+	the reading of some command-line options in fastjet_timing_plugins.cc
+	is so nested that excluding each and every one of them using __FJCORE__
+	guards would be a significant amount of work, and make the code
+	perhaps uselessly unreadable
+	
+2015-02-20  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/Error.hh:
+	fixed a harmless gcc -Wshadow warning in TnternalError
+
+	* include/fastjet/internal/LazyTiling9Alt.hh:
+	* src/LazyTiling9SeparateGhosts.cc:
+	* src/LazyTiling9Alt.cc:
+	* src/LazyTiling25.cc:
+	* src/LazyTiling9.cc:
+	replaced the C preprocessor symbol by a C++ const (cleaner and
+	inside the fastjet namespace)
+
+2015-02-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* src/ClusterSequence.cc (_add_step_to_history):
+	thrown an InternalError if we're trying to cluster a particle that
+	has previsouly been clustered
+
+	* include/fastjet/Error.hh (InternalError):
+	Added an InternalError class that will be thrown in critical
+	internal errors that we still want to be catchable by end-users
+
+	* include/fastjet/internal/LazyTiling9Alt.hh:
+	* src/LazyTiling9SeparateGhosts.cc:
+	* src/LazyTiling9Alt.cc:
+	* src/LazyTiling25.cc:
+	* src/LazyTiling9.cc:
+	(_add_untagged_neighbours_to_tile_union_using_max_info): added a
+	margin of security in the comparison of "distance_to_tile" with
+	"max_NN_dist" when listing tiles need to be browsed for points to
+	update (because their current NN is one of the particle(s) that
+	just clustered). This prevents missed updates due to rounding
+	errors. [Fixing the cause of the bug reported by Jochen Olt on
+	February 12]
+
+2015-02-18  Matteo Cacciari <cacciari@lpthe.jussieu.fr>
+
+        * src/ClusterSequence.cc
+        moved an FJCORE guard, previously in the wrong place
+        and causing an erroneous throw in fjcore about the 
+        N2MHTLazy9AntiKtSeparateGhosts strategy (bug reported by Sergei
+        Chekanov)
+
+2015-01-06  Gregory Soyez  <soyez@fastjet.fr> + Matteo
+
+	* CHECKLIST:
+	small improvements (notes added)
+
+	* NEWS:
+	added the release notes from FastJet 3.1.1.
+
+2014-12-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	added constructor that takes the explicit parameters for the
+	rectangular grid without the need for an intermediate Rectangular
+	Grid. (Request from Pavel Demin).
+
+	* testsuite/TestGrids.hh:
+	added tests of new GMBGE constructor with explicit RG arguments.
+
+	[merged from rev 3778 of 3.1.X-devel]
+
+2014-12-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* gtags.sh -> scripts/gtags.sh:
+	and added testsuite to the list of directories
+
+2014-12-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	* include/fastjet/RectangularGrid.hh:
+	fixed typo in previous commit
+
+2014-12-22  Gavin Salam  <gavin.salam@cern.ch>
+	* src/RectangularGrid.cc:
+	* include/fastjet/RectangularGrid.hh:
+	fixed comment about _is_good and set the Id keyword (this was
+	missing before).
+
+2014-12-22  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/fastjet/tools/GridMedianBackgroundEstimator.hh:
+	made this derive publicly from RectangularGrid.
+
+	* include/fastjet/RectangularGrid.hh (TilingBase):
+	added a virtual destructor.
+
+	(both requests/observations from Pavel Demin)
+
+2014-12-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* regression-tests/test-contrib.pl:
+	run ./configure explicitly (instead of configure) in case . is not
+	in the PATH
+
+2014-12-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* gtags.sh: *** ADDED ***
+	script to generate gtags files for easier navigation around the
+	project within emacs (use ggtags-mode)
+
+2014-12-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* CHECKLIST:
+	adedd a note to make sure that one rebuilds testsuite/run_tests before running it!
+
+	* tools/Filter.cc (_finalise):
+	fixed wrong test for non-explicit-ghosts when trying to filter C/A
+	jets with the C/A algorithm.
+	Reported by David Adams.
+
+2014-12-17  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tools/fastjet/tools/Recluster.hh:
+	fixed typos in comments
+
+2014-12-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* tools/fastjet/tools/Filter.hh:
+	added subtractor() to retreive (a pointer to) the subtractor used
+	internally
+
+2014-11-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Doxyfile-devel:
+	set version number to 3.2.0-devel, added missing file (as already
+	done in the main Doxyfile)
+
+2014-09-30  Gregory Soyez  <soyez@fastjet.fr> + Gavin
+
+	* configure.ac:
+	* include/fastjet/config_win.h:
+	* Doxyfile:
+	* tex/fastjet-doc.tex:
+	  changed version to 3.2.0-devel
+
 2014-09-30  Gavin SALAM  <gavin.salam@cern.ch> + Gregory
 
 	* Release of FastJet 3.1.0

@@ -1,3 +1,202 @@
+2016-08-03  Gregory Soyez  <soyez@fastjet.fr>
+
+	Release of SISCone 3.0.3
+
+	* doc/html/index.html.html:
+	* doc/html/download.html:
+	updated documentation with 3.0.3 release info
+
+	* NEWS:
+	prepared release notes for SISCone 3.0.3
+
+	* configure.ac:
+	* Doxyfile:
+	* doc/html/*.html:
+	changed version to 3.0.3
+
+	* setversion.sh:
+	updated script so that the version is properly set in
+	configure.ac, Doxyfile and the doc
+
+2016-05-23  Gregory Soyez  <soyez@fastjet.fr>
+
+	* examples/Makefile.am:
+	replaced top_builddir by .. [consistency with the same trick
+	already used in the spherical source code
+
+	* siscone/Makefile.am:
+	* siscone/spherical/split_merge.h:
+	same sort of fix as in the "spherical" case to make sure that the
+	config.h file is correctly found in a VPATH build
+
+2016-05-22  Gregory Soyez  <soyez@fastjet.fr>
+
+	* examples/Makefile.am:
+	added the top_builddir to the list of includes so that
+	siscone/config.h is found on a vpath build
+
+	* siscone/spherical/split_merge.h:
+	included <siscone/config.h> instead of "../config.h". This makes
+	life eassier for a vpath build
+
+2016-05-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	remove unneeded commented out code
+
+2016-03-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/split_merge.h:
+	* siscone/spherical/split_merge.h:
+	used SISCONE_USES_UNIQUE_PTR_AS_AUTO_PTR from config.h
+
+	* configure.ac:
+	put (SISCONE_)USES_UNIQUE_PTR_AS_AUTO_PTR in config.h
+
+	* siscone/siscone.{h,cpp}:
+	* siscone/spherical/siscone.{h,cpp}:
+	* siscone/defines.h:
+	PACKAGE_NAME -> SISCONE_PACKAGE_NAME
+	VERSION -> SISCONE_VERSION
+
+	* siscone/Makefile.am:
+	included config.h in the list of distributed headers.
+
+	* configure.ac:
+	* Makefile.am:
+	* m4/ax_config_header_h.m4:        *** ADDED ***
+	prefixed the entries in config.h by SISCONE_ to avoid conflicts
+	with other packages if we want to include it in a header file.
+
+2016-03-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	* configure.ac:
+	* Doxyfile:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	bumped version number to 3.0.3-devel
+
+2016-03-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	Release of SISCone 3.0.2
+
+	* NEWS:
+	tweaked as suggested by Gavin
+
+	* doc/html/usage.html:
+	* doc/html/index.html:
+	backported a change done on the Hepforge pages
+
+	* doc/html/algorithm.html:
+	* doc/html/index.html:
+	* doc/html/sm_issue.html:
+	* doc/html/download.html:
+	* doc/html/perfs.html:
+	* doc/html/usage.html:
+	set version number to 3.0.2; updated a few links and mention the
+	new release
+
+	* Doxyfile:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	* configure.ac:
+	set version number to 3.0.2
+
+	* NEWS:
+	drafted for v3.0.2
+
+2016-03-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/split_merge.h:
+	* siscone/spherical/split_merge.h:
+	switched the auto_ptr into unique_ptr when
+	SISCONE_USES_UNIQUE_PTR_AS_AUTO_PTR is defined
+
+	* configure.ac:
+	fine-tuned the configure test for auto-ptr deprecation [for god
+	knows what reason, -Werror does not turn -Wdeprecated-declarations
+	into errors for gcc-5.2.1... so I replaced it with
+	-Werror=deprecated-declarations which does]
+
+	* configure.ac:
+	added a series of tests to check if the compiler considers
+	auto_ptr as deprecated and, if yes, supports unique_ptr
+
+2016-03-03  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/spherical/siscone.cpp:
+	* siscone/siscone.cpp:
+	restored the original _banner_ostr stream format flags after
+	printing out the banner
+
+	* siscone/spherical/split_merge.cpp:
+	* siscone/split_merge.cpp:
+	removed unnecessary (dead) code at the end of get_sm_var2()
+
+	* siscone/spherical/split_merge.h:
+	* siscone/spherical/split_merge.cpp:
+	* siscone/split_merge.h:
+	* siscone/split_merge.cpp:
+	initialised pass to CJET_INEXISTENT_PASS by default
+
+	* siscone/vicinity.cpp:
+	initialised ve_list before calling set_particle_list
+
+2016-02-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* doc/html/download.html:
+	updated link to html browsing og the svn repo
+
+	* doc/html/usage.html:
+	updated a couple of links to the FJ doxygen pages
+
+	* configure.ac:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	* Doxyfile:
+	switched version number over to 3.0.2-devel
+
+2016-02-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	Release of SISCone 3.0.1
+
+	* NEWS:
+        * CHECKLIST:
+        * Doxyfile:
+        * configure.ac:
+        * doc/html/*.html:
+        * siscone/siscone.cpp:
+        * siscone/spherical/siscone.cpp:
+	prepared for the release of SISCone 3.0.1
+
+2016-02-24  Gregory Soyez  <soyez@fastjet.fr>
+
+	* siscone/spherical/geom_2d.h:
+	get_theta_cell(...): fixed rounding issue for theta==pi
+	[Bug reported by Andrii Verbytskyi, see
+	2016-02-SphericalSISCone-throws in the FastJet issue tracker]
+
+	* siscone/spherical/geom_2d.cpp:
+	add_particle(...): made sure the full phi range is included for
+	theta=0 or theta=pi
+
+	* siscone/spherical/geom_2d.h:
+	fixed typo in comment:
+
+	* siscone/spherical/split_merge.cpp:
+	* siscone/split_merge.cpp:
+	fixed bad variale in debugging outpout and added debugging info
+
+
+2014-09-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Doxyfile:
+	* configure.ac:
+	* siscone/siscone.cpp:
+	* siscone/spherical/siscone.cpp:
+	set version number to 3.0.1-devel
+
 2014-09-09  Gregory Soyez  <soyez@fastjet.fr>
 
 	* SISCone 3.0.0

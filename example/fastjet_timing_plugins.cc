@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: fastjet_timing_plugins.cc 3473 2014-07-29 09:45:34Z soyez $
+// $Id: fastjet_timing_plugins.cc 4076 2016-03-08 19:35:25Z soyez $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -193,11 +193,14 @@
 ///                 fastjet/JetDefinition.hh).
 ///
 
-
+#ifndef __FJCORE__
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 #include "fastjet/tools/GridMedianBackgroundEstimator.hh"
 #include "fastjet/Selector.hh"
+#else
+#include "fjcore.hh"
+#endif
 #include<iostream>
 #include<iomanip>
 #include<sstream>
@@ -208,8 +211,10 @@
 //#include<cstddef> // for size_t
 #include "CmdLine.hh"
 
+#ifndef __FJCORE__
 // get info on how fastjet was configured
 #include "fastjet/config.h"
+#endif
 
 // include the installed plugins (don't delete this line)
 #ifdef FASTJET_ENABLE_PLUGIN_SISCONE
@@ -253,7 +258,11 @@
 using namespace std;
 
 // to avoid excessive typing, use the fastjet namespace
+#ifndef __FJCORE__
 using namespace fastjet;
+#else
+using namespace fjcore;
+#endif
 
 inline double pow2(const double x) {return x*x;}
 
@@ -346,6 +355,7 @@ int main (int argc, char ** argv) {
     : SelectorIdentity();
 
   do_areas = cmdline.present("-area");
+#ifndef __FJCORE__
   AreaDefinition area_def;
   if (do_areas) {
     assert(!write); // it's incompatible
@@ -366,7 +376,12 @@ int main (int argc, char ** argv) {
       area_def = AreaDefinition(active_area, ghost_spec);
     }
   }
+#else
+  do_areas=false;
+#endif
+    
   bool do_bkgd = cmdline.present("-bkgd"); // background estimation
+#ifndef __FJCORE__
   bool do_bkgd_csab = false, do_bkgd_jetmedian = false, do_bkgd_fj2 = false;
   bool do_bkgd_gridmedian = false;
   Selector bkgd_range;
@@ -381,6 +396,9 @@ int main (int argc, char ** argv) {
     }
     assert(do_areas || do_bkgd_gridmedian);
   }
+#else
+  do_bkgd = false; 
+#endif
 
   bool show_cones = cmdline.present("-cones"); // only works for siscone
 
@@ -389,6 +407,10 @@ int main (int argc, char ** argv) {
   double overlap_threshold = cmdline.double_val("-overlap",0.5);
   overlap_threshold = cmdline.double_val("-f",overlap_threshold); 
   double seed_threshold = cmdline.double_val("-seed",1.0);
+
+#ifdef __FJCORE__
+  show_cones = false;
+#endif
 
   // for ee algorithms, allow to specify ycut
   double ycut = cmdline.double_val("-ycut",0.08);
@@ -523,7 +545,10 @@ int main (int argc, char ** argv) {
   } 
   if (all_algs || cmdline.present("-jade")) {
 #ifdef FASTJET_ENABLE_PLUGIN_JADE
-    jet_defs.push_back( JetDefinition(new JadePlugin()));
+    JadePlugin::Strategy jade_strategy =
+      JadePlugin::Strategy(cmdline.value<int>("-jade-strategy",
+                                              JadePlugin::strategy_NNFJN2Plain));
+    jet_defs.push_back( JetDefinition(new JadePlugin(jade_strategy)));
 #else  // FASTJET_ENABLE_PLUGIN_JADE
     is_unavailable("Jade");
 #endif // FASTJET_ENABLE_PLUGIN_JADE
@@ -568,7 +593,7 @@ int main (int argc, char ** argv) {
   if (all_algs || 
       cmdline.present("-kt") || 
       (jet_defs.size() == 0 && !found_unavailable))  {
-    jet_defs.push_back( JetDefinition(kt_algorithm, ktR, strategy));
+    jet_defs.push_back( JetDefinition(kt_algorithm, ktR, E_scheme, strategy));
   }
 
   string filename = cmdline.value<string>("-file", "");
@@ -623,6 +648,7 @@ int main (int argc, char ** argv) {
     if (abs(psjet.rap()) < rapmax) {particles.push_back(psjet);}
   }
 
+#ifndef __FJCORE__
   // add a fake underlying event which is very soft, uniformly distributed
   // in eta,phi so as to allow one to reconstruct the area that is associated
   // with each jet.
@@ -653,6 +679,9 @@ int main (int argc, char ** argv) {
     //   }
     // }
   }
+#else
+  add_dense_coverage = false;
+#endif
 
   // select the particles that pass the selection cut
   particles = particles_sel(particles);
@@ -663,9 +692,12 @@ int main (int argc, char ** argv) {
   for (int irepeat = 0; irepeat < repeat ; irepeat++) {
     int nparticles = particles.size();
     try {
-    auto_ptr<ClusterSequence> clust_seq;
+    // one could use a unique_ptr here, but SharedPtr is available independently of C++ standard
+    SharedPtr<ClusterSequence> clust_seq;
     if (do_areas) {
+#ifndef __FJCORE__
       clust_seq.reset(new ClusterSequenceArea(particles,jet_def,area_def));
+#endif
     } else {
       clust_seq.reset(new ClusterSequence(particles,jet_def,write));
     }
@@ -682,7 +714,9 @@ int main (int argc, char ** argv) {
     cout << "iev "<<iev<< ": number of particles = "<< nparticles << endl;
     cout << "strategy used =  "<< clust_seq->strategy_string()<< endl;
     if (iev == 0) cout << "Jet Definition: " << jet_def.description() << " (" << fastjet_version_string() << ")" << endl;
+#ifndef __FJCORE__
     if (do_areas && iev == 0) cout << "Area definition: " << area_def.description() << endl;
+#endif
 
     // now provide some nice output...
     if (inclkt >= 0.0) {
@@ -774,6 +808,7 @@ int main (int argc, char ** argv) {
     }
 #endif // FASTJET_ENABLE_PLUGIN_SISCONE
 
+#ifndef __FJCORE__
     if (do_bkgd) {
       double rho, sigma, mean_area, empty_area, n_empty_jets;
       ClusterSequenceAreaBase * csab = 
@@ -810,8 +845,9 @@ int main (int argc, char ** argv) {
 	   << ", n_empty_jets = " << n_empty_jets
 	   << endl;
     }
+#endif
   } // try
-  catch (fastjet::Error fjerr) {
+  catch (Error fjerr) {
     cout << "Caught fastjet error, exiting gracefully" << endl;
     exit(0);
   }
@@ -865,9 +901,11 @@ void print_jets(const vector<PseudoJet> & jets_in, bool show_constituents) {
 	     j,jets[j].rap(),jets[j].phi(),jets[j].perp());
       // also print out the scalar area and the perp component of the
       // 4-vector (just enough to check a reasonable 4-vector?)
+#ifndef __FJCORE__
       if (do_areas) printf(" %15.8f %15.8f", jets[j].area(),
 			                     jets[j].area_4vector().perp());
       cout << "\n";
+#endif
 
       if (show_constituents) {
 	vector<PseudoJet> const_jets = jets[j].constituents();
