@@ -20,7 +20,10 @@ fastjetinclude_HEADERS= JetDefinition.hh\
   ClusterSequence1GhostPassiveArea.hh\
   ClusterSequencePassiveArea.hh\
   ClusterSequenceVoronoiArea.hh\
+  NNBase.hh\
   NNH.hh\
+  NNFJN2Plain.hh\
+  NNFJN2Tiled.hh\
   SharedPtr.hh\
   FunctionOfPseudoJet.hh\
   Selector.hh\

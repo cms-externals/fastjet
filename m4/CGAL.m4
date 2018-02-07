@@ -118,12 +118,24 @@ fi
 dnl if CGAL hasn't been found yet and the Makefile search didn't return an error message
 dnl we check if we can get the arguments ourselves. This method leave the option to specify
 dnl a CGAL directory using the --with-cgaldir directive
-dnl If no dir are specified, CGLA will be searched in standard places
+dnl If no dir are specified, CGAL will be searched for in standard places
 if test "$acx_cgal_found" == no; then
-   dnl check support for -frounding-math for the C++ compiler
+   dnl check support for the floating-point specifications needed for CGAL
+   dnl  . gcc required -frounding-math
+   dnl  . icc requires -fp-model srticy
+   dnl    
+   dnl Note that clang does not support it but simply issues a
+   dnl warning. To avoid having that, we force it to be an error if it is
+   dnl not supported
+   dnl   
+   dnl also, icpc supports -Werror but does not seem to convert
+   dnl "unrecognised option" into an error, at least for icc 13.1.3
+   dnl that I've tested. Let's live with that for hte time being since
+   dnl it will just issue a $1006 command-line warning 
    ADDITIONAL_CGAL_FLAGS=""
    AC_LANG_PUSH(C++)
-   AX_CHECK_COMPILER_FLAGS([-frounding-math],[ADDITIONAL_CGAL_FLAGS=${ADDITIONAL_CGAL_FLAGS}" -frounding-math"])
+   AX_CHECK_COMPILER_FLAGS([-frounding-math -Werror],[ADDITIONAL_CGAL_FLAGS=${ADDITIONAL_CGAL_FLAGS}" -frounding-math"])
+   AX_CHECK_COMPILER_FLAGS([-fp-model strict -Werror],[ADDITIONAL_CGAL_FLAGS=${ADDITIONAL_CGAL_FLAGS}" -fp-model strict"])
    AC_LANG_POP(C++)
 
 

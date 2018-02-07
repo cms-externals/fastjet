@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: MassDropTagger.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: MassDropTagger.hh 4269 2017-05-19 14:33:59Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -109,6 +109,7 @@ public:
 protected:
   double _mu, _ycut;
   static LimitedWarning _warnings_nonca;
+  static LimitedWarning _negative_mass_warning;
 };
 
 

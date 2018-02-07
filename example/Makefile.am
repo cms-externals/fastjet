@@ -1,7 +1,7 @@
 # for the time being allow these things to be distributed but without
 # any particular help to go with them? This should change at some point
 
-SUBDIRS = data root
+SUBDIRS = data python root
 EXTRA_DIST = Makefile.alt ktjet_example.cc ktjet_timing.cc CmdLine.hh\
 	makefile.static
 #	test-example.sh test-areas.sh makefile.static

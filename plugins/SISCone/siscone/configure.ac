@@ -1,8 +1,17 @@
-AC_INIT([SISCone], [3.0.0])
+AC_INIT([SISCone], [3.0.3])
 AC_CONFIG_SRCDIR([siscone/siscone.cpp])
 AM_INIT_AUTOMAKE
-dnl uncomment the following line if you want to use autoheader
-AC_CONFIG_HEADERS(siscone/config.h:config.h.in)
+
+dnl (un)comment the following lines if you want to use autoheader
+dnl and also (un)comment the call to autoheader in autogen.sh
+dnl 
+dnl Notes:
+dnl  - the first macro needs to place the files in the correct 
+dnl    dir in order to have the correct -I options for the remote build
+dnl  - see Makefile.am for distcleaning AX_PREFIX_CONFIG_H leftovers
+AC_CONFIG_HEADERS(siscone/config_raw.h:config.h.in)
+AX_PREFIX_CONFIG_H(siscone/config.h,SISCONE,siscone/config_raw.h)
+
 dnl and also uncomment the call to autoheader in autogen.sh
 
 dnl check autoconf version
@@ -62,5 +71,28 @@ dnl fi
 
 dnl enable libtool
 AC_PROG_LIBTOOL
+
+dnl chceck if auto_ptr is deprecated
+dnl if yes, see if unique_ptr is supported
+AC_MSG_CHECKING([[if $CXX $CXXFLAGS considers atd::auto_ptr as deprecated]])
+AC_LANG_PUSH(C++)
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -Werror=deprecated-declarations"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <memory>]],[[int *a= new int(1); std::auto_ptr<int> b; b.reset(a);]])],
+    [ac_compilation_deprecated="no"],[ac_compilation_deprecated="yes"])
+AC_MSG_RESULT([$ac_compilation_deprecated])
+if [[ "$ac_compilation_deprecated" == "yes" ]] ; then
+   AC_MSG_CHECKING([[if $CXX $CXXFLAGS supports atd::unique_ptr]])
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <memory>]],[[int *a= new int(1); std::unique_ptr<int> b; b.reset(a);]])],
+    [ac_supports_unique_ptr="yes"],[as_supports_unique_ptr="no"])
+    if [[ "$ac_supports_unique_ptr" == "yes" ]] ; then
+       AC_DEFINE(USES_UNIQUE_PTR_AS_AUTO_PTR, [], [use unique_ptr instead of auto_ptr])
+    fi
+    AC_MSG_RESULT([$ac_supports_unique_ptr])
+    
+fi
+CXXFLAGS="$save_CXXFLAGS"
+AC_LANG_POP(C++)
+
 
 AC_OUTPUT( Makefile siscone/Makefile siscone/spherical/Makefile examples/Makefile examples/events/Makefile )

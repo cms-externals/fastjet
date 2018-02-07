@@ -1,6 +1,6 @@
 
 //STARTHEADER
-// $Id: fastjet_areas.cc 2704 2011-11-16 11:11:10Z soyez $
+// $Id: fastjet_areas.cc 4078 2016-03-09 09:46:18Z soyez $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -77,7 +77,7 @@ int main () {
   // the associated parameters
   double Rparam = 1.0;
   fastjet::Strategy strategy = fastjet::Best;
-  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, Rparam, strategy);
+  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, Rparam, fastjet::E_scheme, strategy);
   //fastjet::JetDefinition jet_def(fastjet::cambridge_algorithm, Rparam, strategy);
   //fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, Rparam, strategy);
   //fastjet::JetDefinition jet_def(new fastjet::SISConePlugin(Rparam,0.75));
