@@ -62,22 +62,25 @@ public:
   /// the error message
   std::string message() const {return _message;}
 
-  /// an alternative access to the error message (more standard)
-  std::string description() const {return message();}
-  
+
+
+  // CMS change: the following three static functions 
+  //  are no longer defined in the header.
+  // Change not endorsed by fastjet collaboration 
   /// controls whether the error message (and the backtrace, if its printing is enabled) 
   /// is printed out or not
-  static void set_print_errors(bool print_errors) {_print_errors = print_errors;}
+  static void set_print_errors(bool print_errors);// {_print_errors = print_errors;}
 
   /// controls whether the backtrace is printed out with the error message or not.
   /// The default is "false".
   static void set_print_backtrace(bool enabled);
 
+
   /// sets the default output stream for all errors; by default
   /// cerr; if it's null then error output is suppressed.
-  static void set_default_stream(std::ostream * ostr) {
-    _default_ostr = ostr;
-  }
+  static void set_default_stream(std::ostream * ostr);// {
+  //  _default_ostr = ostr;
+  //}
 
 private:
 
@@ -89,12 +92,34 @@ private:
 #endif
 
   std::string _message;                ///< error message
-  static bool _print_errors;           ///< do we print anything?
-  static bool _print_backtrace;        ///< do we print the backtrace?
-  static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  static LimitedWarning _execinfo_undefined;
-#endif
+
+  // CMS change: the following are no longer class statics
+  //  moved to file static since they were changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool _print_errors;           ///< do we print anything?
+  //static bool _print_backtrace;        ///< do we print the backtrace?
+  //static std::ostream* _default_ostr; ///< the output stream (cerr if not set)
+};
+
+//----- Copy of fix from fastjet authors fastjet-3.1.2-devel-20150224-rev3823.tar
+/// @ingroup error_handling
+/// \class InternalError
+/// class corresponding to critical internal errors
+/// 
+/// This is an error class (derived from Error) meant for serious,
+/// critical, internal errors that we still want to be catchable by an
+/// end-user [e.g. a serious issue in clustering where the end-user
+/// can catch it and retry with a different strategy]
+///
+/// Please directly contact the FastJet authors if you see such an
+/// error.
+class InternalError : public Error{
+public:
+  /// ctor with error message:
+  /// just add a bit of info to the message and pass it to the base class
+  InternalError(const std::string & message_in) : Error(std::string("*** CRITICAL INTERNAL FASTJET ERROR *** CONTACT THE AUTHORS *** ") + message_in){ }
 };
 
 

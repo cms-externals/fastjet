@@ -37,6 +37,7 @@
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
+
 /// Rounding errors in the Lazy strategies may cause the following
 /// problem: when browsing tiles in the vicinity of the particles
 /// being clustered in order to decide which of these tiles may

@@ -78,8 +78,8 @@ public:
   unsigned int phi_range;     
 
   /// extremal value for theta
-  static double theta_min;  ///< minimal value for theta (set to 0)
-  static double theta_max;  ///< maximal value for theta (set to pi)
+  const static double theta_min;  ///< minimal value for theta (set to 0)
+  const static double theta_max;  ///< maximal value for theta (set to pi)
 
 private:
   /// return the cell index corrsponding to a theta value
