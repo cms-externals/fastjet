@@ -117,7 +117,8 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy;
+LimitedWarning VoronoiDiagramGenerator::_warning_degeneracy{0};
+
 
 VoronoiDiagramGenerator::VoronoiDiagramGenerator(){
   siteidx = 0;

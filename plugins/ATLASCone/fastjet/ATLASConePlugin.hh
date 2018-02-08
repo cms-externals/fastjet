@@ -91,7 +91,13 @@ private:
   double _seedPt;   ///< the pt seed threshold used in stable-cone search
   double _f;        ///< the overlap thresholod used in the split-merge
 
-  static bool _first_time;
+
+  // CMS change: _first_time is no longer a class static
+  //  moved to file static since it was changed to std::atomic
+  //  and we still need to allow this header to be parsed by
+  //  non C++11 compilers.
+  // Change not endorsed by fastjet collaboration 
+  //static bool _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;
