@@ -46,8 +46,8 @@ using namespace std;
 
 // static member default init
 //----------------------------
-double CSphtheta_phi_range::theta_min = 0.0;
-double CSphtheta_phi_range::theta_max = M_PI;
+const double CSphtheta_phi_range::theta_min = 0.0;
+const double CSphtheta_phi_range::theta_max = M_PI;
 
 // default ctor
 //--------------

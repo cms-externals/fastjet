@@ -38,9 +38,15 @@
 #include<algorithm>
 #include<cmath>
 #include<valarray>
+#include <fstream>
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
+//CMS change: use std::atomic for thread safety.
+//   Change not endorsed by fastjet collaboration
 
 using namespace std;
 
@@ -173,7 +179,7 @@ void ClusterSequenceActiveArea::_postprocess_AA (const GhostedAreaSpec & ghost_s
   for (unsigned i = 0; i < _average_area_4vector.size(); i++) {
     _average_area_4vector[i] = (1.0/ghost_spec.repeat()) * _average_area_4vector[i];
   }
-  //cerr << "Non-jet area = " << _non_jet_area << " +- " << _non_jet_area2<<endl;
+  //(*_safe_cerr) << "Non-jet area = " << _non_jet_area << " +- " << _non_jet_area2<<endl;
 }
 
 
@@ -265,7 +271,7 @@ void ClusterSequenceActiveArea::_postprocess_AA (const GhostedAreaSpec & ghost_s
 //   for (unsigned i = 0; i < _average_area_4vector.size(); i++) {
 //     _average_area_4vector[i] = (1.0/ghost_spec.repeat()) * _average_area_4vector[i];
 //   }
-//   //cerr << "Non-jet area = " << _non_jet_area << " +- " << _non_jet_area2<<endl;
+//   //(*_safe_cerr) << "Non-jet area = " << _non_jet_area << " +- " << _non_jet_area2<<endl;
 // 
 //   
 // }
@@ -348,18 +354,18 @@ double ClusterSequenceActiveArea::pt_per_unit_area(
       trunc_sumsqr += ratio*ratio;
       means[i] = trunc_sum / (i+1);
       sd[i]    = sqrt(abs(means[i]*means[i]  - trunc_sumsqr/(i+1)));
-      cerr << "i, means, sd: " <<i<<", "<< means[i] <<", "<<sd[i]<<", "<<
-	sd[i]/sqrt(i+1.0)<<endl;
+      // (*_safe_cerr) << "i, means, sd: " <<i<<", "<< means[i] <<", "<<sd[i]<<", "<<
+      // 	sd[i]/sqrt(i+1.0)<<endl;
     }
-    cout << "-----------------------------------"<<endl;
-    for (unsigned i = 0; i <= pt_over_areas.size()/2 ; i++ ) {
-      cout << "Median "<< i <<" = " << pt_over_areas[i]<<endl;
-    }
-    cout << "Number of non-jets: "<<_non_jet_number<<endl;
-    cout << "Area of non-jets: "<<_non_jet_area<<endl;
-    cout << "Default median position: " << (pt_over_areas.size()-1)/2.0<<endl;
-    cout << "NJ median position: " << nj_median_pos <<endl;
-    cout << "NJ median value: " << nj_median_ratio <<endl;
+    // (*_safe_cout) << "-----------------------------------"<<endl;
+    // for (unsigned i = 0; i <= pt_over_areas.size()/2 ; i++ ) {
+    //   (*_safe_cout) << "Median "<< i <<" = " << pt_over_areas[i]<<endl;
+    // }
+    // (*_safe_cout) << "Number of non-jets: "<<_non_jet_number<<endl;
+    // (*_safe_cout) << "Area of non-jets: "<<_non_jet_area<<endl;
+    // (*_safe_cout) << "Default median position: " << (pt_over_areas.size()-1)/2.0<<endl;
+    // (*_safe_cout) << "NJ median position: " << nj_median_pos <<endl;
+    // (*_safe_cout) << "NJ median value: " << nj_median_ratio <<endl;
     return 0.0;
   }
 
@@ -437,7 +443,7 @@ double ClusterSequenceActiveArea::pt_per_unit_area(
 //     b = (mean_f*mean_x2 - mean_fx2)/(mean_x2*mean_x2 - mean_x4);
 //     a = mean_f - b*mean_x2;
 //   }
-//   //cerr << "n_excluded = "<< n_excluded << endl;
+//   //(*_safe_cerr) << "n_excluded = "<< n_excluded << endl;
 // }
 
 
@@ -546,7 +552,7 @@ void ClusterSequenceActiveArea::_transfer_ghost_free_history(
       int newjet_k; // dummy var -- not used
       int jet_i = _history[gs2self_hist_map[gs_hist_el.parent1]].jetp_index;
       int jet_j = _history[gs2self_hist_map[gs_hist_el.parent2]].jetp_index;
-      //cerr << "recombining "<< jet_i << " and "<< jet_j << endl;
+      //(*_safe_cerr) << "recombining "<< jet_i << " and "<< jet_j << endl;
       _do_ij_recombination_step(jet_i, jet_j, gs_hist_el.dij, newjet_k);
     } else {
       // we have a non-ghost that has become a beam-jet
@@ -623,9 +629,9 @@ void ClusterSequenceActiveArea::_transfer_areas(
         assert(refjet_index >= 0 && refjet_index < int(_jets.size()));
 	const PseudoJet & refjet = _jets[refjet_index];
 
-      //cerr << "Inclusive" << endl;
-      //cerr << gs_history[parent1].jetp_index << " " << gs_jets.size() << endl;
-      //cerr << _history[_history[hist_index].parent1].jetp_index << " " << _jets.size() << endl;
+      //(*_safe_cerr) << "Inclusive" << endl;
+      //(*_safe_cerr) << gs_history[parent1].jetp_index << " " << gs_jets.size() << endl;
+      //(*_safe_cerr) << _history[_history[hist_index].parent1].jetp_index << " " << _jets.size() << endl;
 
         // If pt disagrees check E; if they both disagree there's a
         // problem here... NB: a massive particle with zero pt may
@@ -663,9 +669,9 @@ void ClusterSequenceActiveArea::_transfer_areas(
       // will not exist)
       if (_history[hist_index].parent2 == BeamJet) throw Error("ClusterSequenceActiveArea: could not match clustering sequences (encountered dij matched with diB)");
 
-      //cerr << "Exclusive: hist_index,hist_size: " << hist_index << " " << _history.size()<< endl;
-      //cerr << gs_hist.jetp_index << " " << gs_jets.size() << endl;
-      //cerr << _history[hist_index].jetp_index << " " << _jets.size() << endl;
+      //(*_safe_cerr) << "Exclusive: hist_index,hist_size: " << hist_index << " " << _history.size()<< endl;
+      //(*_safe_cerr) << gs_hist.jetp_index << " " << gs_jets.size() << endl;
+      //(*_safe_cerr) << _history[hist_index].jetp_index << " " << _jets.size() << endl;
 
       const PseudoJet & jet = gs_jets[gs_hist.jetp_index];
       const PseudoJet & refjet = _jets[_history[hist_index].jetp_index];
@@ -684,12 +690,12 @@ void ClusterSequenceActiveArea::_transfer_areas(
       // GPS TMP debugging (jetclu) -----------------------
       //ext_area = PseudoJet(1e-100,1e-100,1e-100,4e-100);
       //our_area_4vectors[hist_index] = ext_area;
-      //cout << "aa " 
+      //(*_safe_cout) << "aa " 
       //     << our_area_4vectors[hist_index].px() << " "
       //     << our_area_4vectors[hist_index].py() << " "
       //     << our_area_4vectors[hist_index].pz() << " "
       //     << our_area_4vectors[hist_index].E() << endl;
-      //cout << "bb " 
+      //(*_safe_cout) << "bb " 
       //     << ext_area.px() << " "
       //     << ext_area.py() << " "
       //     << ext_area.pz() << " "

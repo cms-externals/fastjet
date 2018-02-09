@@ -31,6 +31,10 @@
 #include <iomanip>
 #include "fastjet/internal/LazyTiling25.hh"
 #include "fastjet/internal/TilingExtent.hh"
+#if __cplusplus >= 201103L
+#include<atomic>
+#endif
+
 using namespace std;
 
 
@@ -90,7 +94,7 @@ void LazyTiling25::_initialise_tiles() {
   TilingExtent tiling_analysis(_cs);
   _tiles_eta_min = tiling_analysis.minrap();
   _tiles_eta_max = tiling_analysis.maxrap();
-  //cout << "Using timing analysis " << " " << _tiles_eta_min << " " << _tiles_eta_max << endl;
+  //(*_safe_cout) << "Using timing analysis " << " " << _tiles_eta_min << " " << _tiles_eta_max << endl;
 #else // not _FASTJET_TILING25_USE_TILING_ANALYSIS_
   // always include zero rapidity in the tiling region
   _tiles_eta_min = 0.0;
@@ -108,7 +112,7 @@ void LazyTiling25::_initialise_tiles() {
       if (eta > _tiles_eta_max) {_tiles_eta_max = eta;}
     }
   }
-  //cout << "NOT using timing analysis " << " " << _tiles_eta_min << " " << _tiles_eta_max << endl;
+  //(*_safe_cout) << "NOT using timing analysis " << " " << _tiles_eta_min << " " << _tiles_eta_max << endl;
 #endif // _FASTJET_TILING25_USE_TILING_ANALYSIS_
 
 
@@ -298,20 +302,20 @@ void LazyTiling25::_bj_remove_from_tiles(TiledJet * const jet) {
 //----------------------------------------------------------------------
 /// output the contents of the tiles
 void LazyTiling25::_print_tiles(TiledJet * briefjets ) const {
-  for (vector<Tile25>::const_iterator tile = _tiles.begin(); 
-       tile < _tiles.end(); tile++) {
-    cout << "Tile " << tile - _tiles.begin()
-         << " at " << setw(10) << tile->eta_centre << "," << setw(10) << tile->phi_centre
-         << " = ";
-    vector<int> list;
-    for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
-      list.push_back(jetI-briefjets);
-      //cout <<" "<<jetI-briefjets;
-    }
-    sort(list.begin(),list.end());
-    for (unsigned int i = 0; i < list.size(); i++) {cout <<" "<<list[i];}
-    cout <<"\n";
-  }
+  // for (vector<Tile25>::const_iterator tile = _tiles.begin(); 
+  //      tile < _tiles.end(); tile++) {
+  //   (*_safe_cout) << "Tile " << tile - _tiles.begin()
+  //        << " at " << setw(10) << tile->eta_centre << "," << setw(10) << tile->phi_centre
+  //        << " = ";
+  //   vector<int> list;
+  //   for (TiledJet * jetI = tile->head; jetI != NULL; jetI = jetI->next) {
+  //     list.push_back(jetI-briefjets);
+  //     //(*_safe_cout) <<" "<<jetI-briefjets;
+  //   }
+  //   sort(list.begin(),list.end());
+  //   for (unsigned int i = 0; i < list.size(); i++) {(*_safe_cout) <<" "<<list[i];}
+  //   (*_safe_cout) <<"\n";
+  // }
 }
 
 
@@ -372,7 +376,7 @@ inline void LazyTiling25::_add_untagged_neighbours_to_tile_union_using_max_info(
     //      << " -> diff = " << dist-(*near_tile)->max_NN_dist << endl;
     if (dist > (*near_tile)->max_NN_dist) continue;
 
-    // cout << "      max info tagged tile " << *near_tile - &_tiles[0] << endl;
+    // (*_safe_cout) << "      max info tagged tile " << *near_tile - &_tiles[0] << endl;
     (*near_tile)->tagged = true;
     // get the tile number
     tile_union[n_near_tiles] = *near_tile - & _tiles[0];
@@ -524,7 +528,7 @@ void LazyTiling25::run() {
   // initialise the basic jet info 
   for (int i = 0; i< n; i++) {
     _tj_set_jetinfo(jetA, i);
-    //cout << i<<": "<<jetA->tile_index<<"\n";
+    //(*_safe_cout) << i<<": "<<jetA->tile_index<<"\n";
     jetA++; // move on to next entry of briefjets
   }
   TiledJet * head = briefjets; // a nicer way of naming start
@@ -604,14 +608,14 @@ void LazyTiling25::run() {
     }
   }
 
-#ifdef INSTRUMENT2
-  cout << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+// #ifdef INSTRUMENT2
+//   (*_safe_cout) << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
+// #endif // INSTRUMENT2
 
   // GPS debugging
   // _print_tiles(briefjets);
   // for (jetB = briefjets; jetB < briefjets+n; jetB++) {
-  //   cout << "Tiled jet " << jetB->_jets_index << " has NN " << jetB->NN-briefjets << endl;
+  //   (*_safe_cout) << "Tiled jet " << jetB->_jets_index << " has NN " << jetB->NN-briefjets << endl;
   // }
 
   vector<double> diJs(n);
@@ -763,7 +767,7 @@ void LazyTiling25::run() {
     }
 
     // deal with jets whose minheap entry needs updating
-    //if (verbose) cout << "  jets whose NN was modified: " << endl;
+    //if (verbose) (*_safe_cout) << "  jets whose NN was modified: " << endl;
     while (jets_for_minheap.size() > 0) {
       TiledJet * jetI = jets_for_minheap.back(); 
       jets_for_minheap.pop_back();
@@ -779,9 +783,9 @@ void LazyTiling25::run() {
 
   // final cleaning up;
   delete[] briefjets;
-#ifdef INSTRUMENT2
-  cout << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+// #ifdef INSTRUMENT2
+//   (*_safe_cout) << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
+// #endif // INSTRUMENT2
 
 }
 
