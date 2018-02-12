@@ -120,7 +120,7 @@ public:
   /// ctor with error message:
   /// just add a bit of info to the message and pass it to the base class
   InternalError(const std::string & message_in) : Error(std::string("*** CRITICAL INTERNAL FASTJET ERROR *** CONTACT THE AUTHORS *** ") + message_in){ }
-}
+};
 
 FASTJET_END_NAMESPACE
 
