@@ -62,7 +62,7 @@ public:
   /// the error message
   std::string message() const {return _message;}
 
-
+  std::string description() const {return message();}
 
   // CMS change: the following three static functions 
   //  are no longer defined in the header.
